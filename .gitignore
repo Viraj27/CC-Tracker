@@ -9,3 +9,5 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 test-results/
+prisma/e2e-smoke.db*
+playwright-report/

@@ -1,0 +1,37 @@
+{
+  "format": "cc-tracker-export",
+  "version": 1,
+  "_comment": "FAKE DEMO DATA for trying the app. Not anyone's real cards or dates. Put your own data in seed/my-cards.json (gitignored).",
+  "holdings": [
+    {
+      "id": "demo-reserve",
+      "catalogCardId": "chase-sapphire-reserve",
+      "nickname": "Demo Reserve",
+      "approvalDate": "2025-01-15",
+      "afMonth": 1,
+      "afDay": 15,
+      "paymentDueDay": 20,
+      "notes": "Demo holding",
+      "usages": [
+        { "benefitId": "travel-credit", "periodKey": "cm-2026-01", "amount": 100, "date": "2026-03-01", "note": "Demo train ticket" }
+      ]
+    },
+    {
+      "id": "demo-flex",
+      "catalogCardId": "chase-freedom-flex",
+      "nickname": "Demo Flex",
+      "approvalDate": "2024-06-01",
+      "paymentDueDay": 5
+    },
+    {
+      "id": "demo-store-card",
+      "nickname": "Example Store Card (demo)",
+      "issuer": "examplebank",
+      "accountType": "personal",
+      "approvalDate": "2025-09-10",
+      "status": "closed",
+      "closedDate": "2026-02-01"
+    }
+  ],
+  "points": [{ "program": "chase-ur", "balance": 12345, "asOf": "2026-10-01" }]
+}
