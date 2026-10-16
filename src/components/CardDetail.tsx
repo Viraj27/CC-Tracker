@@ -9,7 +9,7 @@ import { dropOffDate } from "@/lib/domain/fiveTwentyFour";
 import { benefitStatus } from "@/lib/domain/periods";
 import type { AfOutcome, LifecycleType } from "@/lib/domain/types";
 import { cardHeadline } from "@/lib/domain/wallet";
-import { tempId, useApp } from "./AppState";
+import { isTemp, tempId, useApp } from "./AppState";
 import { BenefitRow } from "./BenefitRow";
 import { HoldingForm } from "./HoldingForm";
 import { use524, type HoldingView } from "./derived";
@@ -262,6 +262,7 @@ export function CardDetail({
                 {e.note && <span className="text-muted">{e.note}</span>}
                 <button
                   type="button"
+                  disabled={isTemp(e.id)}
                   className="ml-auto min-h-8 text-xs text-muted underline hover:text-urgent"
                   onClick={() => mutate((d) => ({ ...d, afEvents: d.afEvents.filter((x) => x.id !== e.id) }), () => deleteAfEvent(e.id))}
                 >
@@ -292,6 +293,7 @@ export function CardDetail({
                 </span>
                 <button
                   type="button"
+                  disabled={isTemp(e.id)}
                   className="ml-auto min-h-8 text-xs text-muted underline hover:text-urgent"
                   onClick={() => mutate((d) => ({ ...d, lifecycle: d.lifecycle.filter((x) => x.id !== e.id) }), () => deleteLifecycleEvent(e.id))}
                 >

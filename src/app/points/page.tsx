@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { deletePoints, savePoints } from "@/app/actions";
-import { tempId, useApp } from "@/components/AppState";
+import { isTemp, tempId, useApp } from "@/components/AppState";
 import { Button, Empty, Field, PageTitle, Section, usd } from "@/components/ui";
 import { centsPerPoint } from "@/lib/domain/bestCard";
 import { shortDate } from "@/lib/domain/dates";
@@ -46,6 +46,7 @@ export default function PointsPage() {
                 <span className="font-mono text-xs tracking-wider text-muted uppercase">as of {shortDate(p.asOf, today)}</span>
                 <button
                   type="button"
+                  disabled={isTemp(p.id)}
                   className="min-h-8 text-xs text-muted underline hover:text-urgent"
                   onClick={() => mutate((d) => ({ ...d, points: d.points.filter((x) => x.id !== p.id) }), () => deletePoints(p.id))}
                 >

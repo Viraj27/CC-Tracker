@@ -25,6 +25,8 @@ const Ctx = createContext<AppState | null>(null);
 
 let tempCounter = 0;
 export const tempId = () => `tmp-${Date.now()}-${tempCounter++}`;
+/** True for an optimistic row the server hasn't saved yet (it can't be deleted until then). */
+export const isTemp = (id: string) => id.startsWith("tmp-");
 
 export function AppProvider({
   catalog,

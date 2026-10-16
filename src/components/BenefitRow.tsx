@@ -7,7 +7,7 @@ import { shortDate } from "@/lib/domain/dates";
 import { benefitAnchor, benefitStatus, computePeriod } from "@/lib/domain/periods";
 import { perkUnitValue } from "@/lib/domain/roi";
 import type { Holding } from "@/lib/domain/types";
-import { tempId, useApp } from "./AppState";
+import { isTemp, tempId, useApp } from "./AppState";
 import { Badge, Button, Field, Progress, Provenance, usd } from "./ui";
 
 export const CYCLE_LABEL: Record<Benefit["cycle"], string> = {
@@ -149,6 +149,7 @@ export function BenefitRow({
               {u.note && <span className="min-w-0 text-muted">{u.note}</span>}
               <button
                 type="button"
+                disabled={isTemp(u.id)}
                 className="ml-auto min-h-8 text-xs text-muted underline hover:text-urgent"
                 aria-label={`Delete use on ${shortDate(u.date)}`}
                 onClick={() =>

@@ -8,6 +8,8 @@ const external = process.env.E2E_BASE_URL;
 export default defineConfig({
   testDir: "e2e",
   timeout: 60_000,
+  // The specs share one database and each imports the demo seed, so run them one at a time.
+  workers: 1,
   use: {
     baseURL: external ?? "http://localhost:3100",
     launchOptions: process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {},

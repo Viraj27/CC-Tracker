@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", ".prisma/client"],
   // Don't generate AGENTS.md on `next dev`.
   agentRules: false,
+  // Keep the dev-mode badge out of e2e screenshots.
+  devIndicators: false,
 };
 
 export default nextConfig;
