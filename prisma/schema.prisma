@@ -1,0 +1,180 @@
+// CC-Tracker database schema.
+//
+// Two layers live in this database:
+//   - Catalog* tables: a cache of the public catalog in `catalog/`. They are
+//     fully rewritten whenever the catalog content hash changes and are never
+//     referenced by foreign keys from user data.
+//   - User-data tables: private to the owner, every row scoped by `profileId`.
+//
+// Kept Postgres-compatible: no SQLite-only types; JSON is stored as text so
+// the provider can be switched without a data migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- catalog --
+
+model CatalogMeta {
+  id       String   @id @default("catalog")
+  hash     String
+  loadedAt DateTime @default(now())
+}
+
+model CatalogCard {
+  id   String @id
+  data String // validated card JSON (see src/lib/catalog/schema.ts)
+}
+
+model CatalogRule {
+  id   String @id
+  data String
+}
+
+model CatalogDoc {
+  // perk-defaults, rotating calendars, etc.
+  id   String @id
+  data String
+}
+
+// -------------------------------------------------------------- user data --
+
+model Profile {
+  id        String   @id
+  name      String
+  createdAt DateTime @default(now())
+
+  holdings            Holding[]
+  pointsBalances      PointsBalance[]
+  settings            Settings?
+}
+
+model Holding {
+  id            String   @id @default(cuid())
+  profileId     String
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  // Catalog card id (not a foreign key: catalog reloads must never cascade).
+  catalogCardId String?
+  // Display name; required for accounts that are not in the catalog.
+  nickname      String?
+  // Only used when catalogCardId is null (or to override it).
+  issuer        String?
+  accountType   String? // "personal" | "business"
+  approvalDate  String // YYYY-MM-DD
+  status        String   @default("open") // open | closed | product_changed
+  closedDate    String?
+  // Set on the holding that resulted from a product change; the account
+  // opening (for 5/24) is the original holding.
+  productChangedFromId String?
+  afMonth       Int?
+  afDay         Int?
+  paymentDueDay Int?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  usages        BenefitUsage[]
+  payments      PaymentRecord[]
+  afEvents      AnnualFeeEvent[]
+  lifecycle     LifecycleEvent[]
+  activations   RotatingActivation[]
+
+  @@index([profileId])
+}
+
+model BenefitUsage {
+  id            String   @id @default(cuid())
+  profileId     String
+  holdingId     String
+  holding       Holding  @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  benefitId     String
+  periodKey     String
+  amount        Float // USD for credits, count for perks
+  valueOverride Float? // USD value of this use (perks)
+  date          String // YYYY-MM-DD
+  note          String?
+  createdAt     DateTime @default(now())
+
+  @@index([holdingId, benefitId, periodKey])
+}
+
+model PaymentRecord {
+  id             String  @id @default(cuid())
+  profileId      String
+  holdingId      String
+  holding        Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  statementMonth String // YYYY-MM
+  dueDate        String
+  paid           Boolean @default(false)
+  paidDate       String?
+
+  @@unique([holdingId, statementMonth])
+}
+
+model AnnualFeeEvent {
+  id         String  @id @default(cuid())
+  profileId  String
+  holdingId  String
+  holding    Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  postedDate String
+  amount     Float
+  outcome    String // paid | retention_offer | downgraded | closed
+  note       String?
+}
+
+model LifecycleEvent {
+  id        String  @id @default(cuid())
+  profileId String
+  holdingId String
+  holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  type      String // retention_call | product_change | closure
+  date      String
+  offer     String?
+  accepted  Boolean?
+  fromCard  String?
+  toCard    String?
+  details   String?
+}
+
+model PointsBalance {
+  id            String  @id @default(cuid())
+  profileId     String
+  profile       Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  program       String
+  balance       Float
+  asOf          String
+  centsPerPoint Float?
+
+  @@unique([profileId, program])
+}
+
+model RotatingActivation {
+  id        String  @id @default(cuid())
+  profileId String
+  holdingId String
+  holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  quarter   String // e.g. 2026-Q4
+  activated Boolean @default(true)
+  date      String?
+
+  @@unique([holdingId, quarter])
+}
+
+model Settings {
+  profileId          String  @id
+  profile            Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  afLeadDays         Int     @default(45)
+  creditLeadDays     Int     @default(30)
+  paymentLeadDays    Int     @default(7)
+  // JSON: { [perkDefaultId]: usd }
+  perkValueOverrides String  @default("{}")
+  // JSON: { [program]: cents }
+  centsPerPoint      String  @default("{}")
+  // YYYY-MM: payments before this month are not flagged as past due.
+  paymentTrackingStart String?
+}
