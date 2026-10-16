@@ -62,7 +62,7 @@ Card file contents:
 - **Downgrade / product-change options**: target products, what you keep/lose, source (official or community data points — mark community DPs `verified: false`).
 
 Catalog scope for v1 = the owner's 7 card products only:
-1. Discover it (exact variant to be confirmed by owner — see §12)
+1. Discover it Cash Back
 2. Chase Freedom Flex
 3. Chase Sapphire Reserve
 4. Wells Fargo Autograph
@@ -169,5 +169,4 @@ Multi-user / P2 profiles (but keep a `profile`/owner concept so P2 can be added 
 - `.gitignore` excludes the DB file and `seed/`.
 
 ## 12. Open items for the owner
-- Exact Discover it variant (Cash Back / Miles / Chrome / other).
 - Confirm which CSR credits are calendar-year vs semiannual from Chase's current benefits page (build should verify from official source).
