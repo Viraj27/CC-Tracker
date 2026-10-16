@@ -16,33 +16,3 @@ rules:
     last_verified: 2026-10-16
     verified: true
     note: Only cards in the catalog with family delta-skymiles-premium (currently the Delta Gold) are matched; add Platinum/Reserve holdings with a catalog entry or check manually.
-  - id: amex-1-in-5
-    name: Amex 1 in 5 days
-    issuer: amex
-    effect: approval
-    description: Amex reportedly approves at most 1 credit card in a rolling 5-day window.
-    check:
-      type: x_in_y
-      max_new_accounts: 0
-      window_days: 5
-      counted_account_types: [personal, business]
-      counted_issuers: [amex]
-    source_url: https://www.doctorofcredit.com/brief-time-related-rules-imposed-american-express-chase-citi/
-    last_verified: 2026-10-16
-    verified: false
-    note: Community data points (source is several years old); never published by Amex.
-  - id: amex-2-in-90
-    name: Amex 2 in 90 days
-    issuer: amex
-    effect: approval
-    description: Amex reportedly approves at most 2 credit cards in a rolling 90-day window.
-    check:
-      type: x_in_y
-      max_new_accounts: 1
-      window_days: 90
-      counted_account_types: [personal, business]
-      counted_issuers: [amex]
-    source_url: https://www.doctorofcredit.com/brief-time-related-rules-imposed-american-express-chase-citi/
-    last_verified: 2026-10-16
-    verified: false
-    note: Community data points (source is several years old); never published by Amex.

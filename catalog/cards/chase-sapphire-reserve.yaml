@@ -99,15 +99,15 @@ benefits:
   - id: the-edit-credit
     kind: credit
     name: The Edit hotel credit
-    description: Up to $500 in statement credits per year on prepaid stays booked with The Edit by Chase Travel (2-night minimum).
-    amount: 500
+    description: Up to $250 Jan–Jun and $250 Jul–Dec ($500/year) in statement credits on prepaid stays booked with The Edit by Chase Travel (2-night minimum, max $250 per booking).
+    amount: 250
     unit: USD
-    cycle: calendar_year
+    cycle: semiannual
     how_to_use: Book a prepaid 2+ night stay with The Edit through Chase Travel.
-    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/the-benefits-of-the-edit-by-chase-travel
     last_verified: 2026-10-16
-    verified: false
-    note: Amount verified — the current product page says up to $250 per prepaid booking, up to $500 annually, 2-night minimum. Reset period not stated on the personal page; an older Chase education page describes $250 Jan–Jun + $250 Jul–Dec, and Chase's business-card terms say calendar year. Modeled as calendar year (matches cardholder experience of a 12/31 expiry).
+    verified: true
+    note: Semiannual split per Chase's Edit benefits page (education center) and confirmed by the cardholder; current product page states the $500 annual total and $250 per-booking cap.
   - id: chase-travel-hotel-credit
     kind: credit
     name: $250 Chase Travel select-hotel credit (2026)

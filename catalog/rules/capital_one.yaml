@@ -17,18 +17,3 @@ rules:
     source_url: https://www.capitalone.com/credit-cards/venture-x/
     last_verified: 2026-10-16
     verified: true
-  - id: capital-one-1-in-6
-    name: Capital One 1 card per 6 months
-    issuer: capital_one
-    effect: approval
-    description: Capital One reportedly approves only one new card (personal or business) per six months.
-    check:
-      type: x_in_y
-      max_new_accounts: 0
-      window_months: 6
-      counted_account_types: [personal, business]
-      counted_issuers: [capital_one]
-    source_url: https://www.doctorofcredit.com/things-everybody-should-know-about-capital-one-credit-cards/
-    last_verified: 2026-10-16
-    verified: false
-    note: Community data points; never published by Capital One.

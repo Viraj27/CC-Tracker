@@ -56,7 +56,7 @@ quarters:
     categories:
       - { name: Top streaming services, maps_to: [streaming] }
       - { name: Grocery stores (excl. Walmart and Target), maps_to: [groceries] }
-    source_url: https://media.chase.com/news/chase-freedom-2026-q4-categories
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
     last_verified: 2026-10-16
     verified: true
-    note: Previewed in Chase's Q4 2026 announcement; activation deadline not yet published.
+    note: Listed as "Next quarter" on Chase's Freedom Flex page; activation opens Dec 15, 2026 (deadline not yet published).

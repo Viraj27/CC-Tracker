@@ -169,4 +169,3 @@ Multi-user / P2 profiles (but keep a `profile`/owner concept so P2 can be added 
 - `.gitignore` excludes the DB file and `seed/`.
 
 ## 12. Open items for the owner
-- Confirm which CSR credits are calendar-year vs semiannual from Chase's current benefits page (build should verify from official source).
