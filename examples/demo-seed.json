@@ -13,7 +13,13 @@
       "paymentDueDay": 20,
       "notes": "Demo holding",
       "usages": [
-        { "benefitId": "travel-credit", "periodKey": "cm-2026-01", "amount": 100, "date": "2026-03-01", "note": "Demo train ticket" }
+        {
+          "benefitId": "travel-credit",
+          "periodKey": "cm-2026-01",
+          "amount": 100,
+          "date": "2026-03-01",
+          "note": "Demo train ticket"
+        }
       ]
     },
     {
@@ -22,6 +28,22 @@
       "nickname": "Demo Flex",
       "approvalDate": "2024-06-01",
       "paymentDueDay": 5
+    },
+    {
+      "id": "demo-venture-x",
+      "catalogCardId": "capital-one-venture-x",
+      "nickname": "Demo Venture X",
+      "approvalDate": "2025-11-20",
+      "afMonth": 11,
+      "afDay": 20,
+      "paymentDueDay": 28
+    },
+    {
+      "id": "demo-autograph",
+      "catalogCardId": "wells-fargo-autograph",
+      "nickname": "Demo Autograph",
+      "approvalDate": "2023-04-12",
+      "paymentDueDay": 12
     },
     {
       "id": "demo-store-card",
@@ -33,5 +55,11 @@
       "closedDate": "2026-02-01"
     }
   ],
-  "points": [{ "program": "chase-ur", "balance": 12345, "asOf": "2026-10-01" }]
+  "points": [
+    {
+      "program": "chase-ur",
+      "balance": 12345,
+      "asOf": "2026-10-01"
+    }
+  ]
 }

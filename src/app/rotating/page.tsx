@@ -1,14 +1,15 @@
 "use client";
 
-import { setActivation } from "@/app/actions";
-import { tempId, useApp } from "@/components/AppState";
+import { useApp } from "@/components/AppState";
+import { useSetActivated } from "@/components/mutations";
 import { Badge, Empty, PageTitle, Provenance, Section, TextLink } from "@/components/ui";
-import { formatDate, quarterBounds } from "@/lib/domain/dates";
+import { shortDate, quarterBounds } from "@/lib/domain/dates";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { currentAndNextQuarter, isActivated, type QuarterView } from "@/lib/domain/rotating";
 
 export default function RotatingPage() {
-  const { catalog, data, today, mutate } = useApp();
+  const { catalog, data, today } = useApp();
+  const setActivated = useSetActivated();
 
   return (
     <div className="flex flex-col gap-4">
@@ -19,15 +20,15 @@ export default function RotatingPage() {
         return (
           <Section key={program.id} title={program.name}>
             <p className="mb-2 text-sm">
-              {program.rate.value}% {program.rate.cap ? `· ${program.rate.cap}` : ""}
+              <span className="font-mono text-lg font-bold">{program.rate.value}%</span> {program.rate.cap ? `· ${program.rate.cap}` : ""}
             </p>
             <Provenance fact={program.rate} />
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 border-y border-hairline sm:grid-cols-2 sm:divide-x sm:divide-hairline">
               {quarters.map((q, i) => (
-                <QuarterCard key={q.quarter} q={q} label={i === 0 ? "Current quarter" : "Next quarter"} calendarUrl={program.calendar_url} />
+                <QuarterCard key={q.quarter} q={q} label={i === 0 ? "Current quarter" : "Next quarter"} calendarUrl={program.calendar_url} today={today} />
               ))}
             </div>
-            <h3 className="mt-4 mb-2 text-sm font-semibold">Activation</h3>
+            <h3 className="mt-5 mb-2 font-mono text-[11px] tracking-wider text-muted uppercase">Activation</h3>
             {holdings.length === 0 ? (
               <Empty>You don&apos;t hold a card in this program.</Empty>
             ) : (
@@ -39,24 +40,12 @@ export default function RotatingPage() {
                       const active = isActivated(data.activations, h.id, q.quarter);
                       return (
                         <li key={`${h.id}-${q.quarter}`}>
-                          <label className="flex cursor-pointer items-center gap-3 text-sm">
+                          <label className="flex min-h-10 cursor-pointer flex-wrap items-center gap-3 text-sm">
                             <input
                               type="checkbox"
                               className="h-5 w-5"
                               checked={active}
-                              onChange={(e) => {
-                                const activated = e.target.checked;
-                                mutate(
-                                  (d) => ({
-                                    ...d,
-                                    activations: [
-                                      ...d.activations.filter((a) => !(a.holdingId === h.id && a.quarter === q.quarter)),
-                                      { id: tempId(), holdingId: h.id, quarter: q.quarter, activated, date: activated ? today : null },
-                                    ],
-                                  }),
-                                  () => setActivation({ holdingId: h.id, quarter: q.quarter, activated }),
-                                );
-                              }}
+                              onChange={(e) => setActivated(h.id, q.quarter, e.target.checked)}
                             />
                             <span>
                               {holdingName(h, cardFor(h, catalog))} — {q.quarter} activated
@@ -79,12 +68,12 @@ export default function RotatingPage() {
   );
 }
 
-function QuarterCard({ q, label, calendarUrl }: { q: QuarterView; label: string; calendarUrl: string }) {
+function QuarterCard({ q, label, calendarUrl, today }: { q: QuarterView; label: string; calendarUrl: string; today: string }) {
   const { start, end } = quarterBounds(q.quarter);
   return (
-    <div className="rounded-lg border border-border p-3">
-      <p className="text-xs text-muted">
-        {label} · {q.quarter} ({formatDate(start)} – {formatDate(end)})
+    <div className="py-3 sm:px-4 sm:first:pl-0">
+      <p className="font-mono text-[11px] tracking-wider text-muted uppercase">
+        {label} · {q.quarter} · {shortDate(start, today)} – {shortDate(end, today)}
       </p>
       {q.announced && q.entry ? (
         <>
@@ -93,7 +82,11 @@ function QuarterCard({ q, label, calendarUrl }: { q: QuarterView; label: string;
               <li key={c.name}>{c.name}</li>
             ))}
           </ul>
-          {q.entry.activation_deadline && <p className="text-sm">Activate by {formatDate(q.entry.activation_deadline)}</p>}
+          {q.entry.activation_deadline && (
+            <p className="text-sm">
+              Activate by <span className="font-mono font-bold">{shortDate(q.entry.activation_deadline, today)}</span>
+            </p>
+          )}
           <Provenance fact={q.entry} />
         </>
       ) : (
@@ -102,7 +95,7 @@ function QuarterCard({ q, label, calendarUrl }: { q: QuarterView; label: string;
           {q.entry ? (
             <Provenance fact={q.entry} />
           ) : (
-            <a className="text-xs text-accent underline" href={calendarUrl} target="_blank" rel="noreferrer">
+            <a className="text-xs underline" href={calendarUrl} target="_blank" rel="noreferrer">
               Check the official calendar
             </a>
           )}
