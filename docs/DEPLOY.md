@@ -85,7 +85,7 @@ Equivalent alternative: create a **self-hosted** application for the hostname `c
 2. On the hosted app (after logging in): **Settings → Export / import →** choose **Merge** → pick the file.
    - The import is validated first. It's written as **one atomic batch**, so it either fully succeeds or changes nothing. Merge is idempotent, so re-running it is safe.
    - Use **Replace** only to wipe the hosted data and load the file instead.
-3. Check the dashboard, 5/24 and payments look the same as on the Mac.
+3. Check the Wallet, 5/24 and payments look the same as on the Mac.
 
 From then on, the hosted app is the one copy of your data. There is no sync back to the Mac. The local app keeps working as a separate local copy.
 

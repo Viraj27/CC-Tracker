@@ -42,9 +42,9 @@ export function Disclosure({
 }) {
   return (
     <details id={id} open={defaultOpen} className="group scroll-mt-24 border-t border-hairline">
-      <summary className="flex min-h-11 items-center justify-between gap-2 py-3">
-        <h2 className="font-mono text-xs font-bold tracking-wider text-muted uppercase">{title}</h2>
-        <span className="flex items-center gap-3 font-mono text-xs text-muted">
+      <summary className="flex min-h-11 items-center justify-between gap-3 py-3">
+        <h2 className="shrink-0 font-mono text-xs font-bold tracking-wider text-muted uppercase">{title}</h2>
+        <span className="flex min-w-0 items-center justify-end gap-3 text-right font-mono text-xs text-muted">
           {meta}
           <span aria-hidden className="disclosure-mark inline-block text-base leading-none transition-transform">
             +

@@ -15,7 +15,7 @@ interface AppState {
   /**
    * Apply `optimistic` immediately, then run the server action and replace
    * state with its result (or roll back on failure). Everything derived from
-   * `data` — dashboard, ROI, utilization, needs-attention — recomputes at once.
+   * `data` — Wallet, ROI, utilization, Up next — recomputes at once.
    */
   mutate: (optimistic: ((d: UserData) => UserData) | null, action: () => Promise<UserData>) => Promise<boolean>;
   replaceData: (d: UserData) => void;

@@ -6,6 +6,7 @@ import { importDemo } from "./helpers";
 const out = path.join(__dirname, "..", "docs", "screenshots");
 const SCREENS = [
   { name: "wallet", path: "/?card=demo-reserve" },
+  { name: "wallet-detail", path: "/?card=demo-reserve#credits" },
   { name: "up-next", path: "/up-next" },
   { name: "eligibility", path: "/eligibility" },
 ];
