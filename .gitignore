@@ -1,0 +1,8 @@
+# Personal data — never commit
+seed/
+*.db
+*.db-journal
+prisma/*.db*
+.env*
+node_modules/
+.next/
