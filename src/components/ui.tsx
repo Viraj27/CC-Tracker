@@ -62,21 +62,27 @@ export function Badge({
   );
 }
 
-/** Source link + last-verified date; loud warning when unverified. */
+/** Source link + last-verified date; community badge, or loud warning when unverified. */
 export function Provenance({
   fact,
 }: {
-  fact: { source_url: string; last_verified: string; verified: boolean; note?: string };
+  fact: { source_url: string; last_verified: string; verified: boolean; source_type?: "official" | "community"; note?: string };
 }) {
+  const community = fact.source_type === "community";
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
-      {!fact.verified && (
+      {community && (
+        <Badge tone="info" title={fact.note}>
+          Community curated
+        </Badge>
+      )}
+      {!community && !fact.verified && (
         <Badge tone="warn" title={fact.note}>
           ⚠ Unverified
         </Badge>
       )}
       <a className="underline decoration-dotted underline-offset-2 hover:text-text" href={fact.source_url} target="_blank" rel="noreferrer">
-        Source
+        {community ? "Community source" : "Source"}
       </a>
       <span>checked {formatDate(fact.last_verified)}</span>
       {fact.note && <span className="basis-full">{fact.note}</span>}

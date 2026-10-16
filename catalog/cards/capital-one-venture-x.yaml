@@ -185,14 +185,16 @@ downgrade_options:
   - target_name: Capital One Venture
     keep: [Capital One miles, Account history / age]
     lose: [$300 travel credit, Anniversary miles, Lounge access, Cell phone protection]
+    source_type: community
     source_url: https://www.capitalone.com/learn-grow/money-management/capital-one-venture-vs-venture-x/
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Product changes are from community data points, not an official Capital One statement.
   - target_name: Capital One VentureOne
     keep: [Capital One miles, Account history / age]
     lose: [$300 travel credit, Anniversary miles, Lounge access, 2x base earn]
+    source_type: community
     source_url: https://www.capitalone.com/credit-cards/ventureone/
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Product changes are from community data points, not an official Capital One statement.

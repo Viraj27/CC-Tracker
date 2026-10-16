@@ -28,7 +28,7 @@ describe("catalog/", () => {
   });
 
   it("every fact has source_url + last_verified; unverified facts explain why", () => {
-    const facts: { where: string; source_url: string; last_verified: string; verified: boolean; note?: string }[] = [];
+    const facts: { where: string; source_url: string; last_verified: string; verified: boolean; source_type?: string; note?: string }[] = [];
     for (const c of catalog.cards) {
       facts.push({ where: `${c.id} AF`, ...c.annual_fee });
       c.earn_rates.forEach((r) => facts.push({ where: `${c.id} earn ${r.label}`, ...r }));
@@ -44,12 +44,14 @@ describe("catalog/", () => {
     for (const f of facts) {
       expect(f.source_url, f.where).toMatch(/^https:\/\//);
       expect(f.last_verified, f.where).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      if (!f.verified) expect(f.note?.length, `${f.where} needs a note`).toBeGreaterThan(0);
+      if (!f.verified || f.source_type === "community") expect(f.note?.length, `${f.where} needs a note`).toBeGreaterThan(0);
     }
   });
 
   it("has the Chase 5/24 rule and the Freedom rotating calendar", () => {
-    expect(catalog.rules.find((r) => r.id === "chase-5-24")?.check.type).toBe("x_in_y");
+    const rule524 = catalog.rules.find((r) => r.id === "chase-5-24");
+    expect(rule524?.check.type).toBe("x_in_y");
+    expect(rule524?.source_type).toBe("community");
     expect(catalog.rotating.find((r) => r.id === "chase-freedom")?.card_ids).toContain("chase-freedom-flex");
   });
 

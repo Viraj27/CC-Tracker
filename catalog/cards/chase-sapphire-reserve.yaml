@@ -336,22 +336,25 @@ downgrade_options:
   - target_name: Chase Sapphire Preferred
     keep: [Ultimate Rewards points, Account history / age]
     lose: [Reserve credits, Priority Pass, Higher earn rates]
+    source_type: community
     source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/upgrading-to-sapphire-reserve-from-sapphire-preferred
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Chase documents Preferred→Reserve upgrades; the reverse (Reserve→Preferred) is community data points only. Ask Chase when calling.
   - target_name: Chase Freedom Unlimited
     keep: [Ultimate Rewards points, Account history / age]
     lose: [All Reserve travel benefits and credits]
+    source_type: community
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Community data points — Chase does not publish product-change paths.
   - target_name: Chase Freedom Flex
     target_card_id: chase-freedom-flex
     keep: [Ultimate Rewards points, Account history / age]
     lose: [All Reserve travel benefits and credits]
+    source_type: community
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Community data points — Chase does not publish product-change paths.

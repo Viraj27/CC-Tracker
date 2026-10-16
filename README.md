@@ -67,7 +67,9 @@ catalog/
 
 **Every fact carries provenance:** `source_url` (an official issuer page wherever possible), `last_verified` (YYYY-MM-DD) and `verified`. If a fact could not be confirmed from an official source it is `verified: false` with a `note` explaining why. Unknown amounts are `null`, never guessed. The UI shows a ⚠ Unverified badge and source link next to every fact, and the dashboard flags unverified facts that affect a pending action. The loader rejects missing provenance or an unverified fact without a note.
 
-> v1 verification note: issuer sites could not be loaded directly from the build environment, so facts were checked using search results restricted to the issuers' own domains. Some details are marked unverified because no official source confirmed them, including Chase 5/24, Amex and Capital One velocity rules, product-change paths, some protection limits, and the Discover Q4 2026 calendar. Please spot-check before relying on them.
+**Community curated:** facts issuers never publish (Chase 5/24, product-change paths) carry `source_type: community`, a community `source_url` and a `note`. The UI shows them with a "Community curated" badge instead of the unverified warning. Omitted `source_type` means `official`.
+
+> Verification note (2026-10-16): catalog facts were re-checked against issuer pages and Guides to Benefits. Remaining non-official items are community curated (5/24, product-change paths); the United Club pass price and United bag fee are still unverified — set your own values in Settings.
 
 Key card fields: `id`, `name`, `issuer`, `network`, `account_type`, `family` (used by issuer rules), `rewards_program`, `rotating_program`, `brand_color`, `annual_fee {amount, first_year_waived}`, `earn_rates[] {categories, rate, unit, conditions, cap}`, `benefits[]`, `downgrade_options[] {target_name, keep, lose}`.
 

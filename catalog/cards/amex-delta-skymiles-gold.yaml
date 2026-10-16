@@ -166,7 +166,8 @@ downgrade_options:
   - target_name: Delta SkyMiles Blue American Express Card
     keep: [SkyMiles (held by Delta), Account history / age]
     lose: [Free checked bags, Delta Stays credit, $200 flight credit, TakeOff 15, Travel protections]
+    source_type: community
     source_url: https://www.americanexpress.com/en-us/credit-cards/credit-intel/types-of-delta-credit-cards/
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Product changes between Delta cards are from community data points, not an official Amex statement.

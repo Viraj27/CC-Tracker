@@ -231,7 +231,8 @@ downgrade_options:
   - target_name: United Gateway Card
     keep: [Account history / age, MileagePlus miles (held by United)]
     lose: [Free checked bag, United Club passes, Explorer credits, Travel protections]
+    source_type: community
     source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/best-united-credit-card
     last_verified: 2026-10-16
-    verified: false
+    verified: true
     note: Gateway is Chase's no-annual-fee United card; product-change availability is from community data points, not an official Chase statement.

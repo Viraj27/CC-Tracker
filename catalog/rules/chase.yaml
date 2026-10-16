@@ -16,10 +16,11 @@ rules:
       counted_account_types: [personal]
       business_counted_issuers: [capital_one, discover]
       counted_issuers: null
+    source_type: community
     source_url: https://www.doctorofcredit.com/chase-524-rule-explained-detail-need-know/
     last_verified: 2026-10-16
     verified: true
-    note: Accepted by owner as a working rule. Chase has never published 5/24; it is a widely documented community rule.
+    note: Chase has never published 5/24; it is a widely documented community rule, accepted by the owner as a working rule.
   - id: chase-sapphire-reserve-bonus
     name: Sapphire Reserve welcome bonus eligibility
     issuer: chase

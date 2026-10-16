@@ -4,6 +4,9 @@ import { z } from "zod";
  * Catalog schema. Every factual field carries provenance:
  *   source_url     official issuer page / benefits guide (preferred)
  *   last_verified  date the fact was last checked against source_url
+ *   source_type    "official" (issuer page / guide; the default when omitted) or "community"
+ *                  (community-curated: data points the issuer never publishes,
+ *                  e.g. 5/24 or product-change paths). Community facts need a note.
  *   verified       false when the fact could not be confirmed from an
  *                  official source; `note` must then explain why.
  */
@@ -14,12 +17,13 @@ export const provenance = {
   source_url: z.url(),
   last_verified: isoDate,
   verified: z.boolean(),
+  source_type: z.enum(["official", "community"]).optional(),
   note: z.string().optional(),
 };
 
-const requireNoteWhenUnverified = <T extends { verified: boolean; note?: string }>(v: T) =>
-  v.verified || (v.note !== undefined && v.note.trim().length > 0);
-const unverifiedNoteMsg = { message: "verified: false requires a note explaining why" };
+const requireNoteWhenUnverified = <T extends { verified: boolean; source_type?: string; note?: string }>(v: T) =>
+  (v.verified && v.source_type !== "community") || (v.note !== undefined && v.note.trim().length > 0);
+const unverifiedNoteMsg = { message: "verified: false and community facts require a note explaining why" };
 
 export const CYCLES = [
   "monthly",
