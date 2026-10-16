@@ -117,3 +117,20 @@ export function formatDate(iso: string | null | undefined): string {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${months[m - 1]} ${d}, ${y}`;
 }
+
+const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+/** Wallet-style short date: `31 OCT`, with the year when it isn't `today`'s year (`15 JAN 2027`). */
+export function shortDate(iso: string | null | undefined, today?: string): string {
+  if (!iso) return "—";
+  const { y, m, d } = parseIso(iso);
+  const sameYear = today !== undefined && parseIso(today).y === y;
+  return `${d} ${MON[m - 1]}${sameYear ? "" : ` ${y}`}`;
+}
+
+/** Day of week + short date: `SAT 17 OCT`. */
+export function dayDate(iso: string, today?: string): string {
+  const { y, m, d } = parseIso(iso);
+  return `${DOW[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${shortDate(iso, today)}`;
+}
