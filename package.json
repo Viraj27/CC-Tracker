@@ -13,6 +13,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "pretest": "npm run catalog:bundle",
     "test": "vitest run",
     "test:watch": "vitest",
     "catalog:check": "tsx scripts/catalog-check.ts",

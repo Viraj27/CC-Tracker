@@ -99,3 +99,12 @@ earn_rates:
     expect(loadCatalog(tmpCatalog(`${base}benefits: []\n`)).cards).toHaveLength(1);
   });
 });
+
+describe("bundled catalog (Cloudflare Workers)", () => {
+  it("src/generated/catalog.json is the validated catalog/ with the same hash", () => {
+    const bundled = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src", "generated", "catalog.json"), "utf8"));
+    const fromDisk = loadCatalog(path.join(process.cwd(), "catalog"));
+    expect(bundled.hash).toBe(fromDisk.hash);
+    expect(bundled).toEqual(JSON.parse(JSON.stringify(fromDisk)));
+  });
+});
