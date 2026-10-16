@@ -158,10 +158,9 @@ benefits:
         - Within 90 days of purchase.
         - Purchase made with the card.
       how_to_claim: File with Amex's claims administrator.
-    source_url: https://global.americanexpress.com/card-benefits/view-all/delta-gold
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
     last_verified: 2026-10-16
-    verified: false
-    note: The figures appeared on an Amex page that may not be specific to the Delta Gold card.
+    verified: true
 
 downgrade_options:
   - target_name: Delta SkyMiles Blue American Express Card

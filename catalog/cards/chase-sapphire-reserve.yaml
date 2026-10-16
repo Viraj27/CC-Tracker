@@ -55,8 +55,7 @@ earn_rates:
     unit: points_per_dollar
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
-    verified: false
-    note: Base rate was not stated in the official-page excerpts available to the build; confirm on the product page.
+    verified: true
 
 benefits:
   # ---------------------------------------------------------------- credits
@@ -108,20 +107,20 @@ benefits:
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
     verified: false
-    note: Chase pages describe "up to $500 annually" with a $250 maximum per transaction; whether the personal card splits it Jan–Jun / Jul–Dec could not be confirmed (spec §12 open item). A Chase page also mentions up to $1,000 from 1/1/2027, apparently for the business card only.
+    note: Amount verified — the current product page says up to $250 per prepaid booking, up to $500 annually, 2-night minimum. Reset period not stated on the personal page; an older Chase education page describes $250 Jan–Jun + $250 Jul–Dec, and Chase's business-card terms say calendar year. Modeled as calendar year (matches cardholder experience of a 12/31 expiry).
   - id: chase-travel-hotel-credit
     kind: credit
     name: $250 Chase Travel select-hotel credit (2026)
-    description: Statement credit on a prepaid Chase Travel hotel booking with participating brands, 2-night minimum.
+    description: Statement credit on prepaid Chase Travel hotel bookings (2-night minimum) with IHG, Montage, Pendry, Omni, Virgin Hotels, Minor Hotels, or Pan Pacific, for stays booked Jan 1–Dec 31, 2026.
     amount: 250
     unit: USD
     cycle: calendar_year
     ends_on: 2026-12-31
     how_to_use: Book a prepaid 2+ night stay at a participating brand through Chase Travel.
-    source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/select-hotel-credit-from-sapphire-reserve-for-business
+    source_url: https://www.chase.com/sapphire-cards/personal/reserve
     last_verified: 2026-10-16
-    verified: false
-    note: The official page found describes this for Sapphire Reserve for Business; the current personal-card page did not list it. Confirm it applies to your card before counting on it.
+    verified: true
+    note: Chase's personal Sapphire Reserve benefits page lists it for "Sapphire Reserve and J.P. Morgan Reserve Personal Cards".
   - id: doordash-promos
     kind: credit
     name: DoorDash promos (with complimentary DashPass)
@@ -133,8 +132,8 @@ benefits:
     how_to_use: Activate complimentary DashPass with the card; promos appear in the DoorDash app each month.
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
-    verified: false
-    note: Search excerpts of Chase pages disagree — the current page reportedly shows $15 + 2×$10 (=$35/mo) through Dec 31, 2029, older pages show lower amounts ending 2027. Confirm in the DoorDash app.
+    verified: true
+    note: Product page — $15 monthly promo on any qualifying order plus two $10 monthly promos for groceries/essentials; available through 12/31/29. DashPass activation by 12/31/29.
   - id: lyft-credit
     kind: credit
     name: Lyft in-app credit
@@ -306,31 +305,32 @@ benefits:
   - id: extended-warranty
     kind: protection
     name: Extended warranty protection
-    description: Extends eligible manufacturer warranties.
+    description: Extends the original U.S. manufacturer's repair warranty by one additional year.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: +1 year on eligible U.S. manufacturer warranties of 3 years or less (coverage starts after any store warranty / service contract).
       conditions:
         - Item paid with the card.
       how_to_claim: File with the benefits administrator.
-    source_url: https://www.chase.com/sapphire-cards/personal/reserve
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11388_v2.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Listed in the Guide to Benefits table of contents, but terms (extension length, limits) were not available to the build.
+    verified: true
+    note: Guide to Benefits, benefits in effect as of 10/01/24.
   - id: emergency-evacuation
     kind: protection
     name: Emergency evacuation and transportation
     description: Covers medical evacuation when injured or sick on a trip far from home.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: Up to $100,000 for necessary emergency evacuation and transportation.
       conditions:
         - Trip 100+ miles from home.
+        - Evacuation must be arranged/approved in advance by the benefit's service provider.
       how_to_claim: Call the benefits administrator before arranging transport.
-    source_url: https://www.chase.com/sapphire-cards/personal/reserve
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11388_v2.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: The only figure found ($100,000) was on the Sapphire Reserve for Business page; personal-card limit not confirmed.
+    verified: true
+    note: Personal Sapphire Reserve Guide to Benefits, benefits in effect as of 10/01/24.
 
 downgrade_options:
   - target_name: Chase Sapphire Preferred

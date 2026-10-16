@@ -114,71 +114,72 @@ benefits:
     description: Coverage for collision or theft damage to an eligible rental vehicle.
     cycle: per_use
     protection:
-      coverage: Primary; vehicles up to $75,000 MSRP; 15 days in your country of residence, 31 days abroad (2021 Guide).
+      coverage: Primary; vehicles up to $75,000 MSRP; 15 days in your country of residence, 31 days abroad.
       conditions:
         - Decline the rental company's CDW/LDW.
         - Pay for the rental with the card.
       how_to_claim: Call the benefits administrator after the incident.
     source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Current Capital One page confirms the benefit exists; limits come from the 2021 Guide to Benefits and may be outdated.
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
   - id: trip-cancellation
     kind: protection
     name: Trip cancellation / interruption coverage
     description: Reimburses eligible travel expenses if plans are affected by a covered event such as a medical emergency.
     cycle: per_use
     protection:
-      coverage: Up to $2,000 per insured person for common-carrier fares (2021 Guide).
+      coverage: Up to $2,000 per insured person for non-refundable common-carrier fares.
       conditions:
         - Trip paid with the card.
       how_to_claim: File with the benefits administrator.
-    source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Benefit confirmed on a current Capital One page; the limit is from the 2021 Guide to Benefits.
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
   - id: trip-delay
     kind: protection
     name: Trip delay reimbursement
     description: Reimbursement for expenses during covered common-carrier delays.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: Up to $500 per purchased ticket for reasonable expenses (meals, lodging, etc.); one claim per covered trip.
       conditions:
-        - Fare paid with the card.
+        - Fare (or part of it) paid with the card or its rewards.
+        - Delay of more than 6 hours or requiring an overnight stay, due to a covered hazard.
       how_to_claim: File with the benefits administrator.
     source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Listed in the 2021 Guide to Benefits; current limits and delay threshold not available to the build.
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
   - id: lost-luggage
     kind: protection
     name: Lost luggage reimbursement
     description: Covers checked or carry-on luggage lost by the carrier.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: Up to $3,000 per covered trip (New York residents $2,000 per bag), for the amount above the carrier's payment.
       conditions:
         - Fare paid with the card.
       how_to_claim: File with the carrier first, then the benefits administrator.
     source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Listed in the 2021 Guide to Benefits; current limits not available to the build.
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
   - id: extended-warranty
     kind: protection
     name: Extended warranty
     description: Extends eligible manufacturer warranties of 3 years or less by one additional year (vehicles excluded).
     cycle: per_use
     protection:
-      coverage: +1 year on warranties of 3 years or less.
+      coverage: +1 year on warranties of 3 years or less; up to $10,000 per claim and $50,000 per cardholder.
       conditions:
         - Item paid with the card.
       how_to_claim: File with the benefits administrator.
     source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: From the 2021 Guide to Benefits; may have changed.
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
 
 downgrade_options:
   - target_name: Capital One Venture

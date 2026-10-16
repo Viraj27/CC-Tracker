@@ -84,17 +84,16 @@ benefits:
   - id: extended-warranty
     kind: protection
     name: Extended warranty protection
-    description: Extends eligible manufacturer warranties.
+    description: Extends the manufacturer's U.S. warranty by one additional year.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: +1 year on eligible warranties of 3 years or less, up to 4 years from purchase.
       conditions:
         - Item paid with the card.
       how_to_claim: File with the benefits administrator.
-    source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/chase-freedom-benefits-guide
+    source_url: https://www.chase.com/personal/credit-cards/freedom/flex
     last_verified: 2026-10-16
-    verified: false
-    note: Chase lists the benefit but the extension length and limits were not available to the build.
+    verified: true
   - id: trip-cancellation
     kind: protection
     name: Trip cancellation / interruption insurance
@@ -132,13 +131,14 @@ benefits:
     description: Coverage against theft or damage for phones on a monthly bill paid with the card.
     cycle: per_use
     protection:
-      coverage: Up to $800 per claim (2020 launch terms).
+      coverage: Up to $800 per claim and $1,000 per 12-month period; max 2 claims per 12 months; $50 deductible per claim. Secondary coverage.
       conditions:
         - Pay the monthly cell phone bill with the card.
-      how_to_claim: File with the benefits administrator.
-    source_url: https://media.chase.com/news/new-chase-freedom-flex-credit-Card-and-more-cash-back-Opportunities-for-freedom-unlimited-cardmembers
+        - Phone must be listed on that bill.
+      how_to_claim: File at mycardbenefits.com (Mastercard benefits administrator).
+    source_url: https://www.chase.com/personal/credit-cards/freedom/flex
     last_verified: 2026-10-16
-    verified: false
-    note: Only found in the 2020 launch release; 2026 benefit lists omit it, so it may have been discontinued. Confirm with Chase before relying on it.
+    verified: true
+    note: Still offered — listed on Chase's current Freedom Flex page.
 
 downgrade_options: []

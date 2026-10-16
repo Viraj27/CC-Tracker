@@ -64,14 +64,13 @@ benefits:
     description: Visa auto rental coverage for theft and collision damage.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: Secondary in the United States; primary outside the United States.
       conditions:
         - Decline the rental company's collision damage waiver.
-        - Pay for the rental with the card.
+        - Pay for the entire rental with the card (or its rewards).
       how_to_claim: Call the Visa benefits administrator.
     source_url: https://www.wellsfargo.com/credit-cards/autograph-visa/guide-to-benefits/
     last_verified: 2026-10-16
-    verified: false
-    note: Not confirmed in the Guide to Benefits excerpts available to the build; check whether it applies and whether it is primary or secondary.
+    verified: true
 
 downgrade_options: []

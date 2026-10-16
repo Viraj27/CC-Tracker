@@ -4,17 +4,20 @@ card_ids: [discover-it-cash-back]
 rate:
   value: 5
   unit: percent
-  cap: null
-  source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+  cap: Up to $1,500 in purchases per quarter when activated (up to $75 cash back).
+  source_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
   last_verified: 2026-10-16
-  verified: false
-  note: 5% up to a "quarterly maximum" is confirmed; the $1,500 cap only appeared in an older (2024) promotion, so the current cap is left blank.
-calendar_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+  verified: true
+calendar_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
 
 quarters:
   - quarter: 2026-Q4
-    announced: false
-    source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+    announced: true
+    categories:
+      - { name: Restaurants, maps_to: [dining] }
+      - { name: Entertainment, maps_to: [entertainment] }
+      - { name: Utilities, maps_to: [] }
+    source_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
     last_verified: 2026-10-16
-    verified: false
-    note: The Oct–Dec 2026 categories could not be retrieved from Discover's calendar during the build. Check the calendar and add them here.
+    verified: true
+    note: Oct 1–Dec 31, 2026, on up to $1,500 in purchases; activation required.

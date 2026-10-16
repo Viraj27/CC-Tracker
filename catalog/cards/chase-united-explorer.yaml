@@ -35,13 +35,12 @@ earn_rates:
     verified: true
   - categories: [airfare]
     label: United purchases
-    rate: null
+    rate: 3
     unit: miles_per_dollar
-    conditions: United purchases only.
+    conditions: Eligible United purchases (on flights, plus the MileagePlus member's 6x for 9x total).
     source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
     last_verified: 2026-10-16
-    verified: false
-    note: Excerpts of Chase pages were inconsistent about the United-purchases multiplier (2x vs 3x); left blank until confirmed on the product page.
+    verified: true
   - categories: [other]
     label: All other purchases
     rate: 1
@@ -113,15 +112,15 @@ benefits:
   - id: avis-budget-credit
     kind: credit
     name: Avis / Budget credit
-    description: Statement credit on Avis or Budget car rentals.
+    description: Up to $50 in United TravelBank cash per year — up to $25 each on the first two Avis/Budget rentals (2+ days) booked through cars.united.com with your MileagePlus number.
     amount: 50
     unit: USD
     cycle: cardmember_year
     anniversary_basis: af_date
-    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
     last_verified: 2026-10-16
-    verified: false
-    note: Mentioned as "up to $50" in an excerpt of the Chase page, but the reset cycle and terms were not available. Confirm before counting it.
+    verified: true
+    note: Chase terms define the year from account open date through the first statement after the open-date anniversary (approximated here by the AF date).
   - id: free-checked-bag
     kind: perk
     name: Free first checked bag
@@ -218,15 +217,15 @@ benefits:
     description: Covers new purchases against damage or theft.
     cycle: per_use
     protection:
-      coverage: null
+      coverage: Up to $10,000 per item and $50,000 per calendar year.
       conditions:
-        - Within 90 days of purchase.
+        - Within 120 days of purchase (90 days for New York residents).
         - Item paid with the card.
       how_to_claim: File with the benefits administrator.
-    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11386_v2.pdf
     last_verified: 2026-10-16
-    verified: false
-    note: Coverage window (90 days) found; per-claim limit not available to the build.
+    verified: true
+    note: United Explorer Guide to Benefits, effective 10/01/24.
 
 downgrade_options:
   - target_name: United Gateway Card
