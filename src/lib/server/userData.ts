@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { localToday } from "../domain/dates";
 import type {
   AccountType,
@@ -9,6 +9,7 @@ import type {
   UserData,
 } from "../domain/types";
 import { DEFAULT_SETTINGS } from "../domain/types";
+import { type Db, type SqlStatement, sqlNow, upsertSql } from "./dbHandle";
 
 /** Ensure the single v1 profile and its settings exist. */
 export async function ensureProfile(prisma: PrismaClient, profileId: string): Promise<void> {
@@ -136,73 +137,42 @@ export function settingsRow(s: Settings) {
 export type ImportMode = "merge" | "replace";
 
 /**
- * Write imported user data. `replace` wipes the profile's user data first;
- * `merge` upserts by id (ids are deterministic, so re-imports are idempotent).
+ * The statements that write imported user data. `replace` wipes the
+ * profile's user data first; `merge` upserts by id (ids are deterministic,
+ * so re-imports are idempotent). Parents before children (foreign keys).
  */
+export function importStatements(
+  profileId: string,
+  data: UserData,
+  mode: ImportMode,
+  includeSettings: boolean,
+): SqlStatement[] {
+  const now = sqlNow();
+  const ops: SqlStatement[] = [];
+  if (mode === "replace") {
+    // Children cascade from holdings.
+    ops.push({ sql: `DELETE FROM "Holding" WHERE "profileId" = ?`, params: [profileId] });
+    ops.push({ sql: `DELETE FROM "PointsBalance" WHERE "profileId" = ?`, params: [profileId] });
+  }
+  for (const h of data.holdings) ops.push(upsertSql("Holding", { ...h, profileId, updatedAt: now }));
+  for (const u of data.usages) ops.push(upsertSql("BenefitUsage", { ...u, profileId }));
+  for (const p of data.payments) ops.push(upsertSql("PaymentRecord", { ...p, profileId }, ["holdingId", "statementMonth"]));
+  for (const e of data.afEvents) ops.push(upsertSql("AnnualFeeEvent", { ...e, profileId }));
+  for (const e of data.lifecycle) ops.push(upsertSql("LifecycleEvent", { ...e, profileId }));
+  for (const a of data.activations) ops.push(upsertSql("RotatingActivation", { ...a, profileId }, ["holdingId", "quarter"]));
+  for (const p of data.points) ops.push(upsertSql("PointsBalance", { ...p, profileId }, ["profileId", "program"]));
+  if (includeSettings) ops.push(upsertSql("Settings", { profileId, ...settingsRow(data.settings) }, ["profileId"]));
+  return ops;
+}
+
+/** Write imported user data atomically (one batch — a single D1 query on Cloudflare). */
 export async function writeImport(
-  prisma: PrismaClient,
+  db: Db,
   profileId: string,
   data: UserData,
   mode: ImportMode,
   includeSettings: boolean,
 ): Promise<void> {
-  await ensureProfile(prisma, profileId);
-  const ops: Prisma.PrismaPromise<unknown>[] = [];
-  if (mode === "replace") {
-    // Children cascade from holdings.
-    ops.push(prisma.holding.deleteMany({ where: { profileId } }));
-    ops.push(prisma.pointsBalance.deleteMany({ where: { profileId } }));
-  }
-  // Insert originals before product-changed successors (no FK, but keeps order tidy).
-  for (const { id, ...h } of data.holdings) {
-    const row = { ...h, profileId };
-    ops.push(prisma.holding.upsert({ where: { id }, create: { id, ...row }, update: row }));
-  }
-  for (const { id, ...u } of data.usages) {
-    const row = { ...u, profileId };
-    ops.push(prisma.benefitUsage.upsert({ where: { id }, create: { id, ...row }, update: row }));
-  }
-  for (const { id, ...p } of data.payments) {
-    const row = { ...p, profileId };
-    ops.push(
-      prisma.paymentRecord.upsert({
-        where: { holdingId_statementMonth: { holdingId: p.holdingId, statementMonth: p.statementMonth } },
-        create: { id, ...row },
-        update: row,
-      }),
-    );
-  }
-  for (const { id, ...e } of data.afEvents) {
-    const row = { ...e, profileId };
-    ops.push(prisma.annualFeeEvent.upsert({ where: { id }, create: { id, ...row }, update: row }));
-  }
-  for (const { id, ...e } of data.lifecycle) {
-    const row = { ...e, profileId };
-    ops.push(prisma.lifecycleEvent.upsert({ where: { id }, create: { id, ...row }, update: row }));
-  }
-  for (const { id, ...a } of data.activations) {
-    const row = { ...a, profileId };
-    ops.push(
-      prisma.rotatingActivation.upsert({
-        where: { holdingId_quarter: { holdingId: a.holdingId, quarter: a.quarter } },
-        create: { id, ...row },
-        update: row,
-      }),
-    );
-  }
-  for (const { id, ...p } of data.points) {
-    const row = { ...p, profileId };
-    ops.push(
-      prisma.pointsBalance.upsert({
-        where: { profileId_program: { profileId, program: p.program } },
-        create: { id, ...row },
-        update: row,
-      }),
-    );
-  }
-  if (includeSettings) {
-    const row = settingsRow(data.settings);
-    ops.push(prisma.settings.upsert({ where: { profileId }, create: { profileId, ...row }, update: row }));
-  }
-  await prisma.$transaction(ops);
+  await ensureProfile(db.prisma, profileId);
+  await db.batch(importStatements(profileId, data, mode, includeSettings));
 }

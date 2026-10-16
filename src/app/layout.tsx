@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { AppProvider } from "@/components/AppState";
 import { Nav } from "@/components/Nav";
 import { localToday } from "@/lib/domain/dates";
-import { PROFILE_ID, prisma } from "@/lib/server/db";
+import { getDb, PROFILE_ID } from "@/lib/server/db";
 import { getCatalog } from "@/lib/server/catalogStore";
 import { loadUserData } from "@/lib/server/userData";
 import "./globals.css";
@@ -24,8 +24,9 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const catalog = await getCatalog(prisma);
-  const data = await loadUserData(prisma, PROFILE_ID);
+  const db = await getDb();
+  const catalog = await getCatalog(db);
+  const data = await loadUserData(db.prisma, PROFILE_ID);
   return (
     <html lang="en">
       <body className="min-h-screen">

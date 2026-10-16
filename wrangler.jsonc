@@ -1,0 +1,34 @@
+// Cloudflare Workers config for the hosted app (see docs/DEPLOY.md).
+// No secrets or account-specific ids here: the account comes from
+// CLOUDFLARE_ACCOUNT_ID and CI fills in the D1 database_id at deploy time
+// (scripts/cf-d1-ensure.mjs).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cc-tracker",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    // OpenNext calls back into the worker itself through this binding.
+    { "binding": "WORKER_SELF_REFERENCE", "service": "cc-tracker" }
+  ],
+  // URL: https://cc-tracker.<your-subdomain>.workers.dev
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cc-tracker",
+      // Placeholder for local preview/tests; CI replaces it with the real id.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Prisma's migrations are the single source of truth for the schema.
+      "migrations_dir": "prisma/migrations",
+      "migrations_pattern": "prisma/migrations/*/migration.sql"
+    }
+  ],
+  "observability": { "enabled": true }
+}
