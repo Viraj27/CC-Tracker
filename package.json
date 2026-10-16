@@ -4,20 +4,30 @@
   "private": true,
   "description": "Personal credit card tracker: rewards, benefits, annual fees, payments and issuer eligibility.",
   "scripts": {
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && npm run catalog:bundle",
     "db:setup": "node scripts/db-setup.mjs",
+    "catalog:bundle": "tsx scripts/bundle-catalog.ts",
     "predev": "npm run db:setup",
     "dev": "next dev",
-    "prebuild": "npm run db:setup",
+    "prebuild": "npm run db:setup && npm run catalog:bundle",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "pretest": "npm run catalog:bundle",
     "test": "vitest run",
     "test:watch": "vitest",
     "catalog:check": "tsx scripts/catalog-check.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:migrate:local": "wrangler d1 migrations apply cc-tracker --local",
+    "preview": "npm run cf:build && npm run cf:migrate:local && opennextjs-cloudflare preview",
+    "cf:d1:ensure": "node scripts/cf-d1-ensure.mjs",
+    "cf:migrate:remote": "wrangler d1 migrations apply cc-tracker --remote",
+    "cf:deploy": "opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.20.12",
+    "@prisma/adapter-d1": "6.19.3",
     "@prisma/client": "6.19.3",
     "next": "16.4.2",
     "react": "19.3.1",
@@ -35,6 +45,7 @@
     "tailwindcss": "4.3.3",
     "tsx": "^4",
     "typescript": "^5",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "wrangler": "4.151.0"
   }
 }

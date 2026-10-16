@@ -122,7 +122,7 @@ function ExportImport() {
   return (
     <Section title="Export / import" id="import">
       <p className="mb-3 text-sm text-muted">
-        Export everything to JSON (backups, or moving to a hosted DB later). Import validates the file first. Your seed file
+        Export everything to JSON (backups, or moving data from the Mac to the hosted app). Import validates the file first. Your seed file
         (<code>seed/my-cards.json</code>, gitignored) is imported here.
       </p>
       <div className="flex flex-col gap-3">

@@ -9,14 +9,16 @@ import { isoDate } from "@/lib/catalog/schema";
 import { localToday } from "@/lib/domain/dates";
 import type { UserData } from "@/lib/domain/types";
 import { buildExport, ImportError, parseImport } from "@/lib/importExport";
-import { PROFILE_ID, prisma } from "@/lib/server/db";
+import { getDb, PROFILE_ID } from "@/lib/server/db";
 import { type ImportMode, loadUserData, settingsRow, writeImport } from "@/lib/server/userData";
 
 const profileId = PROFILE_ID;
-const snapshot = () => loadUserData(prisma, profileId);
+const prismaClient = async () => (await getDb()).prisma;
+const snapshot = async () => loadUserData(await prismaClient(), profileId);
 const optStr = z.string().trim().nullable().optional().transform((v) => (v ? v : null));
 
 async function ownHolding(holdingId: string) {
+  const prisma = await prismaClient();
   const h = await prisma.holding.findFirst({ where: { id: holdingId, profileId } });
   if (!h) throw new Error("Card not found");
   return h;
@@ -43,6 +45,7 @@ const HoldingInput = z
   .refine((h) => h.catalogCardId || h.nickname, { message: "Pick a catalog card or enter a name" });
 
 export async function saveHolding(input: z.input<typeof HoldingInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const { id, ...h } = HoldingInput.parse(input);
   if (id) {
     await ownHolding(id);
@@ -54,6 +57,7 @@ export async function saveHolding(input: z.input<typeof HoldingInput>): Promise<
 }
 
 export async function deleteHolding(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
   await ownHolding(id);
   await prisma.holding.delete({ where: { id } });
   return snapshot();
@@ -72,6 +76,7 @@ const UsageInput = z.object({
 });
 
 export async function logUsage(input: z.input<typeof UsageInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const u = UsageInput.parse(input);
   await ownHolding(u.holdingId);
   await prisma.benefitUsage.create({ data: { ...u, profileId } });
@@ -79,6 +84,7 @@ export async function logUsage(input: z.input<typeof UsageInput>): Promise<UserD
 }
 
 export async function deleteUsage(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
   await prisma.benefitUsage.deleteMany({ where: { id, profileId } });
   return snapshot();
 }
@@ -95,6 +101,7 @@ export async function setPaymentPaid(input: {
     .object({ holdingId: z.string(), month: z.string().regex(/^\d{4}-\d{2}$/), dueDate: isoDate, paid: z.boolean() })
     .parse(input);
   await ownHolding(p.holdingId);
+  const prisma = await prismaClient();
   const paidDate = p.paid ? localToday() : null;
   await prisma.paymentRecord.upsert({
     where: { holdingId_statementMonth: { holdingId: p.holdingId, statementMonth: p.month } },
@@ -107,6 +114,7 @@ export async function setPaymentPaid(input: {
 // ------------------------------------------------------------- rotating --
 
 export async function setActivation(input: { holdingId: string; quarter: string; activated: boolean }): Promise<UserData> {
+  const prisma = await prismaClient();
   const a = z.object({ holdingId: z.string(), quarter: z.string().regex(/^\d{4}-Q[1-4]$/), activated: z.boolean() }).parse(input);
   await ownHolding(a.holdingId);
   const date = a.activated ? localToday() : null;
@@ -129,6 +137,7 @@ const AfInput = z.object({
 });
 
 export async function addAfEvent(input: z.input<typeof AfInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const e = AfInput.parse(input);
   await ownHolding(e.holdingId);
   await prisma.annualFeeEvent.create({ data: { ...e, profileId } });
@@ -136,6 +145,7 @@ export async function addAfEvent(input: z.input<typeof AfInput>): Promise<UserDa
 }
 
 export async function deleteAfEvent(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
   await prisma.annualFeeEvent.deleteMany({ where: { id, profileId } });
   return snapshot();
 }
@@ -152,6 +162,7 @@ const LifecycleInput = z.object({
 });
 
 export async function addLifecycleEvent(input: z.input<typeof LifecycleInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const e = LifecycleInput.parse(input);
   await ownHolding(e.holdingId);
   await prisma.lifecycleEvent.create({ data: { ...e, profileId } });
@@ -159,6 +170,7 @@ export async function addLifecycleEvent(input: z.input<typeof LifecycleInput>): 
 }
 
 export async function deleteLifecycleEvent(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
   await prisma.lifecycleEvent.deleteMany({ where: { id, profileId } });
   return snapshot();
 }
@@ -173,6 +185,7 @@ const PointsInput = z.object({
 });
 
 export async function savePoints(input: z.input<typeof PointsInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const p = PointsInput.parse(input);
   await prisma.pointsBalance.upsert({
     where: { profileId_program: { profileId, program: p.program } },
@@ -183,6 +196,7 @@ export async function savePoints(input: z.input<typeof PointsInput>): Promise<Us
 }
 
 export async function deletePoints(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
   await prisma.pointsBalance.deleteMany({ where: { id, profileId } });
   return snapshot();
 }
@@ -199,6 +213,7 @@ const SettingsInput = z.object({
 });
 
 export async function saveSettings(input: z.input<typeof SettingsInput>): Promise<UserData> {
+  const prisma = await prismaClient();
   const row = settingsRow(SettingsInput.parse(input));
   await prisma.settings.upsert({ where: { profileId }, create: { profileId, ...row }, update: row });
   return snapshot();
@@ -216,7 +231,7 @@ export async function importData(
 ): Promise<{ ok: true; data: UserData; summary: string } | { ok: false; error: string }> {
   try {
     const { data, hasSettings } = parseImport(JSON.parse(json));
-    await writeImport(prisma, profileId, data, mode, hasSettings);
+    await writeImport(await getDb(), profileId, data, mode, hasSettings);
     return {
       ok: true,
       data: await snapshot(),

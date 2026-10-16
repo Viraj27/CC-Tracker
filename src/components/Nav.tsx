@@ -19,7 +19,7 @@ export function Nav() {
   const path = usePathname();
   const { error, clearError, pending } = useApp();
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-bg/90 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-border bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2">
         <Link href="/" className="shrink-0 font-bold">
           CC-Tracker

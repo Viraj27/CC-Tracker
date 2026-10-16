@@ -11,3 +11,8 @@ next-env.d.ts
 test-results/
 prisma/e2e-smoke.db*
 playwright-report/
+# Cloudflare / OpenNext build output and local state
+.open-next/
+.wrangler/
+.dev.vars*
+src/generated/
