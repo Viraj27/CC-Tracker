@@ -6,6 +6,7 @@ account_type: personal
 family: sapphire-reserve
 rewards_program: chase-ur
 brand_color: "#1c2e4a"
+card_ink: "#FFFFFF"
 product_page: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
 
 annual_fee:
