@@ -1,0 +1,77 @@
+id: wells-fargo-autograph
+name: Wells Fargo Autograph
+issuer: wells_fargo
+network: visa
+account_type: personal
+family: autograph
+rewards_program: wells-fargo-rewards
+brand_color: "#c8102e"
+product_page: https://www.wellsfargo.com/credit-cards/autograph-visa/
+
+annual_fee:
+  amount: 0
+  first_year_waived: false
+  source_url: https://newsroom.wf.com/news-releases/news-details/2022/Wells-Fargo-to-Launch-AutographSM-a-New-Visa-Rewards-Credit-Card-that-Offers-3X-Points-Across-Top-Spending-Categories/default.aspx
+  last_verified: 2026-10-16
+  verified: true
+  note: Per Wells Fargo's 2022 launch release; the current fee schedule page was not available to the build.
+
+earn_rates:
+  - categories: [streaming]
+    label: Popular streaming services
+    rate: 3
+    unit: points_per_dollar
+    conditions: Bundled subscriptions or ones billed by a third party may not qualify.
+    source_url: https://www.wellsfargo.com/credit-cards/autograph-visa/streaming/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [dining, travel, airfare, hotels, transit, gas, phone]
+    label: Restaurants, travel & transit, gas stations, phone plans
+    rate: 3
+    unit: points_per_dollar
+    conditions: No caps on bonus points (per launch release).
+    source_url: https://newsroom.wf.com/news-releases/news-details/2022/Wells-Fargo-to-Launch-AutographSM-a-New-Visa-Rewards-Credit-Card-that-Offers-3X-Points-Across-Top-Spending-Categories/default.aspx
+    last_verified: 2026-10-16
+    verified: true
+    note: From Wells Fargo's 2022 launch release; confirm categories on the current product page.
+  - categories: [other]
+    label: All other purchases
+    rate: 1
+    unit: points_per_dollar
+    source_url: https://newsroom.wf.com/news-releases/news-details/2022/Wells-Fargo-to-Launch-AutographSM-a-New-Visa-Rewards-Credit-Card-that-Offers-3X-Points-Across-Top-Spending-Categories/default.aspx
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: cell-phone-protection
+    kind: protection
+    name: Cellular telephone protection
+    description: Repair or replacement after damage, theft or unrecoverable loss of a phone on a bill paid with the card.
+    cycle: per_use
+    protection:
+      coverage: Up to $600 per claim.
+      conditions:
+        - Pay the monthly wireless bill with the card.
+        - Cracked screens with cosmetic-only damage are excluded.
+      how_to_claim: File with the benefits administrator listed in the Guide to Benefits.
+    source_url: https://www.wellsfargo.com/credit-cards/autograph-visa/guide-to-benefits/
+    last_verified: 2026-10-16
+    verified: true
+    note: Deductible and claim-count limits not available to the build.
+  - id: auto-rental-cdw
+    kind: protection
+    name: Auto rental collision damage waiver
+    description: Visa auto rental coverage for theft and collision damage.
+    cycle: per_use
+    protection:
+      coverage: null
+      conditions:
+        - Decline the rental company's collision damage waiver.
+        - Pay for the rental with the card.
+      how_to_claim: Call the Visa benefits administrator.
+    source_url: https://www.wellsfargo.com/credit-cards/autograph-visa/guide-to-benefits/
+    last_verified: 2026-10-16
+    verified: false
+    note: Not confirmed in the Guide to Benefits excerpts available to the build; check whether it applies and whether it is primary or secondary.
+
+downgrade_options: []

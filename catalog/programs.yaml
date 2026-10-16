@@ -1,0 +1,28 @@
+# Rewards programs. `default_cents_per_point` is a valuation ASSUMPTION used
+# only to compare earn rates across programs in the best-card helper — it is
+# not an issuer fact. Override per program in Settings or on Points balances.
+programs:
+  - id: chase-ur
+    name: Chase Ultimate Rewards
+    kind: points
+    default_cents_per_point: 1
+  - id: capital-one-miles
+    name: Capital One Miles
+    kind: miles
+    default_cents_per_point: 1
+  - id: united-mileageplus
+    name: United MileagePlus
+    kind: miles
+    default_cents_per_point: 1
+  - id: delta-skymiles
+    name: Delta SkyMiles
+    kind: miles
+    default_cents_per_point: 1
+  - id: discover-cashback
+    name: Discover Cashback Bonus
+    kind: cash
+    default_cents_per_point: 1
+  - id: wells-fargo-rewards
+    name: Wells Fargo Rewards
+    kind: points
+    default_cents_per_point: 1

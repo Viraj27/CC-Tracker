@@ -1,0 +1,77 @@
+id: discover-it-cash-back
+name: Discover it Cash Back
+issuer: discover
+network: discover
+account_type: personal
+family: discover-it
+rewards_program: discover-cashback
+rotating_program: discover-5
+brand_color: "#e55c20"
+product_page: https://www.discover.com/credit-cards/cash-back/it-card/
+
+annual_fee:
+  amount: 0
+  first_year_waived: false
+  source_url: https://www.discover.com/credit-cards/cash-back/it-card/
+  last_verified: 2026-10-16
+  verified: true
+
+earn_rates:
+  - categories: [other]
+    label: All other purchases
+    rate: 1
+    unit: percent
+    source_url: https://www.discover.com/credit-cards/cash-back/it-card/
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: quarterly-5pct
+    kind: other
+    name: 5% quarterly categories
+    description: 5% cash back at different places each quarter, up to the quarterly maximum, when activated. See Rotating.
+    cycle: quarterly
+    enrollment_required: true
+    how_to_use: Activate each quarter in the Discover app or website.
+    source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+    last_verified: 2026-10-16
+    verified: true
+  - id: cashback-match
+    kind: other
+    name: Cashback Match
+    description: Discover matches all cash back earned at the end of your first year, with no limit (new cardmembers only).
+    cycle: one_time
+    source_url: https://www.discover.com/credit-cards/card-smarts/earn-more-rewards-with-cashback-match/
+    last_verified: 2026-10-16
+    verified: true
+    note: Discover pages differ on the window (first 365 days vs. 12 billing periods or 365 days, whichever is longer).
+  - id: no-foreign-transaction-fee
+    kind: other
+    name: No foreign transaction fee
+    description: No foreign transaction fee wherever Discover is accepted.
+    cycle: none
+    source_url: https://www.discover.com/credit-cards/card-smarts/discover-card-foreign-transaction-fees/
+    last_verified: 2026-10-16
+    verified: true
+  - id: freeze-it
+    kind: other
+    name: Freeze it
+    description: Freeze the account in seconds from the app or website to block new purchases, cash advances and balance transfers.
+    cycle: none
+    source_url: https://www.discover.com/credit-cards/member-benefits/
+    last_verified: 2026-10-16
+    verified: true
+  - id: fraud-liability
+    kind: protection
+    name: $0 fraud liability
+    description: You're never responsible for unauthorized purchases on your Discover card.
+    cycle: per_use
+    protection:
+      coverage: $0 liability for unauthorized purchases.
+      conditions: []
+      how_to_claim: Report unauthorized charges to Discover.
+    source_url: https://www.discover.com/credit-cards/member-benefits/
+    last_verified: 2026-10-16
+    verified: true
+
+downgrade_options: []

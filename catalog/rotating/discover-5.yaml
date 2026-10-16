@@ -1,0 +1,20 @@
+id: discover-5
+name: Discover it 5% quarterly categories
+card_ids: [discover-it-cash-back]
+rate:
+  value: 5
+  unit: percent
+  cap: null
+  source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+  last_verified: 2026-10-16
+  verified: false
+  note: 5% up to a "quarterly maximum" is confirmed; the $1,500 cap only appeared in an older (2024) promotion, so the current cap is left blank.
+calendar_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+
+quarters:
+  - quarter: 2026-Q4
+    announced: false
+    source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
+    last_verified: 2026-10-16
+    verified: false
+    note: The Oct–Dec 2026 categories could not be retrieved from Discover's calendar during the build. Check the calendar and add them here.

@@ -1,0 +1,13 @@
+issuer: discover
+rules:
+  - id: discover-cashback-match-new-only
+    name: Discover Cashback Match — new cardmembers only
+    issuer: discover
+    effect: bonus
+    description: Cashback Match is only available for new cardmembers.
+    check:
+      type: manual
+    source_url: https://www.discover.com/credit-cards/card-smarts/earn-more-rewards-with-cashback-match/
+    last_verified: 2026-10-16
+    verified: true
+    note: Discover's definition of "new cardmember" (e.g. whether a past Discover card disqualifies) is not spelled out on the page.

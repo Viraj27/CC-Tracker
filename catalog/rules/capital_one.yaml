@@ -1,0 +1,34 @@
+issuer: capital_one
+rules:
+  - id: capital-one-venture-48
+    name: Venture / Venture X bonus — 48 months
+    issuer: capital_one
+    effect: bonus
+    description: >-
+      Existing or previous cardmembers are not eligible for the Venture X
+      bonus if they received a new cardmember bonus for this product in the
+      past 48 months; one Capital One page extends this across Venture and
+      Venture X.
+    check:
+      type: family_window
+      family: capital-one-venture
+      months: 48
+      blocks_if_currently_held: false
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - id: capital-one-1-in-6
+    name: Capital One 1 card per 6 months
+    issuer: capital_one
+    effect: approval
+    description: Capital One reportedly approves only one new card (personal or business) per six months.
+    check:
+      type: x_in_y
+      max_new_accounts: 0
+      window_months: 6
+      counted_account_types: [personal, business]
+      counted_issuers: [capital_one]
+    source_url: https://www.doctorofcredit.com/things-everybody-should-know-about-capital-one-credit-cards/
+    last_verified: 2026-10-16
+    verified: false
+    note: Community data points; never published by Capital One.

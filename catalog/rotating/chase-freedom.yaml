@@ -1,0 +1,62 @@
+id: chase-freedom
+name: Chase Freedom 5% quarterly categories
+card_ids: [chase-freedom-flex]
+rate:
+  value: 5
+  unit: percent
+  cap: Up to $1,500 in combined purchases per quarter, then 1%.
+  source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+  last_verified: 2026-10-16
+  verified: true
+calendar_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+
+quarters:
+  - quarter: 2026-Q1
+    announced: true
+    categories:
+      - { name: Dining, maps_to: [dining] }
+      - { name: American Heart Association donations, maps_to: [] }
+      - { name: Norwegian Cruise Line, maps_to: [] }
+    source_url: https://media.chase.com/news/chase-freedom-2026-q1-categories
+    last_verified: 2026-10-16
+    verified: true
+    note: Activation deadline not recorded (quarter has ended).
+  - quarter: 2026-Q2
+    announced: true
+    categories:
+      - { name: Amazon, maps_to: [online] }
+      - { name: Whole Foods Market, maps_to: [groceries] }
+      - { name: Chase Travel, maps_to: [travel, airfare, hotels] }
+      - { name: Feeding America donations, maps_to: [] }
+    source_url: https://media.chase.com/news/chase-freedom-2026-q2-categories
+    last_verified: 2026-10-16
+    verified: true
+  - quarter: 2026-Q3
+    announced: true
+    categories:
+      - { name: Gas stations and EV charging, maps_to: [gas] }
+      - { name: Public transit, maps_to: [transit] }
+      - { name: Select live entertainment, maps_to: [entertainment] }
+      - { name: United Way donations, maps_to: [] }
+    source_url: https://media.chase.com/news/chase-freedom-2026-q3-categories
+    last_verified: 2026-10-16
+    verified: true
+  - quarter: 2026-Q4
+    announced: true
+    categories:
+      - { name: Grocery stores (excl. Walmart and Target), maps_to: [groceries] }
+      - { name: Dining, maps_to: [dining] }
+      - { name: American Red Cross donations, maps_to: [] }
+    activation_deadline: 2026-12-14
+    source_url: https://media.chase.com/news/chase-freedom-2026-q4-categories
+    last_verified: 2026-10-16
+    verified: true
+  - quarter: 2027-Q1
+    announced: true
+    categories:
+      - { name: Top streaming services, maps_to: [streaming] }
+      - { name: Grocery stores (excl. Walmart and Target), maps_to: [groceries] }
+    source_url: https://media.chase.com/news/chase-freedom-2026-q4-categories
+    last_verified: 2026-10-16
+    verified: true
+    note: Previewed in Chase's Q4 2026 announcement; activation deadline not yet published.
