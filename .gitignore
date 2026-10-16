@@ -6,3 +6,8 @@ prisma/*.db*
 .env*
 node_modules/
 .next/
+next-env.d.ts
+*.tsbuildinfo
+test-results/
+prisma/e2e-smoke.db*
+playwright-report/

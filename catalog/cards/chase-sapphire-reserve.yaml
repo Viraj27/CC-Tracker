@@ -1,0 +1,360 @@
+id: chase-sapphire-reserve
+name: Chase Sapphire Reserve
+issuer: chase
+network: visa
+account_type: personal
+family: sapphire-reserve
+rewards_program: chase-ur
+brand_color: "#1c2e4a"
+product_page: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+
+annual_fee:
+  amount: 795
+  first_year_waived: false
+  source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+  last_verified: 2026-10-16
+  verified: true
+  note: $195 per authorized user.
+
+earn_rates:
+  - categories: [travel, airfare, hotels]
+    label: Chase Travel purchases
+    rate: 8
+    unit: points_per_dollar
+    conditions: Booked through Chase Travel (flights, hotels incl. The Edit, car rentals, cruises, activities).
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-earn-8x-points-on-chase-travel-purchases
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [airfare, hotels]
+    label: Flights and hotels booked direct
+    rate: 4
+    unit: points_per_dollar
+    conditions: Booked directly with the airline or hotel (travel agencies don't count).
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [dining]
+    label: Dining worldwide
+    rate: 3
+    unit: points_per_dollar
+    conditions: Restaurants, including takeout and eligible delivery services.
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-are-sapphire-preferred-and-reserve-different
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [transit]
+    label: Lyft rides
+    rate: 5
+    unit: points_per_dollar
+    conditions: Lyft only; through Sep 30, 2027.
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [other]
+    label: All other purchases
+    rate: 1
+    unit: points_per_dollar
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  # ---------------------------------------------------------------- credits
+  - id: travel-credit
+    kind: credit
+    name: $300 annual travel credit
+    description: Statement credits automatically reimburse travel purchases charged to the card.
+    amount: 300
+    unit: USD
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    how_to_use: Charge any qualifying travel purchase to the card; credits post automatically.
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/chase-sapphire-reserve-travel-credit-how-it-works
+    last_verified: 2026-10-16
+    verified: true
+    note: Chase applies it per "account anniversary year" (tracks the AF statement), not the calendar year.
+  - id: dining-credit
+    kind: credit
+    name: Exclusive Tables dining credit
+    description: Up to $150 Jan–Jun and $150 Jul–Dec in statement credits at Sapphire Reserve Exclusive Tables restaurants on OpenTable.
+    amount: 150
+    unit: USD
+    cycle: semiannual
+    how_to_use: Pay with the card at an eligible Exclusive Tables restaurant (see OpenTable for the list). Multiple restaurants per half-year allowed.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/how-to-use-dining-credit-chase-sapphire-reserve-exclusive-tables
+    last_verified: 2026-10-16
+    verified: true
+  - id: stubhub-credit
+    kind: credit
+    name: StubHub / viagogo credit
+    description: Up to $150 Jan–Jun and $150 Jul–Dec in statement credits on StubHub purchases.
+    amount: 150
+    unit: USD
+    cycle: semiannual
+    enrollment_required: true
+    how_to_use: Activate in your Chase account first — purchases before activation don't count. Credit posts in 1–2 billing cycles.
+    ends_on: 2027-12-31
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-use-the-$300-stubhub-credit-with-chase-sapphire-reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: the-edit-credit
+    kind: credit
+    name: The Edit hotel credit
+    description: Up to $250 Jan–Jun and $250 Jul–Dec ($500/year) in statement credits on prepaid stays booked with The Edit by Chase Travel (2-night minimum, max $250 per booking).
+    amount: 250
+    unit: USD
+    cycle: semiannual
+    how_to_use: Book a prepaid 2+ night stay with The Edit through Chase Travel.
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/the-benefits-of-the-edit-by-chase-travel
+    last_verified: 2026-10-16
+    verified: true
+    note: Semiannual split per Chase's Edit benefits page (education center) and confirmed by the cardholder; current product page states the $500 annual total and $250 per-booking cap.
+  - id: chase-travel-hotel-credit
+    kind: credit
+    name: $250 Chase Travel select-hotel credit (2026)
+    description: Statement credit on prepaid Chase Travel hotel bookings (2-night minimum) with IHG, Montage, Pendry, Omni, Virgin Hotels, Minor Hotels, or Pan Pacific, for stays booked Jan 1–Dec 31, 2026.
+    amount: 250
+    unit: USD
+    cycle: calendar_year
+    ends_on: 2026-12-31
+    how_to_use: Book a prepaid 2+ night stay at a participating brand through Chase Travel.
+    source_url: https://www.chase.com/sapphire-cards/personal/reserve
+    last_verified: 2026-10-16
+    verified: true
+    note: Chase's personal Sapphire Reserve benefits page lists it for "Sapphire Reserve and J.P. Morgan Reserve Personal Cards".
+  - id: doordash-promos
+    kind: credit
+    name: DoorDash promos (with complimentary DashPass)
+    description: Monthly DoorDash promos for DashPass members — a restaurant promo plus two promos for groceries / daily essentials.
+    amount: 35
+    unit: USD
+    cycle: monthly
+    enrollment_required: true
+    how_to_use: Activate complimentary DashPass with the card; promos appear in the DoorDash app each month.
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+    note: Product page — $15 monthly promo on any qualifying order plus two $10 monthly promos for groceries/essentials; available through 12/31/29. DashPass activation by 12/31/29.
+  - id: lyft-credit
+    kind: credit
+    name: Lyft in-app credit
+    description: Up to $10 per month in Lyft in-app credits (up to $120 per year).
+    amount: 10
+    unit: USD
+    cycle: monthly
+    enrollment_required: true
+    how_to_use: Add the card as the Lyft payment method; credit applies in-app.
+    ends_on: 2027-09-30
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: peloton-credit
+    kind: credit
+    name: Peloton membership credit
+    description: Up to $10 per month in statement credits toward Peloton memberships (up to $120 per year).
+    amount: 10
+    unit: USD
+    cycle: monthly
+    enrollment_required: true
+    how_to_use: Activate the benefit, then pay for an eligible Peloton membership with the card.
+    ends_on: 2027-12-31
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-earn-10x-points-on-peloton-with-chase-sapphire-reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: global-entry-credit
+    kind: credit
+    name: Global Entry / TSA PreCheck / NEXUS credit
+    description: Statement credit up to $120 for one application fee, once every four years.
+    amount: 120
+    unit: USD
+    cycle: per_use
+    how_to_use: Pay the application fee with the card. Log it when used; the next one is available four years later.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/sapphire-reserve-tsa-precheck-global-entry
+    last_verified: 2026-10-16
+    verified: true
+
+  # ------------------------------------------------------------------ perks
+  - id: priority-pass
+    kind: perk
+    name: Priority Pass Select & Chase Sapphire Lounges
+    description: Access to 1,300+ Priority Pass lounges and Chase Sapphire Lounges, with up to two guests.
+    cycle: none
+    enrollment_required: true
+    how_to_use: Enroll for Priority Pass through Chase; show the Priority Pass app at the lounge.
+    source_url: https://www.chase.com/sapphire-cards/personal/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: apple-subscriptions
+    kind: perk
+    name: Apple TV and Apple Music
+    description: At least a year of complimentary Apple TV and Apple Music.
+    cycle: none
+    enrollment_required: true
+    how_to_use: Activate by June 22, 2027.
+    source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-are-sapphire-preferred-and-reserve-different
+    last_verified: 2026-10-16
+    verified: true
+
+  # ----------------------------------------------------------------- status
+  - id: ihg-platinum
+    kind: status
+    name: IHG One Rewards Platinum Elite
+    description: Complimentary IHG Platinum Elite status.
+    cycle: none
+    enrollment_required: true
+    ends_on: 2027-12-31
+    how_to_use: Activate through your Chase account.
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: spend-75k-unlocks
+    kind: other
+    name: $75,000 calendar-year spend benefits
+    description: After $75,000 in card spend in a calendar year — World of Hyatt Explorist, IHG Diamond Elite, $250 The Shops at Chase credit, $500 Southwest credit (Southwest via Chase Travel) and Southwest A-List.
+    cycle: calendar_year
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+
+  # ------------------------------------------------------------ protections
+  - id: trip-cancellation
+    kind: protection
+    name: Trip cancellation / interruption insurance
+    description: Reimburses prepaid, non-refundable travel costs when a trip is canceled or cut short for a covered reason.
+    cycle: per_use
+    protection:
+      coverage: Up to $10,000 per covered traveler and $20,000 per trip.
+      conditions:
+        - Trip paid with the card (or Ultimate Rewards points).
+        - Covered reasons only (e.g. sickness, severe weather).
+        - Trips scheduled longer than 60 days are excluded.
+      how_to_claim: Start the claim with the benefits administrator within 20 days of the cancellation/interruption (number on the back of the card).
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/chase-sapphire-travel-insurance-guide
+    last_verified: 2026-10-16
+    verified: true
+  - id: trip-delay
+    kind: protection
+    name: Trip delay reimbursement
+    description: Reimburses unreimbursed expenses (meals, lodging) when common-carrier travel is delayed.
+    cycle: per_use
+    protection:
+      coverage: Up to $500 per covered traveler.
+      conditions:
+        - Delay of more than 6 hours or one requiring an overnight stay.
+        - Common-carrier fare paid with the card.
+      how_to_claim: File with the benefits administrator; keep receipts and the carrier's delay confirmation.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/chase-trip-delay-insurance-what-to-know
+    last_verified: 2026-10-16
+    verified: true
+  - id: baggage-delay
+    kind: protection
+    name: Baggage delay insurance
+    description: Reimburses essential purchases when checked bags are delayed.
+    cycle: per_use
+    protection:
+      coverage: Up to $100 per day for up to 5 days.
+      conditions:
+        - Bags delayed more than 6 hours by the passenger carrier.
+        - Fare paid with the card.
+      how_to_claim: File with the benefits administrator with the carrier's delay report and receipts.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/credit-cards-that-cover-baggage-delays
+    last_verified: 2026-10-16
+    verified: true
+  - id: lost-luggage
+    kind: protection
+    name: Lost luggage reimbursement
+    description: Covers checked or carry-on bags lost or damaged by the carrier.
+    cycle: per_use
+    protection:
+      coverage: Up to $3,000 per covered traveler; additionally limited to $2,000 per bag and $10,000 for all covered travelers per trip.
+      conditions:
+        - Fare paid with the card.
+      how_to_claim: File with the carrier first, then with the benefits administrator.
+    source_url: https://www.chase.com/sapphire-cards/personal/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: auto-rental-cdw
+    kind: protection
+    name: Auto rental collision damage waiver (primary)
+    description: Primary coverage for theft and collision damage to rental cars, in and outside the U.S.
+    cycle: per_use
+    protection:
+      coverage: Up to $75,000 for theft and collision damage.
+      conditions:
+        - Decline the rental company's collision damage waiver.
+        - Pay for the entire rental with the card.
+        - Rental periods up to 31 consecutive days.
+        - Does not cover other vehicles, injury, or liability. New York residents have an exception.
+      how_to_claim: Call the benefits administrator as soon as possible after the incident; keep the rental agreement and damage report.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/chase-sapphire-travel-insurance-guide
+    last_verified: 2026-10-16
+    verified: true
+  - id: purchase-protection
+    kind: protection
+    name: Purchase protection
+    description: Covers new purchases against damage or theft.
+    cycle: per_use
+    protection:
+      coverage: Up to $10,000 per item.
+      conditions:
+        - Within 120 days of purchase (90 days for New York residents).
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator with the receipt and statement.
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+  - id: extended-warranty
+    kind: protection
+    name: Extended warranty protection
+    description: Extends the original U.S. manufacturer's repair warranty by one additional year.
+    cycle: per_use
+    protection:
+      coverage: +1 year on eligible U.S. manufacturer warranties of 3 years or less (coverage starts after any store warranty / service contract).
+      conditions:
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11388_v2.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Guide to Benefits, benefits in effect as of 10/01/24.
+  - id: emergency-evacuation
+    kind: protection
+    name: Emergency evacuation and transportation
+    description: Covers medical evacuation when injured or sick on a trip far from home.
+    cycle: per_use
+    protection:
+      coverage: Up to $100,000 for necessary emergency evacuation and transportation.
+      conditions:
+        - Trip 100+ miles from home.
+        - Evacuation must be arranged/approved in advance by the benefit's service provider.
+      how_to_claim: Call the benefits administrator before arranging transport.
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11388_v2.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Personal Sapphire Reserve Guide to Benefits, benefits in effect as of 10/01/24.
+
+downgrade_options:
+  - target_name: Chase Sapphire Preferred
+    keep: [Ultimate Rewards points, Account history / age]
+    lose: [Reserve credits, Priority Pass, Higher earn rates]
+    source_type: community
+    source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/upgrading-to-sapphire-reserve-from-sapphire-preferred
+    last_verified: 2026-10-16
+    verified: true
+    note: Chase documents Preferred→Reserve upgrades; the reverse (Reserve→Preferred) is community data points only. Ask Chase when calling.
+  - target_name: Chase Freedom Unlimited
+    keep: [Ultimate Rewards points, Account history / age]
+    lose: [All Reserve travel benefits and credits]
+    source_type: community
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+    note: Community data points — Chase does not publish product-change paths.
+  - target_name: Chase Freedom Flex
+    target_card_id: chase-freedom-flex
+    keep: [Ultimate Rewards points, Account history / age]
+    lose: [All Reserve travel benefits and credits]
+    source_type: community
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true
+    note: Community data points — Chase does not publish product-change paths.

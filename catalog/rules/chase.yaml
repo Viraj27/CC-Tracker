@@ -1,0 +1,40 @@
+issuer: chase
+rules:
+  - id: chase-5-24
+    name: Chase 5/24
+    issuer: chase
+    effect: approval
+    description: >-
+      Chase generally declines most of its cards if you have opened 5 or more
+      new personal credit card accounts (from any issuer) in the past 24
+      months. Business cards that report to personal credit reports count too.
+      Authorized-user cards may or may not count.
+    check:
+      type: x_in_y
+      max_new_accounts: 4
+      window_months: 24
+      counted_account_types: [personal]
+      business_counted_issuers: [capital_one, discover]
+      counted_issuers: null
+    source_type: community
+    source_url: https://www.doctorofcredit.com/chase-524-rule-explained-detail-need-know/
+    last_verified: 2026-10-16
+    verified: true
+    note: Chase has never published 5/24; it is a widely documented community rule, accepted by the owner as a working rule.
+  - id: chase-sapphire-reserve-bonus
+    name: Sapphire Reserve welcome bonus eligibility
+    issuer: chase
+    effect: bonus
+    description: >-
+      The Sapphire Reserve is unavailable if you currently have one open. The
+      new cardmember bonus may not be available if you previously held this
+      card or received a new cardmember bonus for it. Chase may also consider
+      how many cards you have opened and closed. Upgrades from Sapphire
+      Preferred are not eligible for the bonus. (This replaced the older
+      "48 months since a Sapphire bonus" wording.)
+    check:
+      type: lifetime_family
+      families: [sapphire-reserve]
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-16
+    verified: true

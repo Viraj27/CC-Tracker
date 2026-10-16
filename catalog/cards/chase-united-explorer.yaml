@@ -1,0 +1,238 @@
+id: chase-united-explorer
+name: United Explorer Card
+issuer: chase
+network: visa
+account_type: personal
+family: united
+rewards_program: united-mileageplus
+brand_color: "#0033a0"
+product_page: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+
+annual_fee:
+  amount: 150
+  first_year_waived: true
+  source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+  last_verified: 2026-10-16
+  verified: true
+  note: $0 intro annual fee for the first year, then $150.
+
+earn_rates:
+  - categories: [dining]
+    label: Dining
+    rate: 2
+    unit: miles_per_dollar
+    conditions: Includes eligible delivery services.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [hotels]
+    label: Hotel stays booked directly with the hotel
+    rate: 2
+    unit: miles_per_dollar
+    conditions: Booked directly with the hotel.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [airfare]
+    label: United purchases
+    rate: 3
+    unit: miles_per_dollar
+    conditions: Eligible United purchases (on flights, plus the MileagePlus member's 6x for 9x total).
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [other]
+    label: All other purchases
+    rate: 1
+    unit: miles_per_dollar
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: united-hotels-credit
+    kind: credit
+    name: United Hotels credit
+    description: $50 statement credit on each of your 1st and 2nd prepaid United Hotels stays (up to $100 per anniversary year).
+    amount: 100
+    unit: USD
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    how_to_use: Book a prepaid hotel directly through United Hotels with the card.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: rideshare-credit
+    kind: credit
+    name: Rideshare credit
+    description: Up to $5 back each month on rideshare purchases (up to $60 per calendar year).
+    amount: 5
+    unit: USD
+    cycle: monthly
+    enrollment_required: true
+    how_to_use: Enroll (yearly opt-in required), then pay for rideshares with the card.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: instacart-credit
+    kind: credit
+    name: Instacart credit
+    description: $10 Instacart credit each month (up to $120 per calendar year) for purchases made directly through Instacart.
+    amount: 10
+    unit: USD
+    cycle: monthly
+    ends_on: 2027-12-31
+    how_to_use: Order through Instacart with the card.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: jsx-credit
+    kind: credit
+    name: JSX credit
+    description: Up to $100 back as a statement credit each anniversary year on flights booked directly with JSX.
+    amount: 100
+    unit: USD
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    how_to_use: Book JSX flights directly with JSX using the card.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: global-entry-credit
+    kind: credit
+    name: Global Entry / TSA PreCheck / NEXUS credit
+    description: Up to $120 statement credit for the application fee, once every four years.
+    amount: 120
+    unit: USD
+    cycle: per_use
+    how_to_use: Pay the application fee with the card.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: avis-budget-credit
+    kind: credit
+    name: Avis / Budget credit
+    description: Up to $50 in United TravelBank cash per year — up to $25 each on the first two Avis/Budget rentals (2+ days) booked through cars.united.com with your MileagePlus number.
+    amount: 50
+    unit: USD
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    last_verified: 2026-10-16
+    verified: true
+    note: Chase terms define the year from account open date through the first statement after the open-date anniversary (approximated here by the AF date).
+  - id: free-checked-bag
+    kind: perk
+    name: Free first checked bag
+    description: First standard checked bag free on United flights when you purchase the ticket with the card (terms apply).
+    unit: count
+    cycle: per_use
+    perk_default: united-checked-bag
+    how_to_use: Purchase the United ticket with the card (terms apply).
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: united-club-passes
+    kind: perk
+    name: 2 United Club one-time passes
+    description: Two United Club one-time passes each year.
+    amount: 2
+    unit: count
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    perk_default: united-club-pass
+    how_to_use: Passes are deposited in your MileagePlus account.
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+    note: Treated as resetting on the account anniversary; confirm the exact deposit timing in your MileagePlus account.
+  - id: travelbank-10k
+    kind: other
+    name: $100 United TravelBank cash after $10,000 spend
+    description: Earn $100 in United TravelBank cash after you spend $10,000 on purchases each calendar year.
+    cycle: calendar_year
+    source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
+    last_verified: 2026-10-16
+    verified: true
+  - id: trip-cancellation
+    kind: protection
+    name: Trip cancellation / interruption insurance
+    description: Reimburses prepaid, non-refundable fares when a trip is canceled or cut short for a covered reason.
+    cycle: per_use
+    protection:
+      coverage: Up to $1,500 per covered traveler and $6,000 per trip.
+      conditions:
+        - Fare paid with the card.
+        - Covered reasons only (e.g. sickness, severe weather).
+      how_to_claim: File with the benefits administrator (number on the back of the card).
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    last_verified: 2026-10-16
+    verified: true
+  - id: trip-delay
+    kind: protection
+    name: Trip delay reimbursement
+    description: Covers unreimbursed meals, lodging, etc. when common-carrier travel is delayed.
+    cycle: per_use
+    protection:
+      coverage: Up to $500 per covered traveler.
+      conditions:
+        - Delay of more than 12 hours or requiring an overnight stay.
+        - Fare paid with the card.
+      how_to_claim: File with the benefits administrator with receipts and the carrier's delay confirmation.
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    last_verified: 2026-10-16
+    verified: true
+  - id: baggage-delay
+    kind: protection
+    name: Baggage delay insurance
+    description: Reimburses essential purchases when bags are delayed.
+    cycle: per_use
+    protection:
+      coverage: Up to $100 per day for up to 3 days.
+      conditions:
+        - Bags delayed more than 6 hours.
+        - Fare paid with the card.
+      how_to_claim: File with the benefits administrator with the carrier's delay report and receipts.
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    last_verified: 2026-10-16
+    verified: true
+  - id: auto-rental-cdw
+    kind: protection
+    name: Auto rental collision damage waiver (primary)
+    description: Primary coverage for theft and collision damage to most rental vehicles.
+    cycle: per_use
+    protection:
+      coverage: Up to $60,000 for most rental vehicles with an MSRP of $125,000 or less.
+      conditions:
+        - Decline the rental company's collision damage waiver.
+        - Pay for the rental with the card.
+        - New York residents - secondary inside the U.S.
+      how_to_claim: Call the benefits administrator after the incident.
+    source_url: https://www.chase.com/personal/credit-cards/united/united-explorer-card
+    last_verified: 2026-10-16
+    verified: true
+  - id: purchase-protection
+    kind: protection
+    name: Purchase protection
+    description: Covers new purchases against damage or theft.
+    cycle: per_use
+    protection:
+      coverage: Up to $10,000 per item and $50,000 per calendar year.
+      conditions:
+        - Within 120 days of purchase (90 days for New York residents).
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://static.chasecdn.com/content/services/structured-document/document.en.pdf/card/benefits-center/product-benefits-guide-pdf/BGC11386_v2.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: United Explorer Guide to Benefits, effective 10/01/24.
+
+downgrade_options:
+  - target_name: United Gateway Card
+    keep: [Account history / age, MileagePlus miles (held by United)]
+    lose: [Free checked bag, United Club passes, Explorer credits, Travel protections]
+    source_type: community
+    source_url: https://www.chase.com/personal/credit-cards/education/chase-cards/best-united-credit-card
+    last_verified: 2026-10-16
+    verified: true
+    note: Gateway is Chase's no-annual-fee United card; product-change availability is from community data points, not an official Chase statement.

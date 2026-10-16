@@ -1,0 +1,19 @@
+issuer: capital_one
+rules:
+  - id: capital-one-venture-48
+    name: Venture / Venture X bonus — 48 months
+    issuer: capital_one
+    effect: bonus
+    description: >-
+      Existing or previous cardmembers are not eligible for the Venture X
+      bonus if they received a new cardmember bonus for this product in the
+      past 48 months; one Capital One page extends this across Venture and
+      Venture X.
+    check:
+      type: family_window
+      family: capital-one-venture
+      months: 48
+      blocks_if_currently_held: false
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true

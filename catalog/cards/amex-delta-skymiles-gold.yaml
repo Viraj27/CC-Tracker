@@ -1,0 +1,173 @@
+id: amex-delta-skymiles-gold
+name: Delta SkyMiles Gold American Express Card
+issuer: amex
+network: amex
+account_type: personal
+# Gold, Platinum and Reserve share Amex's "have or have had" welcome-offer family.
+family: delta-skymiles-premium
+rewards_program: delta-skymiles
+brand_color: "#a67c2e"
+product_page: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+
+annual_fee:
+  amount: 150
+  first_year_waived: true
+  source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+  last_verified: 2026-10-16
+  verified: true
+  note: $0 introductory annual fee for the first year, then $150.
+
+earn_rates:
+  - categories: [airfare]
+    label: Purchases made directly with Delta
+    rate: 2
+    unit: miles_per_dollar
+    conditions: Delta purchases only.
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [dining]
+    label: Restaurants (incl. takeout and delivery in the U.S.)
+    rate: 2
+    unit: miles_per_dollar
+    conditions: Amex pages differ on worldwide vs. U.S.-only restaurants.
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [groceries]
+    label: U.S. supermarkets
+    rate: 2
+    unit: miles_per_dollar
+    conditions: U.S. supermarkets only; superstores, convenience stores, warehouse clubs and meal-kit services don't count.
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [other]
+    label: All other eligible purchases
+    rate: 1
+    unit: miles_per_dollar
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: delta-stays-credit
+    kind: credit
+    name: Delta Stays credit
+    description: Up to $100 in statement credits per calendar year on a new prepaid hotel or vacation rental booked on Delta Stays.
+    amount: 100
+    unit: USD
+    cycle: calendar_year
+    how_to_use: Book a prepaid hotel or vacation rental on the Delta Stays platform with the card.
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+  - id: flight-credit-10k
+    kind: other
+    name: $200 Delta Flight Credit after $10,000 spend
+    description: After $10,000 in eligible purchases in a calendar year, receive a $200 Delta eCredit for a flight booked on delta.com or with Delta Reservations.
+    cycle: calendar_year
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+    note: An older Amex page says $100; current Amex and Delta terms say $200.
+  - id: first-checked-bag
+    kind: perk
+    name: First checked bag free
+    description: First checked bag free on Delta flights for you and up to 8 companions on the same reservation.
+    unit: count
+    cycle: per_use
+    perk_default: delta-checked-bag
+    how_to_use: Book the Delta flight with the card.
+    source_url: https://www.delta.com/us/en/baggage/checked-baggage/first-checked-bag-free
+    last_verified: 2026-10-16
+    verified: true
+  - id: second-checked-bag
+    kind: perk
+    name: Second checked bag free (domestic)
+    description: Basic Card Members can check a second bag free on domestic Delta flights (from June 4, 2026).
+    unit: count
+    cycle: per_use
+    perk_default: delta-second-checked-bag
+    starts_on: 2026-06-04
+    how_to_use: Book the domestic Delta flight with the card.
+    source_url: https://www.delta.com/us/en/baggage/overview
+    last_verified: 2026-10-16
+    verified: true
+  - id: takeoff-15
+    kind: perk
+    name: TakeOff 15
+    description: At least 15% off the miles portion of award tickets on Delta-operated flights booked on delta.com or the Fly Delta app.
+    cycle: per_use
+    how_to_use: Book the award on delta.com or the Fly Delta app; pay taxes and fees with the card. Not for Pay with Miles or partner flights.
+    source_url: https://global.americanexpress.com/card-benefits/terms/delta-gold
+    last_verified: 2026-10-16
+    verified: true
+  - id: inflight-savings
+    kind: other
+    name: 20% back on in-flight purchases
+    description: 20% savings as a statement credit on eligible pre-purchased meals and in-flight food, alcoholic beverages and audio headsets on Delta-operated flights (not Wi-Fi).
+    cycle: per_use
+    source_url: https://global.americanexpress.com/card-benefits/terms/delta-gold
+    last_verified: 2026-10-16
+    verified: true
+  - id: priority-boarding
+    kind: perk
+    name: Zone 5 priority boarding
+    description: Priority boarding on Delta flights.
+    cycle: none
+    source_url: https://global.americanexpress.com/card-benefits/detail/priority-boarding/delta-gold
+    last_verified: 2026-10-16
+    verified: true
+  - id: car-rental-loss-damage
+    kind: protection
+    name: Car rental loss and damage insurance (secondary)
+    description: Covers damage to or theft of a rental vehicle in a covered territory.
+    cycle: per_use
+    protection:
+      coverage: Secondary coverage; no liability coverage.
+      conditions:
+        - Reserve and pay for the entire rental with the card.
+        - Decline the rental company's collision damage waiver.
+        - Not all vehicle types are covered; rentals in Australia, Italy and New Zealand are excluded.
+      how_to_claim: File with Amex's claims administrator (see the benefit terms).
+    source_url: https://global.americanexpress.com/card-benefits/view-all/delta-gold
+    last_verified: 2026-10-16
+    verified: true
+  - id: baggage-insurance
+    kind: protection
+    name: Baggage insurance plan
+    description: Covers lost, damaged or stolen baggage on a common carrier, in excess of the carrier's coverage.
+    cycle: per_use
+    protection:
+      coverage: Up to $1,250 for carry-on and up to $500 for checked baggage.
+      conditions:
+        - Entire common-carrier fare charged to the card.
+      how_to_claim: File with the carrier first, then with Amex's claims administrator.
+    source_url: https://global.americanexpress.com/card-benefits/view-all/delta-gold
+    last_verified: 2026-10-16
+    verified: true
+  - id: purchase-protection
+    kind: protection
+    name: Purchase protection
+    description: Covers eligible purchases against accidental damage or theft.
+    cycle: per_use
+    protection:
+      coverage: Up to $1,000 per covered purchase, up to $50,000 per calendar year.
+      conditions:
+        - Within 90 days of purchase.
+        - Purchase made with the card.
+      how_to_claim: File with Amex's claims administrator.
+    source_url: https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/
+    last_verified: 2026-10-16
+    verified: true
+
+downgrade_options:
+  - target_name: Delta SkyMiles Blue American Express Card
+    keep: [SkyMiles (held by Delta), Account history / age]
+    lose: [Free checked bags, Delta Stays credit, $200 flight credit, TakeOff 15, Travel protections]
+    source_type: community
+    source_url: https://www.americanexpress.com/en-us/credit-cards/credit-intel/types-of-delta-credit-cards/
+    last_verified: 2026-10-16
+    verified: true
+    note: Product changes between Delta cards are from community data points, not an official Amex statement.

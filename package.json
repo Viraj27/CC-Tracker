@@ -1,0 +1,40 @@
+{
+  "name": "cc-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal credit card tracker: rewards, benefits, annual fees, payments and issuer eligibility.",
+  "scripts": {
+    "postinstall": "prisma generate",
+    "db:setup": "node scripts/db-setup.mjs",
+    "predev": "npm run db:setup",
+    "dev": "next dev",
+    "prebuild": "npm run db:setup",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "catalog:check": "tsx scripts/catalog-check.ts",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "prisma": "6.19.3",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vitest": "5.0.5"
+  }
+}

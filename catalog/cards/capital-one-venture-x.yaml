@@ -1,0 +1,200 @@
+id: capital-one-venture-x
+name: Capital One Venture X
+issuer: capital_one
+network: visa
+account_type: personal
+family: capital-one-venture
+rewards_program: capital-one-miles
+brand_color: "#0d2c4b"
+product_page: https://www.capitalone.com/credit-cards/venture-x/
+
+annual_fee:
+  amount: 395
+  first_year_waived: false
+  source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
+  last_verified: 2026-10-16
+  verified: true
+
+earn_rates:
+  - categories: [hotels, travel]
+    label: Hotels and rental cars via Capital One Travel
+    rate: 10
+    unit: miles_per_dollar
+    conditions: Booked through Capital One Travel.
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [airfare]
+    label: Flights and vacation rentals via Capital One Travel
+    rate: 5
+    unit: miles_per_dollar
+    conditions: Booked through Capital One Travel.
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [other]
+    label: All other purchases
+    rate: 2
+    unit: miles_per_dollar
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: travel-credit
+    kind: credit
+    name: $300 Capital One Travel credit
+    description: Annual credit for bookings made through Capital One Travel.
+    amount: 300
+    unit: USD
+    cycle: cardmember_year
+    anniversary_basis: af_date
+    how_to_use: Book through Capital One Travel; the credit applies to eligible bookings.
+    source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
+    last_verified: 2026-10-16
+    verified: true
+    note: Capital One says "annual"; modeled as resetting on the account anniversary — confirm the reset date in your account.
+  - id: anniversary-miles
+    kind: other
+    name: 10,000 anniversary bonus miles
+    description: 10,000 bonus miles every year, starting on your first anniversary.
+    cycle: cardmember_year
+    anniversary_basis: approval
+    source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - id: global-entry-credit
+    kind: credit
+    name: Global Entry / TSA PreCheck credit
+    description: Up to $120 statement credit toward the application fee; one credit per account every four years.
+    amount: 120
+    unit: USD
+    cycle: per_use
+    how_to_use: Pay the application fee with the card.
+    source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - id: lounge-access
+    kind: perk
+    name: Capital One Lounges and Priority Pass
+    description: Access to Capital One Lounges and Landings plus 1,300+ Priority Pass lounges.
+    cycle: none
+    enrollment_required: true
+    how_to_use: Enroll in Priority Pass through Capital One (primary cardholder).
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - id: hertz-status
+    kind: status
+    name: Hertz status upgrade
+    description: Complimentary Hertz Gold Plus Rewards status upgrade.
+    cycle: none
+    enrollment_required: true
+    source_url: https://www.capitalone.com/credit-cards/venture-x/
+    last_verified: 2026-10-16
+    verified: true
+  - id: cell-phone-protection
+    kind: protection
+    name: Cell phone protection
+    description: Reimbursement if your phone is stolen or damaged when you pay the monthly bill with the card.
+    cycle: per_use
+    protection:
+      coverage: Up to $800 per claim.
+      conditions:
+        - Pay your monthly cell phone bill with the card.
+        - $50 deductible; max 2 claims and $1,600 per 12 months (per 2021 Guide to Benefits — may be outdated).
+        - Cosmetic damage and phones stolen from checked baggage are not covered.
+      how_to_claim: File with the benefits administrator listed in the Guide to Benefits.
+    source_url: https://www.capitalone.com/learn-grow/money-management/credit-cards-with-cell-phone-protection/
+    last_verified: 2026-10-16
+    verified: true
+  - id: auto-rental-cdw
+    kind: protection
+    name: Auto rental collision damage waiver
+    description: Coverage for collision or theft damage to an eligible rental vehicle.
+    cycle: per_use
+    protection:
+      coverage: Primary; vehicles up to $75,000 MSRP; 15 days in your country of residence, 31 days abroad.
+      conditions:
+        - Decline the rental company's CDW/LDW.
+        - Pay for the rental with the card.
+      how_to_claim: Call the benefits administrator after the incident.
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
+  - id: trip-cancellation
+    kind: protection
+    name: Trip cancellation / interruption coverage
+    description: Reimburses eligible travel expenses if plans are affected by a covered event such as a medical emergency.
+    cycle: per_use
+    protection:
+      coverage: Up to $2,000 per insured person for non-refundable common-carrier fares.
+      conditions:
+        - Trip paid with the card.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
+  - id: trip-delay
+    kind: protection
+    name: Trip delay reimbursement
+    description: Reimbursement for expenses during covered common-carrier delays.
+    cycle: per_use
+    protection:
+      coverage: Up to $500 per purchased ticket for reasonable expenses (meals, lodging, etc.); one claim per covered trip.
+      conditions:
+        - Fare (or part of it) paid with the card or its rewards.
+        - Delay of more than 6 hours or requiring an overnight stay, due to a covered hazard.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
+  - id: lost-luggage
+    kind: protection
+    name: Lost luggage reimbursement
+    description: Covers checked or carry-on luggage lost by the carrier.
+    cycle: per_use
+    protection:
+      coverage: Up to $3,000 per covered trip (New York residents $2,000 per bag), for the amount above the carrier's payment.
+      conditions:
+        - Fare paid with the card.
+      how_to_claim: File with the carrier first, then the benefits administrator.
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
+  - id: extended-warranty
+    kind: protection
+    name: Extended warranty
+    description: Extends eligible manufacturer warranties of 3 years or less by one additional year (vehicles excluded).
+    cycle: per_use
+    protection:
+      coverage: +1 year on warranties of 3 years or less; up to $10,000 per claim and $50,000 per cardholder.
+      conditions:
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://ecm.capitalone.com/WCM/card/benefits-guide/20211109-venture-x/jb34520_build-it_dm_final_eng-proof_v1.pdf
+    last_verified: 2026-10-16
+    verified: true
+    note: Limits from Capital One's Venture X Guide to Benefits (benefits in effect as of 10/01/21) — the latest Venture X guide found on capitalone.com; matches Capital One's Visa Infinite guide.
+
+downgrade_options:
+  - target_name: Capital One Venture
+    keep: [Capital One miles, Account history / age]
+    lose: [$300 travel credit, Anniversary miles, Lounge access, Cell phone protection]
+    source_type: community
+    source_url: https://www.capitalone.com/learn-grow/money-management/capital-one-venture-vs-venture-x/
+    last_verified: 2026-10-16
+    verified: true
+    note: Product changes are from community data points, not an official Capital One statement.
+  - target_name: Capital One VentureOne
+    keep: [Capital One miles, Account history / age]
+    lose: [$300 travel credit, Anniversary miles, Lounge access, 2x base earn]
+    source_type: community
+    source_url: https://www.capitalone.com/credit-cards/ventureone/
+    last_verified: 2026-10-16
+    verified: true
+    note: Product changes are from community data points, not an official Capital One statement.

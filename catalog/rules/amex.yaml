@@ -1,0 +1,18 @@
+issuer: amex
+rules:
+  - id: amex-delta-gold-family
+    name: Delta Gold welcome offer — "have or have had"
+    issuer: amex
+    effect: bonus
+    description: >-
+      You may not be eligible for a welcome offer if you have or have had the
+      Delta SkyMiles Gold, Delta SkyMiles Platinum, or Delta SkyMiles Reserve
+      card (or previous versions of these cards). Amex checks eligibility
+      during the application and lets you withdraw before processing.
+    check:
+      type: lifetime_family
+      families: [delta-skymiles-premium]
+    source_url: https://www.americanexpress.com/us/credit-cards/card-application/apply/prospect/terms/delta-skymiles-gold-american-express-card/28310-10-0
+    last_verified: 2026-10-16
+    verified: true
+    note: Only cards in the catalog with family delta-skymiles-premium (currently the Delta Gold) are matched; add Platinum/Reserve holdings with a catalog entry or check manually.

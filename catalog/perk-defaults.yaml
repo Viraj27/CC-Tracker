@@ -1,0 +1,34 @@
+# Default USD value per use of non-credit perks, used for ROI. Owner can
+# override any value in Settings. Values are the price you would otherwise
+# pay, taken from the provider's own published prices.
+perks:
+  - id: delta-checked-bag
+    name: Delta first checked bag (domestic, Main/Comfort)
+    value_usd: 45
+    basis: Delta's standard fee for the 1st checked bag, domestic, each way (tickets purchased on/after Apr 8, 2026).
+    source_url: https://www.delta.com/us/en/baggage/overview
+    last_verified: 2026-10-16
+    verified: true
+  - id: delta-second-checked-bag
+    name: Delta second checked bag (domestic, Main/Comfort)
+    value_usd: 55
+    basis: Delta's standard fee for the 2nd checked bag, domestic, each way (tickets purchased on/after Apr 8, 2026).
+    source_url: https://www.delta.com/us/en/baggage/overview
+    last_verified: 2026-10-16
+    verified: true
+  - id: united-checked-bag
+    name: United first checked bag
+    value_usd: null
+    basis: United's fee for the 1st checked bag on the itinerary.
+    source_url: https://www.united.com/CMS/en-US/travel/Pages/CheckedBaggage.aspx
+    last_verified: 2026-10-16
+    verified: false
+    note: United does not publish a single flat fee in the pages available to the build (fee depends on itinerary; use United's bag calculator). Set your typical value in Settings.
+  - id: united-club-pass
+    name: United Club one-time pass
+    value_usd: 59
+    basis: Price of a United Club one-time pass.
+    source_url: https://gtmpreview.united.com/web/en-US/content/travel/airport/lounge/rates.aspx
+    last_verified: 2026-10-16
+    verified: false
+    note: $59 found only on a United preview (gtmpreview) page, not the live site; confirm current price.

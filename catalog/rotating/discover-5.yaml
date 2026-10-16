@@ -1,0 +1,23 @@
+id: discover-5
+name: Discover it 5% quarterly categories
+card_ids: [discover-it-cash-back]
+rate:
+  value: 5
+  unit: percent
+  cap: Up to $1,500 in purchases per quarter when activated (up to $75 cash back).
+  source_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
+  last_verified: 2026-10-16
+  verified: true
+calendar_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
+
+quarters:
+  - quarter: 2026-Q4
+    announced: true
+    categories:
+      - { name: Restaurants, maps_to: [dining] }
+      - { name: Entertainment, maps_to: [entertainment] }
+      - { name: Utilities, maps_to: [] }
+    source_url: https://www.discover.com/credit-cards/cash-back/cashback-calendar.html
+    last_verified: 2026-10-16
+    verified: true
+    note: Oct 1–Dec 31, 2026, on up to $1,500 in purchases; activation required.

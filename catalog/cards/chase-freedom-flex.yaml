@@ -1,0 +1,144 @@
+id: chase-freedom-flex
+name: Chase Freedom Flex
+issuer: chase
+network: mastercard
+account_type: personal
+family: freedom
+rewards_program: chase-ur
+rotating_program: chase-freedom
+brand_color: "#0b5fa5"
+product_page: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+
+annual_fee:
+  amount: 0
+  first_year_waived: false
+  source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+  last_verified: 2026-10-16
+  verified: true
+
+earn_rates:
+  - categories: [travel, airfare, hotels]
+    label: Chase Travel purchases
+    rate: 5
+    unit: percent
+    conditions: Booked through Chase Travel. Cash back is paid as Ultimate Rewards points.
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [dining]
+    label: Dining at restaurants
+    rate: 3
+    unit: percent
+    conditions: Includes takeout and eligible delivery. Stacks with a dining 5% quarter (max 7% total, up to the cap).
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [drugstores]
+    label: Drugstores
+    rate: 3
+    unit: percent
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+  - categories: [other]
+    label: All other purchases
+    rate: 1
+    unit: percent
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+
+benefits:
+  - id: quarterly-5pct
+    kind: other
+    name: 5% quarterly bonus categories
+    description: 5% cash back on up to $1,500 in combined purchases each quarter in the activated bonus categories. See Rotating.
+    cycle: quarterly
+    enrollment_required: true
+    how_to_use: Activate each quarter by the deadline at ChaseBonus.com or in the Chase Mobile app.
+    source_url: https://media.chase.com/news/chase-freedom-2026-q4-categories
+    last_verified: 2026-10-16
+    verified: true
+  - id: no-foreign-transaction-fee
+    kind: other
+    name: No foreign transaction fees
+    description: No foreign transaction fees on international purchases.
+    cycle: none
+    source_url: https://media.chase.com/news/chase-freedom-flex-more-travel-value
+    last_verified: 2026-10-16
+    verified: true
+  - id: purchase-protection
+    kind: protection
+    name: Purchase protection
+    description: Covers eligible new purchases against damage or theft.
+    cycle: per_use
+    protection:
+      coverage: Up to $500 per item.
+      conditions:
+        - Within 120 days of purchase (90 days for New York residents).
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator (number on the back of the card) with receipt and statement.
+    source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+  - id: extended-warranty
+    kind: protection
+    name: Extended warranty protection
+    description: Extends the manufacturer's U.S. warranty by one additional year.
+    cycle: per_use
+    protection:
+      coverage: +1 year on eligible warranties of 3 years or less, up to 4 years from purchase.
+      conditions:
+        - Item paid with the card.
+      how_to_claim: File with the benefits administrator.
+    source_url: https://www.chase.com/personal/credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+  - id: trip-cancellation
+    kind: protection
+    name: Trip cancellation / interruption insurance
+    description: Reimburses prepaid, non-refundable passenger fares when a trip is canceled or cut short for a covered reason.
+    cycle: per_use
+    protection:
+      coverage: Up to $1,500 per covered traveler and $6,000 per trip.
+      conditions:
+        - Fare paid with the card.
+        - Covered reasons only (e.g. sickness, severe weather).
+        - Trips longer than 60 consecutive days, carrier/agency insolvency and pre-existing conditions are excluded.
+      how_to_claim: Contact the common carrier first, then file with the benefits administrator.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/what-does-chase-freedom-travel-insurance-cover
+    last_verified: 2026-10-16
+    verified: true
+  - id: auto-rental-cdw
+    kind: protection
+    name: Auto rental collision damage waiver (secondary in the U.S.)
+    description: Theft and collision damage coverage for most rental vehicles.
+    cycle: per_use
+    protection:
+      coverage: null
+      conditions:
+        - Decline the rental company's collision coverage.
+        - Charge the rental to the card.
+        - Secondary to personal auto insurance within the U.S.
+      how_to_claim: Call the benefits administrator after the incident.
+    source_url: https://www.chase.com/personal/credit-cards/education/basics/what-does-chase-freedom-travel-insurance-cover
+    last_verified: 2026-10-16
+    verified: true
+    note: Coverage limit not stated in the official excerpts available to the build.
+  - id: cell-phone-protection
+    kind: protection
+    name: Cell phone protection
+    description: Coverage against theft or damage for phones on a monthly bill paid with the card.
+    cycle: per_use
+    protection:
+      coverage: Up to $800 per claim and $1,000 per 12-month period; max 2 claims per 12 months; $50 deductible per claim. Secondary coverage.
+      conditions:
+        - Pay the monthly cell phone bill with the card.
+        - Phone must be listed on that bill.
+      how_to_claim: File at mycardbenefits.com (Mastercard benefits administrator).
+    source_url: https://www.chase.com/personal/credit-cards/freedom/flex
+    last_verified: 2026-10-16
+    verified: true
+    note: Still offered — listed on Chase's current Freedom Flex page.
+
+downgrade_options: []
