@@ -8,6 +8,7 @@ import { benefitAnchor, benefitStatus, computePeriod } from "@/lib/domain/period
 import { perkUnitValue } from "@/lib/domain/roi";
 import type { Holding } from "@/lib/domain/types";
 import { isTemp, tempId, useApp } from "./AppState";
+import { ReminderSwitch } from "./Reminders";
 import { Badge, Button, Field, Progress, Provenance, usd } from "./ui";
 
 export const CYCLE_LABEL: Record<Benefit["cycle"], string> = {
@@ -112,6 +113,11 @@ export function BenefitRow({
         {benefit.how_to_use && <p className="text-muted">How to use: {benefit.how_to_use}</p>}
         {benefit.protection && <ProtectionTerms p={benefit.protection} />}
         <Provenance fact={benefit} />
+        {(isCredit || benefit.kind === "perk") && (
+          <div>
+            <ReminderSwitch holdingId={holding.id} kind="benefit" benefitId={benefit.id} name={benefit.name} />
+          </div>
+        )}
       </div>
 
       {open && (

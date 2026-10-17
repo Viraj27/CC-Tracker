@@ -83,6 +83,8 @@ model Holding {
   afEvents      AnnualFeeEvent[]
   lifecycle     LifecycleEvent[]
   activations   RotatingActivation[]
+  dismissals    Dismissal[]
+  reminderMutes ReminderMute[]
 
   @@index([profileId])
 }
@@ -163,6 +165,40 @@ model RotatingActivation {
   date      String?
 
   @@unique([holdingId, quarter])
+}
+
+// "Skip" on one Up next occurrence (docs/SPEC-v4.1-skip.md). `key` is the
+// deterministic occurrence key (src/lib/domain/skips.ts), derived from
+// kind + holding + benefit + period.
+model Dismissal {
+  id        String  @id @default(cuid())
+  profileId String
+  holdingId String
+  holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  key       String
+  kind      String // af | credit | payment | rotating | unverified
+  benefitId String?
+  period    String // quarter, statement month, benefit period key or fee date
+  date      String // when it was skipped
+
+  @@unique([profileId, key])
+  @@index([holdingId])
+}
+
+// "Don't remind me": a permanent, reversible mute of a recurring reminder
+// (a card's rotating activation, or one credit/perk). Never payments or AFs.
+model ReminderMute {
+  id        String  @id @default(cuid())
+  profileId String
+  holdingId String
+  holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  key       String // rotating:<holding> | benefit:<holding>:<benefit>
+  kind      String // rotating | benefit
+  benefitId String?
+  date      String
+
+  @@unique([profileId, key])
+  @@index([holdingId])
 }
 
 model Settings {

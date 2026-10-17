@@ -81,6 +81,8 @@ export function userData(over: Partial<UserData> = {}): UserData {
     lifecycle: [],
     points: [],
     activations: [],
+    dismissals: [],
+    mutes: [],
     settings: { ...DEFAULT_SETTINGS },
     ...over,
   };

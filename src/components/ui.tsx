@@ -160,7 +160,7 @@ export function Button({
   size = "md",
   className = "",
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: keyof typeof BUTTON; size?: "md" | "sm" }) {
+}: React.ComponentProps<"button"> & { variant?: keyof typeof BUTTON; size?: "md" | "sm" }) {
   return (
     <button
       type="button"

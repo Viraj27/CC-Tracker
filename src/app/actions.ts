@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { isoDate } from "@/lib/catalog/schema";
 import { localToday } from "@/lib/domain/dates";
+import { muteKey, occurrenceKey } from "@/lib/domain/skips";
 import type { UserData } from "@/lib/domain/types";
 import { buildExport, ImportError, parseImport } from "@/lib/importExport";
 import { getDb, PROFILE_ID } from "@/lib/server/db";
@@ -126,6 +127,61 @@ export async function setActivation(input: { holdingId: string; quarter: string;
   return snapshot();
 }
 
+// --------------------------------------------- Up next skips and mutes --
+
+const OccurrenceInput = z
+  .object({
+    holdingId: z.string(),
+    kind: z.enum(["af", "credit", "payment", "rotating", "unverified"]),
+    benefitId: z.string().nullable(),
+    period: z.string().min(1),
+  })
+  .refine((o) => o.kind !== "credit" || o.benefitId, { message: "credit skips need a benefitId" });
+
+/** Skip one Up next occurrence (or undo it). Never marks anything paid, used or activated. */
+export async function setSkipped(input: z.input<typeof OccurrenceInput> & { skipped: boolean }): Promise<UserData> {
+  const o = OccurrenceInput.parse(input);
+  await ownHolding(o.holdingId);
+  const prisma = await prismaClient();
+  const key = occurrenceKey(o);
+  if (input.skipped) {
+    await prisma.dismissal.upsert({
+      where: { profileId_key: { profileId, key } },
+      create: { profileId, key, ...o, date: localToday() },
+      update: {},
+    });
+  } else {
+    await prisma.dismissal.deleteMany({ where: { profileId, key } });
+  }
+  return snapshot();
+}
+
+const MuteInput = z
+  .object({ kind: z.enum(["rotating", "benefit"]), benefitId: z.string().nullable(), muted: z.boolean() })
+  .refine((m) => (m.kind === "benefit") === !!m.benefitId, { message: "benefit mutes need a benefitId" });
+
+/** Turn recurring reminders off / back on for one card (rotating activation, or individual credits/perks). */
+export async function setMutes(input: { holdingId: string; mutes: z.input<typeof MuteInput>[] }): Promise<UserData> {
+  const { holdingId, mutes } = z.object({ holdingId: z.string(), mutes: z.array(MuteInput) }).parse(input);
+  await ownHolding(holdingId);
+  const prisma = await prismaClient();
+  const date = localToday();
+  for (const m of mutes) {
+    const benefitId = m.kind === "benefit" ? m.benefitId : null;
+    const key = muteKey({ kind: m.kind, holdingId, benefitId });
+    if (m.muted) {
+      await prisma.reminderMute.upsert({
+        where: { profileId_key: { profileId, key } },
+        create: { profileId, holdingId, key, kind: m.kind, benefitId, date },
+        update: {},
+      });
+    } else {
+      await prisma.reminderMute.deleteMany({ where: { profileId, key } });
+    }
+  }
+  return snapshot();
+}
+
 // -------------------------------------------------- AF & lifecycle log --
 
 const AfInput = z.object({
@@ -235,7 +291,9 @@ export async function importData(
     return {
       ok: true,
       data: await snapshot(),
-      summary: `Imported ${data.holdings.length} card(s), ${data.usages.length} benefit use(s), ${data.payments.length} payment(s), ${data.points.length} points balance(s) (${mode}).`,
+      summary: `Imported ${data.holdings.length} card(s), ${data.usages.length} benefit use(s), ${data.payments.length} payment(s), ${data.points.length} points balance(s)${
+        data.dismissals.length + data.mutes.length ? `, ${data.dismissals.length} skip(s), ${data.mutes.length} reminder mute(s)` : ""
+      } (${mode}).`,
     };
   } catch (e) {
     if (e instanceof ImportError || e instanceof SyntaxError) return { ok: false, error: e.message };

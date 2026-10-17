@@ -91,6 +91,40 @@ function storageSuite(name: string, open: () => Promise<{ db: Db; batches: () =>
       expect(await loadUserData(db.prisma, PROFILE)).toEqual(before);
     });
 
+    it("stores skips and mutes; merge is idempotent and replace round-trips them", async () => {
+      const file = JSON.parse(JSON.stringify(demo));
+      file.holdings[0].skips = [
+        { kind: "credit", benefitId: "lyft-credit", period: "2026-10", date: "2026-10-17" },
+        { kind: "af", period: "2027-01-15", date: "2026-10-17" },
+      ];
+      file.holdings[1].mutes = [{ kind: "rotating", date: "2026-10-17" }];
+      const { data, hasSettings } = parseImport(file);
+      await writeImport(db, PROFILE, data, "replace", hasSettings);
+      const first = await loadUserData(db.prisma, PROFILE);
+      expect(first.dismissals.map((d) => `${d.holdingId}/${d.kind}/${d.period}`).sort()).toEqual([
+        "demo-reserve/af/2027-01-15",
+        "demo-reserve/credit/2026-10",
+      ]);
+      expect(first.mutes).toEqual([{ id: data.mutes[0].id, holdingId: "demo-flex", kind: "rotating", benefitId: null, date: "2026-10-17" }]);
+      await writeImport(db, PROFILE, data, "merge", hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(first);
+
+      const exported = JSON.parse(JSON.stringify(buildExport(first, "2026-10-17T00:00:00.000Z")));
+      const again = parseImport(exported);
+      await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(first);
+
+      // A unique key per occurrence: a second skip of the same occurrence with another id doesn't duplicate it.
+      const twice = { ...again.data, dismissals: again.data.dismissals.map((d) => ({ ...d, id: `${d.id}-other` })) };
+      await writeImport(db, PROFILE, twice, "merge", false);
+      expect((await loadUserData(db.prisma, PROFILE)).dismissals).toHaveLength(2);
+
+      // Deleting a card deletes its skips and mutes.
+      await db.prisma.holding.delete({ where: { id: "demo-flex" } });
+      expect((await loadUserData(db.prisma, PROFILE)).mutes).toEqual([]);
+      await writeImport(db, PROFILE, parseImport(demo).data, "replace", true);
+    });
+
     it("a catalog reload never touches user data", async () => {
       const before = await loadUserData(db.prisma, PROFILE);
       expect(await syncCatalog(db, { ...catalog, hash: "changed", cards: catalog.cards.slice(1) })).toBe(true);
@@ -160,5 +194,12 @@ describe("D1 migrations", () => {
     for (const d of dirs) expect(fs.existsSync(path.join(root, "prisma", "migrations", d, "migration.sql")), d).toBe(true);
     const config = fs.readFileSync(path.join(root, "wrangler.jsonc"), "utf8");
     expect(config).toContain('"migrations_pattern": "prisma/migrations/*/migration.sql"');
+  });
+
+  it("the deploy job applies D1 migrations before deploying the new code", () => {
+    const ci = fs.readFileSync(path.join(root, ".github", "workflows", "ci.yml"), "utf8");
+    const migrate = ci.indexOf("npm run cf:migrate:remote");
+    expect(migrate).toBeGreaterThan(0);
+    expect(ci.indexOf("npm run cf:deploy")).toBeGreaterThan(migrate);
   });
 });

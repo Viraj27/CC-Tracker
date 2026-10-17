@@ -26,7 +26,7 @@ export default function BestCardPage() {
   const { catalog, data, today } = useApp();
   const [category, setCategory] = useState<SpendCategory>("dining");
   const ranked = useMemo(
-    () => rankCards(category, data.holdings, catalog, data.settings, data.activations, today, data.points),
+    () => rankCards(category, data.holdings, catalog, data.settings, data.activations, today, data.points, data.mutes),
     [category, data, catalog, today],
   );
 
@@ -77,6 +77,12 @@ export default function BestCardPage() {
                       <>
                         {" "}
                         <Badge tone="accent">Rotating 5%</Badge>
+                      </>
+                    )}
+                    {r.remindersOff && (
+                      <>
+                        {" "}
+                        <Badge tone="info">Reminders off</Badge>
                       </>
                     )}
                     {!r.verified && (
