@@ -102,6 +102,7 @@ benefits:
   - id: global-entry-credit
     kind: credit
     name: Global Entry / TSA PreCheck / NEXUS credit
+    short_name: Global Entry
     description: Up to $120 statement credit for the application fee, once every four years.
     amount: 120
     unit: USD

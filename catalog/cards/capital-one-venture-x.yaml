@@ -45,6 +45,7 @@ benefits:
   - id: travel-credit
     kind: credit
     name: $300 Capital One Travel credit
+    short_name: Travel
     description: Annual credit for bookings made through Capital One Travel.
     amount: 300
     unit: USD
@@ -67,6 +68,7 @@ benefits:
   - id: global-entry-credit
     kind: credit
     name: Global Entry / TSA PreCheck credit
+    short_name: Global Entry
     description: Up to $120 statement credit toward the application fee; one credit per account every four years.
     amount: 120
     unit: USD

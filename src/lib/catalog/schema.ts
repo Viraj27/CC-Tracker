@@ -82,6 +82,8 @@ export const BenefitSchema = z
     id: z.string().regex(/^[a-z0-9-]+$/),
     kind: z.enum(BENEFIT_KINDS),
     name: z.string(),
+    /** Display-only short title for one-line rows (e.g. "DoorDash"); derived from `name` when omitted. */
+    short_name: z.string().optional(),
     description: z.string(),
     amount: z.number().nonnegative().nullable().default(null),
     unit: z.enum(["USD", "count"]).nullable().default(null),

@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { importDemo } from "./helpers";
+import { importDemo, sheet } from "./helpers";
 
-// Up next Skip / "Don't remind me" (docs/SPEC-v4.1-skip.md). Demo seed only.
+// Up next Skip / "Don't remind me" (docs/SPEC-v4.1-skip.md), on the v5 UI: the desktop Wallet strip,
+// the Up next screen and the card's sheets (docs/SPEC-v5-app-pass.md). Demo seed only.
 const LYFT = "Demo Reserve: $10 Lyft in-app credit left";
 
 test("skip an item: it's gone, the count shows, Show skipped + Unskip bring it back", async ({ page }) => {
@@ -30,16 +31,18 @@ test("skip an item: it's gone, the count shows, Show skipped + Unskip bring it b
   await expect(show).toHaveText(/^1 skipped · show$/i);
   // Skipping doesn't log a use.
   await page.getByTestId("wallet-card-demo-reserve").click();
-  await expect(page.getByTestId("remaining-lyft-credit")).toContainText("$10.00");
+  await expect(page.getByTestId("remaining-lyft-credit")).toHaveText("$10");
 
   // Stored in the database: still skipped after a reload, and on the Up next screen.
   await page.goto("/up-next");
-  await expect(page.getByTestId("attention-list")).not.toContainText(LYFT);
+  await expect(page.getByTestId("attention-list").getByRole("button", { name: LYFT, exact: true })).toHaveCount(0);
   await page.getByTestId("show-skipped").click();
   const skipped = page.getByTestId("skipped-item");
   await expect(skipped).toHaveCount(1);
-  await expect(skipped).toContainText(LYFT);
-  await expect(skipped).toContainText("Skipped");
+  await expect(skipped).toContainText("Lyft");
+  await expect(skipped).toContainText("Demo Reserve");
+  await expect(skipped).toContainText(/Skipped/i);
+  await expect(skipped.getByRole("button", { name: `Unskip — ${LYFT}` })).toBeVisible();
 
   // Unskip from the Wallet strip.
   await page.goto("/");
@@ -65,6 +68,7 @@ test("stop reminding rotating 5% for a card: no Up next item, still on /rotating
   await page.goto("/");
   const strip = page.getByTestId("up-next-strip");
   const activate = strip.getByRole("button", { name: /^Activate — Demo Flex: Activate \d{4}-Q\d 5% categories$/ });
+  await expect(strip.getByTestId("up-next-item").first()).toBeVisible(); // rendered (the demo always has past-due payments)
   test.skip((await activate.count()) === 0, "the current quarter's Chase calendar isn't announced (or its deadline passed)");
   const label = (await activate.getAttribute("aria-label"))!.replace("Activate — ", "");
 
@@ -73,13 +77,16 @@ test("stop reminding rotating 5% for a card: no Up next item, still on /rotating
   await strip.getByRole("button", { name: `Stop reminding me — ${label}` }).click();
   await expect(activate).toHaveCount(0);
   await expect(page.getByTestId("show-skipped")).toHaveText(/1 skipped/i);
-  // Nothing was activated.
+  // Nothing was activated. The card's Rotating sheet shows the switch off.
   await page.goto("/?card=demo-flex");
-  const flexRotating = page.locator("#rotating");
-  await expect(flexRotating.getByRole("checkbox").first()).not.toBeChecked();
-  const toggle = flexRotating.getByRole("switch", { name: /^Reminders: / });
+  await page.getByTestId("rotating-row").click();
+  const rot = sheet(page);
+  await expect(rot.getByRole("checkbox").first()).not.toBeChecked();
+  const toggle = rot.getByRole("switch", { name: /^Reminders: / });
   await expect(toggle).toHaveAttribute("aria-checked", "false");
   await expect(toggle).toHaveText("Reminders off");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("rotating-row")).toContainText(/Reminders off/i);
 
   // /rotating still shows the categories, marked reminders off.
   await page.goto("/rotating");
@@ -95,35 +102,41 @@ test("stop reminding rotating 5% for a card: no Up next item, still on /rotating
   // The hidden item says how to undo it, and the Wallet toggle turns reminders back on.
   await page.goto("/up-next");
   await page.getByTestId("show-skipped").click();
-  await expect(page.getByTestId("skipped-item")).toContainText("Reminders off");
+  await expect(page.getByTestId("skipped-item")).toContainText(/Reminders off/i);
   await expect(page.getByRole("button", { name: `Turn reminders back on — ${label}` })).toBeVisible();
   await page.goto("/?card=demo-flex");
-  await page.locator("#rotating").getByRole("switch", { name: /^Reminders: / }).click();
-  await expect(page.locator("#rotating").getByRole("switch", { name: /^Reminders: / })).toHaveAttribute("aria-checked", "true");
+  await page.getByTestId("rotating-row").click();
+  await sheet(page).getByRole("switch", { name: /^Reminders: / }).click();
+  await expect(sheet(page).getByRole("switch", { name: /^Reminders: / })).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("Escape");
   await expect(strip.getByRole("button", { name: `Activate — ${label}` })).toBeVisible();
 });
 
-test("per-credit reminders: Wallet row switch and Edit card", async ({ page }) => {
+test("per-credit reminders: the credit sheet's switch and Edit card", async ({ page }) => {
   await importDemo(page);
   await page.goto("/?card=demo-reserve");
   const strip = page.getByTestId("up-next-strip");
-  const row = page.locator("#benefit-lyft-credit");
-  await row.getByRole("switch", { name: "Reminders: Lyft in-app credit" }).click();
+  const s = sheet(page);
+  await page.getByRole("button", { name: "Lyft in-app credit", exact: true }).click();
+  await s.getByRole("switch", { name: "Reminders: Lyft in-app credit" }).click();
   await expect(strip.getByRole("button", { name: `Log — ${LYFT}` })).toHaveCount(0);
   // The credit itself is untouched and can still be logged.
-  await expect(row.getByRole("button", { name: "Log Lyft in-app credit" })).toBeVisible();
+  await expect(s.getByRole("button", { name: "Log $10" })).toBeVisible();
+  await page.keyboard.press("Escape");
 
   // Edit card shows the same setting and can turn it back on.
-  await page.getByRole("link", { name: "Edit card →" }).click();
-  const edit = page.getByTestId("edit-reminders");
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  const edit = s.getByTestId("edit-reminders");
   const box = edit.getByRole("checkbox", { name: "Remind me: Lyft in-app credit" });
   await expect(box).not.toBeChecked();
   // Payments and annual fees can't be muted.
   await expect(edit.getByRole("checkbox", { name: /payment|annual fee/i })).toHaveCount(0);
   await box.check();
-  await page.locator("#edit").getByRole("button", { name: "Save" }).click();
+  await s.getByRole("button", { name: "Save" }).click();
+  await expect(s).toHaveCount(0);
   await expect(strip.getByRole("button", { name: `Log — ${LYFT}` })).toBeVisible();
-  await expect(row.getByRole("switch", { name: "Reminders: Lyft in-app credit" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("button", { name: "Lyft in-app credit", exact: true }).click();
+  await expect(s.getByRole("switch", { name: "Reminders: Lyft in-app credit" })).toHaveAttribute("aria-checked", "true");
 });
 
 test("a skipped month's credit comes back next month (browser clock moved forward)", async ({ page }) => {

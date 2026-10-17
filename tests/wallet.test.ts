@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildAttention } from "@/lib/domain/attention";
 import { dayDate, shortDate } from "@/lib/domain/dates";
+import { benefitShortName } from "@/lib/domain/holdings";
 import { cardChip, cardHeadline, walletOrder } from "@/lib/domain/wallet";
 import { benefit, card, catalog, holding, userData } from "./fixtures";
 
@@ -43,6 +44,24 @@ describe("attention items carry structured parts", () => {
     expect(pay).toMatchObject({ label: "Payment past due", month: "2026-10" });
     const af = attention.find((a) => a.kind === "af")!;
     expect(af).toMatchObject({ label: "$250 annual fee posts", amount: 250, daysUntil: 30 });
+  });
+});
+
+describe("one-line titles (docs/SPEC-v5-app-pass.md §2.1)", () => {
+  it("names the thing, never the card", () => {
+    const by = (kind: string) => attention.find((a) => a.kind === kind)!;
+    expect(by("credit").short).toBe("Demo monthly");
+    expect(by("payment").short).toBe("Payment past due");
+    expect(by("af").short).toBe("Annual fee");
+    for (const a of attention) expect(a.short).not.toContain(a.cardName);
+  });
+
+  it("shortens benefit names: catalog short_name, else no amount, parenthetical or trailing 'credit'", () => {
+    expect(benefitShortName({ name: "DoorDash promos (with complimentary DashPass)", short_name: "DoorDash" })).toBe("DoorDash");
+    expect(benefitShortName({ name: "$300 Capital One Travel credit" })).toBe("Capital One Travel");
+    expect(benefitShortName({ name: "Instacart credit" })).toBe("Instacart");
+    expect(benefitShortName({ name: "$250 Chase Travel select-hotel credit (2026)" })).toBe("Chase Travel select-hotel");
+    expect(benefitShortName({ name: "credit" })).toBe("Credit");
   });
 });
 

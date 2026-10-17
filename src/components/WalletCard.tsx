@@ -10,7 +10,7 @@ export function issuerLabel(v: Pick<HoldingView, "holding" | "card">): string {
  * A physical-looking card face (ISO ID-1, 1.586:1): solid catalog colour, no
  * issuer logos or artwork. Name + state chip on top; issuer + annual fee below.
  */
-export function WalletCard({ view, chip }: { view: HoldingView; chip: string | null }) {
+export function WalletCard({ view, chip, selected = false }: { view: HoldingView; chip: string | null; selected?: boolean }) {
   const { card, holding } = view;
   const product = card && holding.nickname && holding.nickname !== card.name ? card.name : null;
   const inactive = holding.status !== "open";
@@ -31,10 +31,19 @@ export function WalletCard({ view, chip }: { view: HoldingView; chip: string | n
         </div>
         {chip && (
           <span
-            className="mt-0.5 shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider whitespace-nowrap"
+            className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider whitespace-nowrap ${selected ? "lg:hidden" : ""}`}
             style={urgent ? { background: view.ink, color: view.color, borderColor: view.ink } : { borderColor: "currentColor" }}
           >
             {chip}
+          </span>
+        )}
+        {/* Desktop: the card in front is the selected one. */}
+        {selected && (
+          <span
+            className="mt-0.5 hidden shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider whitespace-nowrap lg:inline"
+            style={{ borderColor: "currentColor" }}
+          >
+            SELECTED
           </span>
         )}
       </div>

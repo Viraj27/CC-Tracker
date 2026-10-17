@@ -91,6 +91,7 @@ describe("occurrence keys", () => {
     expect(byKind("rotating")[0].mute).toEqual({ kind: "rotating", benefitId: null });
     expect(byKind("credit").find((i) => i.benefitId === "ride-credit")!.mute).toEqual({ kind: "benefit", benefitId: "ride-credit" });
     expect(byKind("rotating")[0].periodNoun).toBe("quarter");
+    expect(byKind("rotating")[0].short).toBe("Activate Q4 5%");
     expect(byKind("credit").find((i) => i.benefitId === "ride-credit")!.periodNoun).toBe("month");
   });
 });
