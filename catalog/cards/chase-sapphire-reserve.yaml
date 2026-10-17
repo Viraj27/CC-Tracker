@@ -63,6 +63,7 @@ benefits:
   - id: travel-credit
     kind: credit
     name: $300 annual travel credit
+    short_name: Travel
     description: Statement credits automatically reimburse travel purchases charged to the card.
     amount: 300
     unit: USD
@@ -76,6 +77,7 @@ benefits:
   - id: dining-credit
     kind: credit
     name: Exclusive Tables dining credit
+    short_name: Dining
     description: Up to $150 Jan–Jun and $150 Jul–Dec in statement credits at Sapphire Reserve Exclusive Tables restaurants on OpenTable.
     amount: 150
     unit: USD
@@ -87,6 +89,7 @@ benefits:
   - id: stubhub-credit
     kind: credit
     name: StubHub / viagogo credit
+    short_name: StubHub
     description: Up to $150 Jan–Jun and $150 Jul–Dec in statement credits on StubHub purchases.
     amount: 150
     unit: USD
@@ -100,6 +103,7 @@ benefits:
   - id: the-edit-credit
     kind: credit
     name: The Edit hotel credit
+    short_name: The Edit
     description: Up to $250 Jan–Jun and $250 Jul–Dec ($500/year) in statement credits on prepaid stays booked with The Edit by Chase Travel (2-night minimum, max $250 per booking).
     amount: 250
     unit: USD
@@ -112,6 +116,7 @@ benefits:
   - id: chase-travel-hotel-credit
     kind: credit
     name: $250 Chase Travel select-hotel credit (2026)
+    short_name: Chase Travel hotel
     description: Statement credit on prepaid Chase Travel hotel bookings (2-night minimum) with IHG, Montage, Pendry, Omni, Virgin Hotels, Minor Hotels, or Pan Pacific, for stays booked Jan 1–Dec 31, 2026.
     amount: 250
     unit: USD
@@ -125,6 +130,7 @@ benefits:
   - id: doordash-promos
     kind: credit
     name: DoorDash promos (with complimentary DashPass)
+    short_name: DoorDash
     description: Monthly DoorDash promos for DashPass members — a restaurant promo plus two promos for groceries / daily essentials.
     amount: 35
     unit: USD
@@ -138,6 +144,7 @@ benefits:
   - id: lyft-credit
     kind: credit
     name: Lyft in-app credit
+    short_name: Lyft
     description: Up to $10 per month in Lyft in-app credits (up to $120 per year).
     amount: 10
     unit: USD
@@ -151,6 +158,7 @@ benefits:
   - id: peloton-credit
     kind: credit
     name: Peloton membership credit
+    short_name: Peloton
     description: Up to $10 per month in statement credits toward Peloton memberships (up to $120 per year).
     amount: 10
     unit: USD
@@ -164,6 +172,7 @@ benefits:
   - id: global-entry-credit
     kind: credit
     name: Global Entry / TSA PreCheck / NEXUS credit
+    short_name: Global Entry
     description: Statement credit up to $120 for one application fee, once every four years.
     amount: 120
     unit: USD

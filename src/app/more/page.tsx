@@ -1,29 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { MORE_LINKS } from "@/components/Nav";
-import { PageTitle } from "@/components/ui";
+import { Group, PageTitle, Row } from "@/components/ui";
 
 /** The phone's "More" tab: the screens that don't get their own tab. */
 export default function MorePage() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3">
       <PageTitle>More</PageTitle>
-      <ul className="divide-y divide-hairline border-y border-hairline">
+      <Group>
         {MORE_LINKS.map((l) => (
-          <li key={l.href}>
-            <Link href={l.href} className="group flex min-h-14 items-center justify-between gap-3 py-3">
-              <span>
-                <span className="block text-lg font-semibold group-hover:underline">{l.label}</span>
-                <span className="block text-sm text-muted">{l.sub}</span>
-              </span>
-              <span aria-hidden className="font-mono text-muted">
-                →
-              </span>
-            </Link>
-          </li>
+          <Row key={l.href} title={l.label} href={l.href} chevron />
         ))}
-      </ul>
+      </Group>
     </div>
   );
 }

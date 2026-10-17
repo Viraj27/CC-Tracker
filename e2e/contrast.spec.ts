@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test";
-import { gotoReady, importDemo } from "./helpers";
+import { gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
 
 // WCAG AA text contrast: every visible text run (and input placeholder) against the
-// background it is actually painted on, in both colour schemes, with disclosures open.
+// background it is actually painted on, in both colour schemes, with disclosures and
+// every ⓘ open, on the list surface, in sheets and with a swiped Up next row.
 const PAGES = [
+  "/",
   "/?card=demo-reserve",
+  "/cards/demo-reserve",
   "/up-next",
   "/eligibility",
   "/payments",
@@ -25,26 +28,59 @@ test.describe("contrast", () => {
       ["390", 390],
     ] as const) {
       test(`${scheme} ${label}: text ≥ 4.5:1 on its background`, async ({ page }) => {
+        test.setTimeout(240_000);
         await importDemo(page);
         await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
         await page.setViewportSize({ width, height: 900 });
         const failures: Hit[] = [];
+        const check = async (where: string) => {
+          // Open every disclosure and every ⓘ (provenance, screen help) before measuring.
+          await page.evaluate(() => {
+            document.querySelectorAll("details").forEach((d) => (d.open = true));
+            document.querySelectorAll<HTMLButtonElement>('button[aria-expanded="false"][aria-label="Source"], button[aria-expanded="false"][aria-label="About this screen"]').forEach((b) => b.click());
+          });
+          const hits: Hit[] = await page.evaluate(measure);
+          if (process.env.CONTRAST_REPORT) console.log(JSON.stringify({ scheme, label, where, hits }));
+          failures.push(...hits.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `${where} ${h.where}` })));
+        };
         for (const p of PAGES) {
           await gotoReady(page, p);
-          await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
-          const hits: Hit[] = await page.evaluate(measure);
-          if (process.env.CONTRAST_REPORT) console.log(JSON.stringify({ scheme, label, page: p, hits }));
-          failures.push(...hits.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `${p} ${h.where}` })));
+          await check(p);
         }
-        // Greyed skipped items (docs/SPEC-v4.1-skip.md): skip one, reveal it, measure the Up next screen again.
+
+        // Sheets (docs/SPEC-v5-app-pass.md §3.4): a credit, a drill-in list and a benefit, ROI, rotating, an Up next item.
+        const openSheet = async (where: string, open: () => Promise<void>) => {
+          await open();
+          await sheetSettled(page);
+          await check(where);
+          await page.keyboard.press("Escape");
+          await expect(sheet(page)).toHaveCount(0);
+        };
+        await gotoReady(page, "/cards/demo-reserve");
+        await openSheet("credit sheet", () => page.getByRole("button", { name: "Lyft in-app credit", exact: true }).click());
+        await openSheet("ROI sheet", () => page.getByTestId("roi-panel").click());
+        for (const list of ["perks", "protections", "earn", "downgrade", "fees", "lifecycle"]) {
+          await openSheet(`${list} sheet`, () => page.getByTestId(`drill-${list}`).click());
+        }
+        await openSheet("edit sheet", () => page.getByRole("button", { name: "Edit", exact: true }).click());
+        await gotoReady(page, "/cards/demo-flex");
+        await openSheet("rotating sheet", () => page.getByTestId("rotating-row").click());
+
+        // Up next: a swiped row (Skip + action showing), an item sheet, and the greyed skipped list (docs/SPEC-v4.1-skip.md).
         await gotoReady(page, "/up-next");
         const lyft = "Demo Reserve: $10 Lyft in-app credit left";
-        await page.getByRole("button", { name: `Skip — ${lyft}` }).click();
-        await page.getByRole("button", { name: `Skip this month — ${lyft}` }).click();
+        const row = page.getByTestId("up-next-item").filter({ has: page.getByRole("button", { name: lyft, exact: true }) });
+        await mouseSwipeLeft(page, row.getByTestId("up-next-row"));
+        await expect(row).toHaveAttribute("data-open", "true");
+        await check("/up-next (row swiped)");
+        await row.getByTestId("up-next-row").click(); // a tap closes the open row
+        await expect(row).not.toHaveAttribute("data-open", "true");
+        await openSheet("item sheet", () => page.getByTestId("attention-list").getByRole("button", { name: "Demo Reserve: Payment due", exact: true }).click());
+        await row.getByTestId("up-next-row").click();
+        await sheet(page).getByRole("button", { name: `Skip this month — ${lyft}` }).click();
         await page.getByTestId("show-skipped").click();
         await expect(page.getByTestId("skipped-item")).toBeVisible();
-        const skipped: Hit[] = await page.evaluate(measure);
-        failures.push(...skipped.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `/up-next (skipped shown) ${h.where}` })));
+        await check("/up-next (skipped shown)");
         expect(failures, JSON.stringify(failures, null, 2)).toEqual([]);
       });
     }

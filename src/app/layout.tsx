@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Space_Mono } from "next/font/google";
 import { AppProvider } from "@/components/AppState";
+import { SheetHost } from "@/components/CardSheets";
+import { SheetProvider } from "@/components/Sheet";
 import { Nav, TabBar } from "@/components/Nav";
 import { localToday } from "@/lib/domain/dates";
 import { getDb, PROFILE_ID } from "@/lib/server/db";
@@ -50,10 +52,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen">
         <AppProvider catalog={catalog} initialData={data} serverToday={localToday()}>
-          <Nav />
-          {/* Bottom padding keeps content clear of the phone tab bar. */}
-          <main className="mx-auto max-w-6xl px-4 pt-4 pb-[calc(88px+env(safe-area-inset-bottom))] sm:px-6 lg:pb-16">{children}</main>
-          <TabBar />
+          <SheetProvider>
+            <Nav />
+            {/* Phones have no top bar: pad for the notch. Bottom padding keeps content clear of the phone tab bar. */}
+            <main className="mx-auto max-w-6xl px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-[calc(88px+env(safe-area-inset-bottom))] sm:px-6 lg:pt-6 lg:pb-16">
+              {children}
+            </main>
+            <TabBar />
+            <SheetHost />
+          </SheetProvider>
         </AppProvider>
       </body>
     </html>

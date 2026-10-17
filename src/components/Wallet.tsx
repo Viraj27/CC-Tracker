@@ -1,15 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { AttentionItem } from "@/lib/domain/attention";
 import { cardChip, walletOrder } from "@/lib/domain/wallet";
 import { useApp } from "./AppState";
-import { CardDetail } from "./CardDetail";
-import { useHoldingViews, useUpNext, type HoldingView } from "./derived";
-import { UpNextStrip } from "./UpNext";
+import { CardPage } from "./CardPage";
+import { use524, useHoldingViews, useUpNext, type HoldingView } from "./derived";
+import { UpNextStrip, UpNextTop } from "./UpNext";
 import { WalletCard } from "./WalletCard";
-import { PageTitle, PillLink } from "./ui";
+import { Group, GroupLabel, PageTitle, PillLink, Row } from "./ui";
 
 /** How the selection is written to the URL: `/?card=<id>` or `/cards/<id>`. */
 export type WalletUrl = "query" | "path";
@@ -22,103 +23,99 @@ function idFromLocation(): string | null {
   return new URLSearchParams(window.location.search).get("card");
 }
 
-/** Open the <details> holding the URL's #fragment (e.g. #downgrade, #edit) and scroll to it. */
-function revealHash() {
-  const id = decodeURIComponent(window.location.hash.slice(1));
-  if (!id) return;
-  const el = document.getElementById(id);
-  if (!el) return;
-  for (let d = el.closest("details"); d; d = d.parentElement?.closest("details") ?? null) d.open = true;
-  el.scrollIntoView({ block: "start" });
-}
-
 /**
- * Home: the Up next strip, the card stack and the selected card's details.
- * Selection lives in the URL (pushState, no server round trip) so deep links
- * and Back work.
+ * Home. Phone (< 1024px): large title with the 5/24 pill, the top 3 Up next
+ * rows and the card stack; tapping a card pushes its Card page (`/cards/<id>`).
+ * Desktop: the Up next strip, the stack on the left and the selected card's
+ * page on the right; selection lives in the URL (pushState, no server round
+ * trip) so deep links and Back work. `/cards/<id>` renders this same component
+ * as the Card page on phones.
  */
 export function Wallet({ selectedId, logBenefitId = null, url }: { selectedId: string | null; logBenefitId?: string | null; url: WalletUrl }) {
   const { data } = useApp();
   const router = useRouter();
   const views = useHoldingViews();
   const { visible: attention, hidden } = useUpNext();
+  const { status } = use524();
   const ordered = useMemo(() => walletOrder(views, attention), [views, attention]);
+  const cardScreen = url === "path";
 
   const [selected, setSelected] = useState(selectedId);
-  const [logTarget, setLogTarget] = useState<{ holdingId: string; benefitId: string } | null>(
-    selectedId && logBenefitId ? { holdingId: selectedId, benefitId: logBenefitId } : null,
-  );
   useEffect(() => setSelected(selectedId), [selectedId]);
   useEffect(() => {
     const onPop = () => setSelected(idFromLocation());
     window.addEventListener("popstate", onPop);
-    window.addEventListener("hashchange", revealHash);
-    revealHash();
-    return () => {
-      window.removeEventListener("popstate", onPop);
-      window.removeEventListener("hashchange", revealHash);
-    };
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   const current = ordered.find((v) => v.holding.id === selected) ?? ordered[0] ?? null;
 
   const select = useCallback(
     (id: string) => {
+      // Phones push the Card page; desktop selects in place.
+      if (!window.matchMedia("(min-width: 1024px)").matches) {
+        router.push(`/cards/${encodeURIComponent(id)}`);
+        return;
+      }
       if (id === current?.holding.id) return;
       setSelected(id);
-      setLogTarget(null);
       window.history.pushState(null, "", hrefFor(url, id));
     },
-    [current, url],
-  );
-
-  const onLog = useCallback(
-    (holdingId: string, benefitId: string) => {
-      if (holdingId !== current?.holding.id) {
-        setSelected(holdingId);
-        window.history.pushState(null, "", hrefFor(url, holdingId));
-      }
-      // A fresh object re-triggers the row even when it is already the target.
-      setLogTarget({ holdingId, benefitId });
-    },
-    [current, url],
+    [current, url, router],
   );
 
   if (data.holdings.length === 0) return <GetStarted />;
-  if (url === "path" && selectedId && !views.some((v) => v.holding.id === selectedId)) {
+  if (cardScreen && selectedId && !views.some((v) => v.holding.id === selectedId)) {
     return (
       <div className="flex flex-col items-start gap-4 py-8">
-        <PageTitle sub="It may have been deleted.">Card not found</PageTitle>
+        <PageTitle>Card not found</PageTitle>
         <PillLink href="/">Back to the wallet</PillLink>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <UpNextStrip items={attention} hidden={hidden} onLog={onLog} />
+    <div className="flex flex-col gap-2 lg:gap-6">
+      {!cardScreen && (
+        <div className="lg:hidden">
+          <PageTitle
+            right={
+              <Link
+                href="/eligibility"
+                data-testid="five24-pill"
+                aria-label={`5/24: ${status.count} counted`}
+                className="shrink-0 rounded-full bg-list px-3 py-1 font-mono text-[13px] font-bold"
+              >
+                {status.count}/24
+              </Link>
+            }
+          >
+            Wallet
+          </PageTitle>
+          <UpNextTop items={attention} count={attention.length} />
+        </div>
+      )}
+      <div className="hidden lg:block">
+        <UpNextStrip items={attention} hidden={hidden} />
+      </div>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-12">
-        <div className="lg:sticky lg:top-24 lg:self-start">
+        <div className={`lg:sticky lg:top-24 lg:self-start ${cardScreen ? "hidden lg:block" : ""}`}>
           <Stack ordered={ordered} selectedId={current!.holding.id} attention={attention} onSelect={select} />
         </div>
-        <CardDetail
-          key={current!.holding.id}
-          view={current!}
-          attention={attention}
-          logBenefitId={logTarget?.holdingId === current!.holding.id ? logTarget.benefitId : null}
-          onDeleted={() => router.push("/")}
-        />
+        <div className={cardScreen ? "" : "hidden lg:block"}>
+          <CardPage key={current!.holding.id} view={current!} attention={attention} logBenefitId={current!.holding.id === selectedId ? logBenefitId : null} />
+        </div>
       </div>
     </div>
   );
 }
 
-const STRIP = 62; // visible height of a collapsed card
-const OVERLAP = 16; // the next strip's rounded top sits over the previous one
 
 /**
- * Apple Wallet-style stack: the selected card in full, the rest as overlapping
- * strips. Real buttons; arrow keys move the selection; aria-pressed marks it.
+ * Apple Wallet-style stack. Phone: ~58px strips (name + state chip) with the
+ * last card in full. Desktop: the selected card in full first, the rest as
+ * strips. Real buttons; arrow keys move the selection (desktop) or focus
+ * (phone); aria-pressed marks the selected card.
  */
 function Stack({
   ordered,
@@ -165,6 +162,17 @@ function Stack({
   }, [display, selectedId]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    const focused = display.findIndex((v) => buttons.current.get(v.holding.id) === document.activeElement);
+    if (!desktop) {
+      // Phones: arrows move focus; Enter opens the card.
+      const n =
+        e.key === "ArrowDown" || e.key === "ArrowRight" ? focused + 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? focused - 1 : null;
+      if (n === null || n < 0 || n >= display.length) return;
+      e.preventDefault();
+      buttons.current.get(display[n].holding.id)?.focus();
+      return;
+    }
     const i = ordered.findIndex((v) => v.holding.id === selectedId);
     const next =
       e.key === "ArrowDown" || e.key === "ArrowRight"
@@ -184,7 +192,9 @@ function Stack({
 
   return (
     <div>
-      <h2 className="sr-only">Cards</h2>
+      <div className="lg:sr-only">
+        <GroupLabel>Cards · {display.length}</GroupLabel>
+      </div>
       <p className="sr-only" id="stack-help">
         Use the arrow keys to move between cards.
       </p>
@@ -192,7 +202,10 @@ function Stack({
         {display.map((v, i) => {
           const selected = i === 0;
           const last = i === display.length - 1;
-          const chip = selected ? "SELECTED" : cardChip(v.holding, attention);
+          const chip = cardChip(v.holding, attention);
+          // Phone: every card but the last is a strip. Desktop: every card but the selected one.
+          const height = `${last ? "" : "h-[74px]"} ${selected ? "lg:h-auto" : "lg:h-[78px]"}`;
+          const round = `${last ? "rounded-2xl" : "rounded-t-2xl"} ${selected || last ? "lg:rounded-2xl" : "lg:rounded-t-2xl lg:rounded-b-none"}`;
           return (
             <li
               key={v.holding.id}
@@ -200,8 +213,8 @@ function Stack({
                 if (el) items.current.set(v.holding.id, el);
                 else items.current.delete(v.holding.id);
               }}
-              className="relative"
-              style={{ marginTop: i === 0 ? 0 : i === 1 ? 14 : -OVERLAP, zIndex: i }}
+              className={`relative ${i === 0 ? "" : i === 1 ? "-mt-4 lg:mt-3.5" : "-mt-4"}`}
+              style={{ zIndex: i }}
             >
               <button
                 type="button"
@@ -210,15 +223,13 @@ function Stack({
                   else buttons.current.delete(v.holding.id);
                 }}
                 aria-pressed={selected}
-                aria-label={`${v.name}${chip && !selected ? `, ${chip.toLowerCase()}` : ""}`}
+                aria-label={`${v.name}${chip ? `, ${chip.toLowerCase()}` : ""}`}
                 data-testid={`wallet-card-${v.holding.id}`}
                 onClick={() => onSelect(v.holding.id)}
-                className={`block w-full overflow-hidden text-left transition-[filter] ${
-                  selected ? "rounded-2xl" : `rounded-t-2xl hover:brightness-110 ${last ? "rounded-b-2xl" : ""}`
-                }`}
-                style={selected ? undefined : { height: STRIP + OVERLAP, boxShadow: "0 -1px 3px rgb(0 0 0 / 0.12)" }}
+                className={`block w-full overflow-hidden text-left transition-[filter] hover:brightness-110 ${height} ${round}`}
+                style={{ boxShadow: i > 0 ? "0 -1px 3px rgb(0 0 0 / 0.12)" : undefined }}
               >
-                <WalletCard view={v} chip={chip} />
+                <WalletCard view={v} chip={chip} selected={selected} />
               </button>
             </li>
           );
@@ -230,28 +241,12 @@ function Stack({
 
 function GetStarted() {
   return (
-    <div className="flex max-w-xl flex-col gap-5 py-6">
-      <PageTitle sub="Add your cards to see fees, credits, payments and 5/24 in one stack.">Your wallet is empty</PageTitle>
-      <ol className="divide-y divide-hairline border-y border-hairline text-sm">
-        <li className="flex flex-wrap items-center justify-between gap-3 py-4">
-          <span>
-            <span className="block font-semibold">Import your seed file</span>
-            <span className="text-muted">
-              e.g. <code className="font-mono">seed/my-cards.json</code> (gitignored), or the demo file.
-            </span>
-          </span>
-          <PillLink href="/settings#import" variant="primary">
-            Import
-          </PillLink>
-        </li>
-        <li className="flex flex-wrap items-center justify-between gap-3 py-4">
-          <span>
-            <span className="block font-semibold">Or add a card by hand</span>
-            <span className="text-muted">From the catalog or a custom card.</span>
-          </span>
-          <PillLink href="/cards">Add card</PillLink>
-        </li>
-      </ol>
+    <div className="flex max-w-xl flex-col gap-2">
+      <PageTitle>Your wallet is empty</PageTitle>
+      <Group>
+        <Row title="Import your seed file" sub="seed/my-cards.json, or the demo file" chevron href="/settings#import" ariaLabel="Import" />
+        <Row title="Add a card by hand" sub="From the catalog or a custom card" chevron href="/cards" ariaLabel="Add card" />
+      </Group>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { exportData, importData, saveSettings } from "@/app/actions";
 import { useApp } from "@/components/AppState";
-import { Button, Field, PageTitle, Provenance, Section, usd } from "@/components/ui";
+import { Button, Field, Group, GroupLabel, PageTitle, Provenance, usd } from "@/components/ui";
 
 export default function SettingsPage() {
   const { catalog, data, mutate } = useApp();
@@ -21,11 +21,20 @@ export default function SettingsPage() {
   const numMap = (m: Record<string, string>) =>
     Object.fromEntries(Object.entries(m).filter(([, v]) => v.trim() !== "").map(([k, v]) => [k, Number(v)]));
 
+  const lead = (k: "afLeadDays" | "creditLeadDays" | "paymentLeadDays", label: string) => (
+    <li>
+      <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
+        <span>{label}</span>
+        <input type="number" min={0} className="w-24 text-right font-mono" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+      </label>
+    </li>
+  );
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <PageTitle>Settings</PageTitle>
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col"
         onSubmit={async (e) => {
           e.preventDefault();
           const next = {
@@ -40,67 +49,68 @@ export default function SettingsPage() {
           setSaved(ok);
         }}
       >
-        <Section title="Lead times (days)">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-            <Field label="Annual fee">
-              <input type="number" min={0} value={form.afLeadDays} onChange={(e) => setForm({ ...form, afLeadDays: e.target.value })} />
-            </Field>
-            <Field label="Expiring credits">
-              <input type="number" min={0} value={form.creditLeadDays} onChange={(e) => setForm({ ...form, creditLeadDays: e.target.value })} />
-            </Field>
-            <Field label="Payments">
-              <input type="number" min={0} value={form.paymentLeadDays} onChange={(e) => setForm({ ...form, paymentLeadDays: e.target.value })} />
-            </Field>
-            <Field label="Track payments from" hint="Earlier months are never flagged past due.">
-              <input type="month" value={form.paymentTrackingStart} onChange={(e) => setForm({ ...form, paymentTrackingStart: e.target.value })} />
-            </Field>
-          </div>
-        </Section>
+        <GroupLabel>Lead times (days)</GroupLabel>
+        <Group>
+          {lead("afLeadDays", "Annual fee")}
+          {lead("creditLeadDays", "Expiring credits")}
+          {lead("paymentLeadDays", "Payments")}
+          <li>
+            <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
+              <span>
+                Track payments from
+                <span className="block text-xs text-muted">Earlier months never show past due</span>
+              </span>
+              <input type="month" className="w-40" value={form.paymentTrackingStart} onChange={(e) => setForm({ ...form, paymentTrackingStart: e.target.value })} />
+            </label>
+          </li>
+        </Group>
 
-        <Section title="Perk values (USD per use)">
-          <ul className="flex flex-col gap-3">
-            {catalog.perkDefaults.map((p) => (
-              <li key={p.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_10rem]">
-                <div className="min-w-0 text-sm">
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-xs text-muted">
-                    Default {usd(p.value_usd, 2)} — {p.basis}
-                  </p>
-                  <Provenance fact={p} />
-                </div>
-                <Field label="Your value">
-                  <input
-                    type="number"
-                    min={0}
-                    step="any"
-                    placeholder={p.value_usd === null ? "not set" : String(p.value_usd)}
-                    value={form.perk[p.id] ?? ""}
-                    onChange={(e) => setForm({ ...form, perk: { ...form.perk, [p.id]: e.target.value } })}
-                  />
-                </Field>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        <GroupLabel>Perk values (USD per use)</GroupLabel>
+        <Group>
+          {catalog.perkDefaults.map((p) => (
+            <li key={p.id} className="flex min-h-14 items-center gap-3 px-4 py-2">
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-center gap-x-1">
+                  <span className="font-medium">{p.name}</span>
+                  <Provenance fact={p} description={`Default ${usd(p.value_usd, 2)}: ${p.basis}`} />
+                </span>
+                <span className="block font-mono text-[11px] tracking-wider text-muted uppercase">Default {usd(p.value_usd, 2)}</span>
+              </span>
+              <input
+                type="number"
+                min={0}
+                step="any"
+                aria-label={`Your value: ${p.name}`}
+                className="w-24 shrink-0 text-right font-mono"
+                placeholder={p.value_usd === null ? "not set" : String(p.value_usd)}
+                value={form.perk[p.id] ?? ""}
+                onChange={(e) => setForm({ ...form, perk: { ...form.perk, [p.id]: e.target.value } })}
+              />
+            </li>
+          ))}
+        </Group>
 
-        <Section title="Cents per point (valuation assumption)">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {catalog.programs.map((p) => (
-              <Field key={p.id} label={p.name}>
+        <GroupLabel>Cents per point (assumption)</GroupLabel>
+        <Group>
+          {catalog.programs.map((p) => (
+            <li key={p.id}>
+              <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
+                <span className="min-w-0">{p.name}</span>
                 <input
                   type="number"
                   min={0}
                   step="any"
+                  className="w-24 shrink-0 text-right font-mono"
                   placeholder={String(p.default_cents_per_point)}
                   value={form.cpp[p.id] ?? ""}
                   onChange={(e) => setForm({ ...form, cpp: { ...form.cpp, [p.id]: e.target.value } })}
                 />
-              </Field>
-            ))}
-          </div>
-        </Section>
+              </label>
+            </li>
+          ))}
+        </Group>
 
-        <div className="flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3">
           <Button type="submit" variant="primary">
             Save settings
           </Button>
@@ -120,12 +130,9 @@ function ExportImport() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <Section title="Export / import" id="import">
-      <p className="mb-3 text-sm text-muted">
-        Export everything to JSON (backups, or moving data from the Mac to the hosted app). Import validates the file first. Your seed file
-        (<code className="font-mono">seed/my-cards.json</code>, gitignored) is imported here.
-      </p>
-      <div className="flex flex-col gap-3">
+    <section id="import" className="scroll-mt-24" aria-labelledby="import-heading">
+      <GroupLabel id="import-heading">Export / import</GroupLabel>
+      <div className="flex flex-col gap-3 rounded-[14px] bg-list p-4">
         <div>
           <Button
             onClick={async () => {
@@ -141,16 +148,16 @@ function ExportImport() {
             Export JSON
           </Button>
         </div>
-        <fieldset className="flex flex-wrap items-center gap-4 text-sm">
-          <legend className="mb-1 text-muted">Import mode</legend>
-          <label className="flex items-center gap-2">
+        <fieldset className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <legend className="mb-1 font-mono text-[11px] tracking-wider text-muted uppercase">Import mode</legend>
+          <label className="flex min-h-10 items-center gap-2">
             <input type="radio" name="mode" checked={mode === "merge"} onChange={() => setMode("merge")} /> Merge (upsert; safe to re-run)
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex min-h-10 items-center gap-2">
             <input type="radio" name="mode" checked={mode === "replace"} onChange={() => setMode("replace")} /> Replace all my data
           </label>
         </fieldset>
-        <Field label="Import JSON file">
+        <Field label="Import JSON file" hint="Validated before anything is written. Your seed file is seed/my-cards.json (gitignored).">
           <input
             type="file"
             accept="application/json,.json"
@@ -181,6 +188,6 @@ function ExportImport() {
           </p>
         )}
       </div>
-    </Section>
+    </section>
   );
 }

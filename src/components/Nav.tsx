@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { dayDate } from "@/lib/domain/dates";
 import { useApp } from "./AppState";
 import { use524 } from "./derived";
@@ -20,13 +21,18 @@ const LINKS = [
 
 /** Screens reached through the phone's "More" tab. */
 export const MORE_LINKS = [
-  { href: "/payments", label: "Payments", sub: "Due dates, mark paid" },
-  { href: "/rotating", label: "Rotating 5%", sub: "This and next quarter, activation" },
-  { href: "/best-card", label: "Best card", sub: "Which card for a purchase" },
-  { href: "/points", label: "Points", sub: "Balances and estimated value" },
-  { href: "/settings", label: "Settings", sub: "Lead times, values, export / import" },
-  { href: "/cards", label: "Add card", sub: "Add or manage cards" },
+  { href: "/payments", label: "Payments" },
+  { href: "/rotating", label: "Rotating 5%" },
+  { href: "/best-card", label: "Best card" },
+  { href: "/points", label: "Points" },
+  { href: "/settings", label: "Settings" },
+  { href: "/cards", label: "Add card" },
 ];
+
+// Whether this tab has navigated inside the app, so "‹ Wallet" can go back instead of pushing "/".
+let lastPath: string | null = null;
+let moved = false;
+export const canGoBack = () => moved;
 
 type Section = "wallet" | "up-next" | "eligibility" | "more" | null;
 
@@ -56,8 +62,14 @@ export function WalletStatus() {
 export function Nav() {
   const path = usePathname();
   const { error, clearError, pending } = useApp();
+  useEffect(() => {
+    if (lastPath !== null && lastPath !== path) moved = true;
+    lastPath = path;
+  }, [path]);
   return (
-    <header className="sticky top-0 z-20 border-b border-hairline bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+    <>
+    {/* Phones get large titles instead of a web header (docs/SPEC-v5-app-pass.md §3.1). */}
+    <header className="sticky top-0 z-20 hidden border-b border-hairline bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:block">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-2.5 sm:px-6">
         <div className="min-w-0 flex-1 lg:flex-none">
           <Link href="/" className="text-[17px] font-bold tracking-tight">
@@ -89,17 +101,23 @@ export function Nav() {
           </PillLink>
         </span>
       </div>
-      {error && (
-        <div role="alert" className="border-t border-urgent/40 px-4 py-2 text-sm text-urgent">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-            <span>{error}</span>
-            <button type="button" onClick={clearError} className="min-h-9 underline">
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
     </header>
+    {error && (
+      <div role="alert" className="sticky top-0 z-30 border-b border-urgent/40 bg-bg px-4 pt-[calc(env(safe-area-inset-top)+8px)] pb-2 text-sm text-urgent lg:top-[61px] lg:pt-2">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
+          <span>{error}</span>
+          <button type="button" onClick={clearError} className="min-h-9 underline">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )}
+    {pending && (
+      <span aria-hidden className="fixed top-[calc(env(safe-area-inset-top)+6px)] right-4 z-30 font-mono text-xs text-muted lg:hidden">
+        …
+      </span>
+    )}
+    </>
   );
 }
 

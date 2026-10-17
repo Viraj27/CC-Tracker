@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { expect, test } from "@playwright/test";
-import { importDemo } from "./helpers";
+import { importDemo, sheet } from "./helpers";
 
 // Uses examples/demo-seed.json (fake demo data).
 test("import demo seed, log a partial credit, everything updates without reload", async ({ page }) => {
@@ -9,29 +9,31 @@ test("import demo seed, log a partial credit, everything updates without reload"
   await page.getByRole("link", { name: "Wallet" }).click();
   await expect(page.getByTestId("five24-count")).toHaveText("3/24"); // Demo Reserve, Venture X, store card; Demo Flex (2024-06) has dropped off
   const strip = page.getByTestId("up-next-strip");
-  await expect(strip).toContainText("$10 Lyft in-app credit left");
+  await expect(strip.getByRole("button", { name: "Demo Reserve: $10 Lyft in-app credit left", exact: true })).toBeVisible();
 
   // Mark navigation so we can prove no full reload happens.
   await page.evaluate(() => ((window as unknown as { __marker: number }).__marker = 42));
 
   await page.getByTestId("wallet-card-demo-reserve").click();
-  const row = page.locator("#benefit-lyft-credit");
-  await row.getByRole("button", { name: "Log Lyft in-app credit" }).click();
-  await row.getByLabel("Amount (USD)").fill("4");
-  await row.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByTestId("remaining-lyft-credit")).toContainText("$6.00");
+  await page.getByRole("button", { name: "Lyft in-app credit", exact: true }).click();
+  await sheet(page).getByText("More options").click();
+  await sheet(page).getByLabel("Amount (USD)").fill("4");
+  await sheet(page).getByRole("button", { name: "Log $4" }).click();
+  await expect(sheet(page).getByTestId("sheet-left")).toHaveText("$6");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("remaining-lyft-credit")).toHaveText("$6");
   await expect(page.getByTestId("roi-panel")).toHaveText("$104"); // seed has a $100 travel use this AF year
-  await expect(strip).toContainText("$6 Lyft in-app credit left");
+  await expect(strip.getByRole("button", { name: "Demo Reserve: $6 Lyft in-app credit left", exact: true })).toBeVisible();
 
   // Other screens see the change too, still without a reload.
   await page.getByRole("link", { name: "Up next" }).first().click();
-  await expect(page.getByTestId("attention-list")).toContainText("Demo Reserve: $6 Lyft in-app credit left");
+  await expect(page.getByTestId("attention-list").getByRole("button", { name: "Demo Reserve: $6 Lyft in-app credit left", exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __marker?: number }).__marker)).toBe(42);
 });
 
 const PAGES = ["/", "/cards/demo-reserve", "/up-next", "/cards", "/eligibility", "/payments", "/rotating", "/best-card", "/points", "/settings", "/more"];
 
-for (const width of [375, 430]) {
+for (const width of [375, 390, 430]) {
   test(`pages render at ${width}px without horizontal scroll`, async ({ page }) => {
     await importDemo(page);
     await page.setViewportSize({ width, height: 800 });
@@ -74,5 +76,5 @@ test("empty wallet shows Get started", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("Imported 0 card(s)");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Your wallet is empty" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Import" })).toHaveAttribute("href", "/settings#import");
+  await expect(page.getByRole("link", { name: "Import", exact: true })).toHaveAttribute("href", "/settings#import");
 });

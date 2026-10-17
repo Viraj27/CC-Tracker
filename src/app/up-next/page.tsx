@@ -1,22 +1,19 @@
 "use client";
 
-import { useApp } from "@/components/AppState";
+import { useState } from "react";
 import { useUpNext } from "@/components/derived";
-import { UpNextList } from "@/components/UpNext";
+import { ShowSkipped, UpNextList } from "@/components/UpNext";
 import { PageTitle } from "@/components/ui";
 
 export default function UpNextPage() {
-  const { data } = useApp();
   const { visible, hidden } = useUpNext();
-  const s = data.settings;
+  const [shown, setShown] = useState(false);
   return (
-    <div className="flex flex-col gap-5">
-      <PageTitle
-        sub={`Annual fees within ${s.afLeadDays} days, credits expiring within ${s.creditLeadDays}, payments due within ${s.paymentLeadDays} or past due, rotating quarters to activate, and unverified facts behind any of them. Soonest first. Skip hides one occurrence; skipped items stay under “skipped · show”.`}
-      >
+    <div className="flex flex-col gap-1">
+      <PageTitle right={hidden.length > 0 && <ShowSkipped count={hidden.length} shown={shown} onToggle={() => setShown((x) => !x)} controls="skipped-list" />}>
         Up next
       </PageTitle>
-      <UpNextList items={visible} hidden={hidden} />
+      <UpNextList items={visible} hidden={hidden} shown={shown} />
     </div>
   );
 }

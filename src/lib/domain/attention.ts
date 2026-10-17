@@ -1,6 +1,6 @@
 import type { Benefit, Catalog } from "../catalog/schema";
 import { addDays, diffDays, formatDate, quarterOf } from "./dates";
-import { cardFor, holdingName } from "./holdings";
+import { benefitShortName, cardFor, holdingName } from "./holdings";
 import { benefitStatus } from "./periods";
 import { paymentSchedule } from "./payments";
 import { nextAfDate } from "./roi";
@@ -35,6 +35,8 @@ export interface AttentionItem {
   cardName: string;
   /** The title without the card name, e.g. "$10 Lyft in-app credit left". */
   label: string;
+  /** One-line row title: the thing itself, e.g. "Lyft", "Payment due", "Annual fee", "Activate Q4 5%". */
+  short: string;
   /** USD at stake (fee, credit remaining), when known. */
   amount: number | null;
   /** Credits: the benefit to log against. */
@@ -76,6 +78,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
       kind: "unverified",
       title: `Unverified catalog data: ${what}`,
       label: `Unverified: ${what}`,
+      short: `Verify: ${base.short}`,
       detail: `Affects “${base.title}”. Check the official source before acting.`,
       severity: "info",
     });
@@ -110,6 +113,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
           title: `${name}: ${fee === null ? "annual fee" : `${usd(fee)} annual fee`} posts ${formatDate(date)}${estimated ? " (est.)" : ""}`,
           cardName: name,
           label: `${fee === null ? "Annual fee" : `${usd(fee)} annual fee`} posts${estimated ? " (est.)" : ""}`,
+          short: "Annual fee",
           amount: fee,
           detail: "Call for retention / downgrade / cancel? See downgrade options.",
           daysUntil: days,
@@ -138,6 +142,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         title: `${name}: ${usd(s.remaining)} ${b.name} left`,
         cardName: name,
         label: `${usd(s.remaining)} ${b.name} left`,
+        short: benefitShortName(b),
         amount: s.remaining,
         benefitId: b.id,
         benefitName: b.name,
@@ -169,6 +174,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         title: p.state === "past_due" ? `${name}: payment PAST DUE` : `${name}: payment due ${formatDate(p.dueDate)}`,
         cardName: name,
         label: p.state === "past_due" ? "Payment past due" : "Payment due",
+        short: p.state === "past_due" ? "Payment past due" : "Payment due",
         amount: null,
         month: p.month,
         detail: p.state === "past_due" ? `Was due ${formatDate(p.dueDate)} — mark paid once settled.` : "Not marked paid yet.",
@@ -197,6 +203,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
             title: `${name}: activate ${quarter} 5% categories`,
             cardName: name,
             label: `Activate ${quarter} 5% categories`,
+            short: `Activate ${quarter.slice(5)} ${program.rate.value}${program.rate.unit === "percent" ? "%" : "x"}`,
             amount: null,
             quarter,
             detail: `${qv.entry!.categories.map((c) => c.name).join(", ")}${deadline ? ` · activate by ${formatDate(deadline)}` : ""}`,

@@ -2,7 +2,7 @@
 
 import { useApp } from "@/components/AppState";
 import { useSetActivated } from "@/components/mutations";
-import { Badge, Empty, PageTitle, Provenance, Section, TextLink } from "@/components/ui";
+import { Badge, Empty, Group, GroupLabel, PageTitle, Provenance } from "@/components/ui";
 import { shortDate, quarterBounds } from "@/lib/domain/dates";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { currentAndNextQuarter, isActivated, type QuarterView } from "@/lib/domain/rotating";
@@ -13,28 +13,29 @@ export default function RotatingPage() {
   const setActivated = useSetActivated();
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageTitle sub="Quarterly 5% categories from the issuers' official calendars. Activate every quarter.">Rotating categories</PageTitle>
+    <div className="flex flex-col">
+      <PageTitle help="Quarterly categories from the issuers' official calendars. Activate every quarter. Activated categories also feed Best card.">
+        Rotating
+      </PageTitle>
       {catalog.rotating.map((program) => {
         const holdings = data.holdings.filter((h) => h.status === "open" && program.card_ids.includes(h.catalogCardId ?? ""));
         const quarters = currentAndNextQuarter(program, today);
         return (
-          <Section key={program.id} title={program.name}>
-            <p className="mb-2 text-sm">
-              <span className="font-mono text-lg font-bold">{program.rate.value}%</span> {program.rate.cap ? `· ${program.rate.cap}` : ""}
-            </p>
-            <Provenance fact={program.rate} />
-            <div className="mt-4 grid grid-cols-1 border-y border-hairline sm:grid-cols-2 sm:divide-x sm:divide-hairline">
+          <section key={program.id} aria-label={program.name}>
+            <GroupLabel right={<Provenance fact={program.rate} description={program.rate.cap ?? undefined} className="justify-end" />}>
+              {program.name} · {program.rate.value}
+              {program.rate.unit === "percent" ? "%" : "x"}
+            </GroupLabel>
+            <Group>
               {quarters.map((q, i) => (
-                <QuarterCard key={q.quarter} q={q} label={i === 0 ? "Current quarter" : "Next quarter"} calendarUrl={program.calendar_url} today={today} />
+                <QuarterRow key={q.quarter} q={q} label={i === 0 ? "This quarter" : "Next quarter"} calendarUrl={program.calendar_url} today={today} />
               ))}
-            </div>
-            <h3 className="mt-5 mb-2 font-mono text-[11px] tracking-wider text-muted uppercase">Activation</h3>
-            {holdings.length === 0 ? (
-              <Empty>You don&apos;t hold a card in this program.</Empty>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {holdings.flatMap((h) =>
+              {holdings.length === 0 ? (
+                <li className="px-4 py-3">
+                  <Empty>You don&apos;t hold a card in this program.</Empty>
+                </li>
+              ) : (
+                holdings.flatMap((h) =>
                   quarters
                     .filter((q) => q.announced)
                     .map((q) => {
@@ -42,19 +43,14 @@ export default function RotatingPage() {
                       const muted = isMuted(data.mutes, h.id, "rotating");
                       return (
                         <li key={`${h.id}-${q.quarter}`}>
-                          <label className="flex min-h-10 cursor-pointer flex-wrap items-center gap-3 text-sm">
-                            <input
-                              type="checkbox"
-                              className="h-5 w-5"
-                              checked={active}
-                              onChange={(e) => setActivated(h.id, q.quarter, e.target.checked)}
-                            />
-                            <span>
+                          <label className="flex min-h-12 cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-4 py-1.5 text-sm">
+                            <input type="checkbox" className="h-5 w-5" checked={active} onChange={(e) => setActivated(h.id, q.quarter, e.target.checked)} />
+                            <span className="min-w-0 flex-1">
                               {holdingName(h, cardFor(h, catalog))} — {q.quarter} activated
                             </span>
                             {!active && q.quarter === quarters[0].quarter && !muted && <Badge tone="warn">Not activated</Badge>}
                             {muted && (
-                              <Badge tone="info" title="Up next won't remind you to activate this card. Turn reminders back on in the card's Wallet detail.">
+                              <Badge tone="info" title="Up next won't remind you to activate this card. Turn reminders back on from the card's Rotating sheet.">
                                 Reminders off
                               </Badge>
                             )}
@@ -62,52 +58,40 @@ export default function RotatingPage() {
                         </li>
                       );
                     }),
-                )}
-              </ul>
-            )}
-          </Section>
+                )
+              )}
+            </Group>
+          </section>
         );
       })}
-      <p className="text-xs text-muted">
-        Bonus categories also feed the <TextLink href="/best-card">best-card helper</TextLink> once activated.
-      </p>
     </div>
   );
 }
 
-function QuarterCard({ q, label, calendarUrl, today }: { q: QuarterView; label: string; calendarUrl: string; today: string }) {
+function QuarterRow({ q, label, calendarUrl, today }: { q: QuarterView; label: string; calendarUrl: string; today: string }) {
   const { start, end } = quarterBounds(q.quarter);
   return (
-    <div className="py-3 sm:px-4 sm:first:pl-0">
-      <p className="font-mono text-[11px] tracking-wider text-muted uppercase">
-        {label} · {q.quarter} · {shortDate(start, today)} – {shortDate(end, today)}
+    <li className="px-4 py-2.5">
+      <p className="flex items-start justify-between gap-2">
+        <span className="min-w-0">
+          <span className="block font-mono text-[11px] tracking-wider text-muted uppercase">
+            {label} · {q.quarter} · {shortDate(start, today)} – {shortDate(end, today)}
+          </span>
+          <span className="block leading-snug font-semibold">
+            {q.announced && q.entry ? q.entry.categories.map((c) => c.name).join(", ") : "Not announced"}
+          </span>
+          {q.announced && q.entry?.activation_deadline && (
+            <span className="block font-mono text-[11px] tracking-wider text-muted uppercase">Activate by {shortDate(q.entry.activation_deadline, today)}</span>
+          )}
+        </span>
+        {q.entry ? (
+          <Provenance fact={q.entry} className="shrink-0 justify-end" />
+        ) : (
+          <a className="min-h-8 shrink-0 text-xs text-muted underline" href={calendarUrl} target="_blank" rel="noreferrer">
+            Calendar
+          </a>
+        )}
       </p>
-      {q.announced && q.entry ? (
-        <>
-          <ul className="my-2 list-disc pl-5 text-sm">
-            {q.entry.categories.map((c) => (
-              <li key={c.name}>{c.name}</li>
-            ))}
-          </ul>
-          {q.entry.activation_deadline && (
-            <p className="text-sm">
-              Activate by <span className="font-mono font-bold">{shortDate(q.entry.activation_deadline, today)}</span>
-            </p>
-          )}
-          <Provenance fact={q.entry} />
-        </>
-      ) : (
-        <>
-          <p className="my-2 text-sm font-medium">Not announced</p>
-          {q.entry ? (
-            <Provenance fact={q.entry} />
-          ) : (
-            <a className="text-xs underline" href={calendarUrl} target="_blank" rel="noreferrer">
-              Check the official calendar
-            </a>
-          )}
-        </>
-      )}
-    </div>
+    </li>
   );
 }
