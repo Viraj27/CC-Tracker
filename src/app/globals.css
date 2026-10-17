@@ -6,7 +6,7 @@
   --surface: #f4f3ef; /* inputs, open disclosures */
   --surface-2: #dcdad4;
   --text: #15171c;
-  --muted: #6a6c72;
+  --muted: #616369;
   --hairline: #d3d1cb;
   --urgent: #b4371b;
   --ok: #2e6b3f;
@@ -88,6 +88,12 @@ textarea {
   min-height: 40px;
   min-width: 0;
   max-width: 100%;
+}
+
+/* The browser default placeholder grey is below 4.5:1 on --surface. */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 input[type="checkbox"],

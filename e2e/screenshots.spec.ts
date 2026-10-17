@@ -1,6 +1,6 @@
 import path from "node:path";
 import { test } from "@playwright/test";
-import { importDemo } from "./helpers";
+import { gotoReady, importDemo } from "./helpers";
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 const out = path.join(__dirname, "..", "docs", "screenshots");
@@ -24,8 +24,7 @@ test.describe("screenshots", () => {
         await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
         await page.setViewportSize({ width, height });
         for (const s of SCREENS) {
-          await page.goto(s.path);
-          await page.evaluate(() => document.fonts.ready);
+          await gotoReady(page, s.path);
           await page.screenshot({ path: path.join(out, `${s.name}-${label}-${scheme}.png`) });
         }
       });

@@ -27,7 +27,7 @@ export function WalletCard({ view, chip }: { view: HoldingView; chip: string | n
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-[17px] leading-snug font-bold">{view.name}</p>
-          {product && <p className="truncate font-mono text-[10px] tracking-wider uppercase opacity-75">{product}</p>}
+          {product && <p className="truncate font-mono text-[10px] tracking-wider uppercase">{product}</p>}
         </div>
         {chip && (
           <span
@@ -41,9 +41,9 @@ export function WalletCard({ view, chip }: { view: HoldingView; chip: string | n
       {/* A generic contact-chip outline: physical, not branded. */}
       <span aria-hidden className="block h-[22%] w-[13%] rounded-md border opacity-30" style={{ borderColor: "currentColor" }} />
       <div className="flex items-end justify-between gap-3">
-        <span className="truncate font-mono text-[11px] tracking-wider uppercase opacity-85">{issuerLabel(view)}</span>
+        <span className="truncate font-mono text-[11px] tracking-wider uppercase">{issuerLabel(view)}</span>
         <span className="shrink-0 text-right font-mono leading-none">
-          <span className="block text-[9px] tracking-wider opacity-75">AF</span>
+          <span className="block text-[9px] tracking-wider">AF</span>
           <span className="text-2xl font-bold">{card ? (card.annual_fee.amount === null ? "?" : `$${card.annual_fee.amount}`) : "—"}</span>
         </span>
       </div>

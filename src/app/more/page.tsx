@@ -12,9 +12,9 @@ export default function MorePage() {
       <ul className="divide-y divide-hairline border-y border-hairline">
         {MORE_LINKS.map((l) => (
           <li key={l.href}>
-            <Link href={l.href} className="flex min-h-14 items-center justify-between gap-3 py-3 hover:opacity-80">
+            <Link href={l.href} className="group flex min-h-14 items-center justify-between gap-3 py-3">
               <span>
-                <span className="block text-lg font-semibold">{l.label}</span>
+                <span className="block text-lg font-semibold group-hover:underline">{l.label}</span>
                 <span className="block text-sm text-muted">{l.sub}</span>
               </span>
               <span aria-hidden className="font-mono text-muted">
