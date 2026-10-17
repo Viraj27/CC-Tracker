@@ -134,7 +134,7 @@ export function Sheet({
     >
       <div className="flex max-h-[inherit] flex-col lg:h-full">
         <div
-          className="shrink-0 cursor-grab touch-none pt-2 select-none lg:cursor-auto lg:pt-3"
+          className="flex h-6 shrink-0 cursor-grab touch-none items-center select-none lg:h-3 lg:cursor-auto"
           onPointerDown={(e) => {
             if ((e.target as HTMLElement).closest("button,a")) return;
             drag.current = { id: e.pointerId, y: e.clientY, t: e.timeStamp };
