@@ -83,7 +83,7 @@ describe("needs attention", () => {
       "payment:h1:2026-11",
       "credit:h1:q-credit:2026-Q4", // 21 days left
       "credit:h1:y-credit:2026",
-      "unverified:credit:h1:y-credit",
+      "unverified:h1:y-credit:credit@2026", // keyed by the occurrence it annotates
     ]);
     expect(items[0]).toMatchObject({ kind: "payment", severity: "critical", daysUntil: -51 });
     const ids = items.map((i) => i.id);
@@ -95,7 +95,7 @@ describe("needs attention", () => {
     const af = items.find((i) => i.kind === "af")!;
     expect(af.daysUntil).toBe(35);
     expect(af.title).toMatch(/\$250 annual fee posts Nov 20, 2026/);
-    expect(items.some((i) => i.id === `unverified:af:h1`)).toBe(true);
+    expect(items.some((i) => i.id === "unverified:h1:af@2026-11-20")).toBe(true);
   });
 
   it("logging a partial use updates the remaining amount; fully used credits drop off", () => {

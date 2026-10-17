@@ -1,16 +1,26 @@
-import type { Catalog } from "../catalog/schema";
+import type { Benefit, Catalog } from "../catalog/schema";
 import { addDays, diffDays, formatDate, quarterOf } from "./dates";
 import { cardFor, holdingName } from "./holdings";
 import { benefitStatus } from "./periods";
 import { paymentSchedule } from "./payments";
 import { nextAfDate } from "./roi";
 import { isActivated, quarterView } from "./rotating";
-import type { UserData } from "./types";
+import { occurrenceKey, type Occurrence } from "./skips";
+import type { MuteKind, SkipKind, UserData } from "./types";
 
-export type AttentionKind = "af" | "credit" | "payment" | "rotating" | "unverified";
+export type AttentionKind = SkipKind;
 
 export interface AttentionItem {
+  /** The stable occurrence key (`occurrenceKey(occurrence)`), e.g. `rotating:<holding>:2026-Q4`. */
   id: string;
+  /** What a Skip records: kind + holding + benefit + period/date. */
+  occurrence: Occurrence;
+  /** "Skip this <periodNoun>" (recurring reminders); null when the occurrence is one date. */
+  periodNoun: "month" | "quarter" | "half" | "year" | null;
+  /** The permanent "Don't remind me" this item offers (rotating, credits); never payments or fees. */
+  mute: { kind: MuteKind; benefitId: string | null } | null;
+  /** Unverified items: the item they annotate (hidden with it). */
+  parentId?: string;
   kind: AttentionKind;
   holdingId: string;
   title: string;
@@ -36,22 +46,44 @@ export interface AttentionItem {
   quarter?: string;
 }
 
+const PERIOD_NOUN: Partial<Record<Benefit["cycle"], AttentionItem["periodNoun"]>> = {
+  monthly: "month",
+  quarterly: "quarter",
+  semiannual: "half",
+  calendar_year: "year",
+  cardmember_year: "year",
+};
+
 const usd = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
 export function buildAttention(catalog: Catalog, data: UserData, today: string): AttentionItem[] {
   const items: AttentionItem[] = [];
   const { settings } = data;
-  const unverified = (id: string, holdingId: string, what: string, base: AttentionItem) =>
+  const unverified = (what: string, base: AttentionItem) => {
+    const occurrence: Occurrence = {
+      kind: "unverified",
+      holdingId: base.holdingId,
+      benefitId: base.occurrence.benefitId,
+      period: `${base.kind}@${base.occurrence.period}`,
+    };
     items.push({
       ...base,
-      id: `unverified:${id}`,
+      id: occurrenceKey(occurrence),
+      occurrence,
+      periodNoun: null,
+      mute: null,
+      parentId: base.id,
       kind: "unverified",
-      holdingId,
       title: `Unverified catalog data: ${what}`,
       label: `Unverified: ${what}`,
       detail: `Affects “${base.title}”. Check the official source before acting.`,
       severity: "info",
     });
+  };
+  const occ = (kind: SkipKind, holdingId: string, period: string, benefitId: string | null = null) => {
+    const occurrence: Occurrence = { kind, holdingId, benefitId, period };
+    return { id: occurrenceKey(occurrence), occurrence };
+  };
 
   for (const h of data.holdings) {
     if (h.status !== "open") continue;
@@ -70,7 +102,9 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         data.lifecycle.some((e) => e.holdingId === h.id && e.date >= windowStart && e.date <= date);
       if (days <= settings.afLeadDays && !handled) {
         const item: AttentionItem = {
-          id: `af:${h.id}:${date}`,
+          ...occ("af", h.id, date),
+          periodNoun: null,
+          mute: null,
           kind: "af",
           holdingId: h.id,
           title: `${name}: ${fee === null ? "annual fee" : `${usd(fee)} annual fee`} posts ${formatDate(date)}${estimated ? " (est.)" : ""}`,
@@ -84,7 +118,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
           severity: days <= 7 ? "critical" : "warning",
         };
         items.push(item);
-        if (!card.annual_fee.verified) unverified(`af:${h.id}`, h.id, `${card.name} annual fee`, item);
+        if (!card.annual_fee.verified) unverified(`${card.name} annual fee`, item);
       }
     }
 
@@ -96,7 +130,9 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
       if (!s.active || s.remaining === null || s.remaining <= 0 || s.daysToExpiry === null) continue;
       if (s.daysToExpiry > settings.creditLeadDays) continue;
       const item: AttentionItem = {
-        id: `credit:${h.id}:${b.id}:${s.period.key}`,
+        ...occ("credit", h.id, s.period.key, b.id),
+        periodNoun: PERIOD_NOUN[b.cycle] ?? null,
+        mute: { kind: "benefit", benefitId: b.id },
         kind: "credit",
         holdingId: h.id,
         title: `${name}: ${usd(s.remaining)} ${b.name} left`,
@@ -112,7 +148,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         severity: s.daysToExpiry <= 7 ? "critical" : "warning",
       };
       items.push(item);
-      if (!b.verified) unverified(`credit:${h.id}:${b.id}`, h.id, `${card!.name} — ${b.name}`, item);
+      if (!b.verified) unverified(`${card!.name} — ${b.name}`, item);
     }
 
     // Payments due within lead time, and past-due ones.
@@ -125,7 +161,9 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
     )) {
       if (p.state !== "due_soon" && p.state !== "past_due") continue;
       items.push({
-        id: `payment:${h.id}:${p.month}`,
+        ...occ("payment", h.id, p.month),
+        periodNoun: null,
+        mute: null,
         kind: "payment",
         holdingId: h.id,
         title: p.state === "past_due" ? `${name}: payment PAST DUE` : `${name}: payment due ${formatDate(p.dueDate)}`,
@@ -151,7 +189,9 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         const days = deadline ? diffDays(today, deadline) : 0;
         if (!deadline || days >= 0) {
           const item: AttentionItem = {
-            id: `rotating:${h.id}:${quarter}`,
+            ...occ("rotating", h.id, quarter),
+            periodNoun: "quarter",
+            mute: { kind: "rotating", benefitId: null },
             kind: "rotating",
             holdingId: h.id,
             title: `${name}: activate ${quarter} 5% categories`,
@@ -166,7 +206,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
             severity: "warning",
           };
           items.push(item);
-          if (!qv.entry!.verified) unverified(`rotating:${h.id}:${quarter}`, h.id, `${program.name} ${quarter} calendar`, item);
+          if (!qv.entry!.verified) unverified(`${program.name} ${quarter} calendar`, item);
         }
       }
     }

@@ -6,6 +6,7 @@ import { Badge, Empty, PageTitle, Provenance, Section, TextLink } from "@/compon
 import { shortDate, quarterBounds } from "@/lib/domain/dates";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { currentAndNextQuarter, isActivated, type QuarterView } from "@/lib/domain/rotating";
+import { isMuted } from "@/lib/domain/skips";
 
 export default function RotatingPage() {
   const { catalog, data, today } = useApp();
@@ -38,6 +39,7 @@ export default function RotatingPage() {
                     .filter((q) => q.announced)
                     .map((q) => {
                       const active = isActivated(data.activations, h.id, q.quarter);
+                      const muted = isMuted(data.mutes, h.id, "rotating");
                       return (
                         <li key={`${h.id}-${q.quarter}`}>
                           <label className="flex min-h-10 cursor-pointer flex-wrap items-center gap-3 text-sm">
@@ -50,7 +52,12 @@ export default function RotatingPage() {
                             <span>
                               {holdingName(h, cardFor(h, catalog))} — {q.quarter} activated
                             </span>
-                            {!active && q.quarter === quarters[0].quarter && <Badge tone="warn">Not activated</Badge>}
+                            {!active && q.quarter === quarters[0].quarter && !muted && <Badge tone="warn">Not activated</Badge>}
+                            {muted && (
+                              <Badge tone="info" title="Up next won't remind you to activate this card. Turn reminders back on in the card's Wallet detail.">
+                                Reminders off
+                              </Badge>
+                            )}
                           </label>
                         </li>
                       );

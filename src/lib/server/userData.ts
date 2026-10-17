@@ -5,10 +5,13 @@ import type {
   AfOutcome,
   HoldingStatus,
   LifecycleType,
+  MuteKind,
   Settings,
+  SkipKind,
   UserData,
 } from "../domain/types";
 import { DEFAULT_SETTINGS } from "../domain/types";
+import { muteKey, occurrenceKey } from "../domain/skips";
 import { type Db, type SqlStatement, sqlNow, upsertSql } from "./dbHandle";
 
 /** Ensure the single v1 profile and its settings exist. */
@@ -33,7 +36,7 @@ function parseJson<T>(s: string, fallback: T): T {
 export async function loadUserData(prisma: PrismaClient, profileId: string): Promise<UserData> {
   await ensureProfile(prisma, profileId);
   const where = { profileId };
-  const [holdings, usages, payments, afEvents, lifecycle, points, activations, settings] = await Promise.all([
+  const [holdings, usages, payments, afEvents, lifecycle, points, activations, dismissals, mutes, settings] = await Promise.all([
     prisma.holding.findMany({ where, orderBy: [{ approvalDate: "asc" }, { id: "asc" }] }),
     prisma.benefitUsage.findMany({ where, orderBy: [{ date: "asc" }, { createdAt: "asc" }] }),
     prisma.paymentRecord.findMany({ where }),
@@ -41,6 +44,8 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
     prisma.lifecycleEvent.findMany({ where, orderBy: { date: "asc" } }),
     prisma.pointsBalance.findMany({ where, orderBy: { program: "asc" } }),
     prisma.rotatingActivation.findMany({ where }),
+    prisma.dismissal.findMany({ where, orderBy: { key: "asc" } }),
+    prisma.reminderMute.findMany({ where, orderBy: { key: "asc" } }),
     prisma.settings.findUnique({ where }),
   ]);
   return {
@@ -110,6 +115,21 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
       activated: a.activated,
       date: a.date,
     })),
+    dismissals: dismissals.map((d) => ({
+      id: d.id,
+      holdingId: d.holdingId,
+      kind: d.kind as SkipKind,
+      benefitId: d.benefitId,
+      period: d.period,
+      date: d.date,
+    })),
+    mutes: mutes.map((m) => ({
+      id: m.id,
+      holdingId: m.holdingId,
+      kind: m.kind as MuteKind,
+      benefitId: m.benefitId,
+      date: m.date,
+    })),
     settings: settings
       ? {
           afLeadDays: settings.afLeadDays,
@@ -160,6 +180,8 @@ export function importStatements(
   for (const e of data.afEvents) ops.push(upsertSql("AnnualFeeEvent", { ...e, profileId }));
   for (const e of data.lifecycle) ops.push(upsertSql("LifecycleEvent", { ...e, profileId }));
   for (const a of data.activations) ops.push(upsertSql("RotatingActivation", { ...a, profileId }, ["holdingId", "quarter"]));
+  for (const d of data.dismissals) ops.push(upsertSql("Dismissal", { ...d, key: occurrenceKey(d), profileId }, ["profileId", "key"]));
+  for (const m of data.mutes) ops.push(upsertSql("ReminderMute", { ...m, key: muteKey(m), profileId }, ["profileId", "key"]));
   for (const p of data.points) ops.push(upsertSql("PointsBalance", { ...p, profileId }, ["profileId", "program"]));
   if (includeSettings) ops.push(upsertSql("Settings", { profileId, ...settingsRow(data.settings) }, ["profileId"]));
   return ops;

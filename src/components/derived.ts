@@ -5,6 +5,7 @@ import type { Card } from "@/lib/catalog/schema";
 import { buildAttention } from "@/lib/domain/attention";
 import { chase524Params, fiveTwentyFourStatus } from "@/lib/domain/fiveTwentyFour";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
+import { splitAttention } from "@/lib/domain/skips";
 import { cardRoi, cardUtilization, nextAfDate, type RoiResult, type Utilization } from "@/lib/domain/roi";
 import type { Holding } from "@/lib/domain/types";
 import { CUSTOM_CARD_COLOR, inkFor } from "@/lib/cardColors";
@@ -47,9 +48,15 @@ export function useHoldingViews(): HoldingView[] {
   );
 }
 
-export function useAttention() {
+/** Up next: what shows, and what the owner skipped or muted (docs/SPEC-v4.1-skip.md). */
+export function useUpNext() {
   const { catalog, data, today } = useApp();
-  return useMemo(() => buildAttention(catalog, data, today), [catalog, data, today]);
+  return useMemo(() => splitAttention(buildAttention(catalog, data, today), data.dismissals, data.mutes), [catalog, data, today]);
+}
+
+/** The Up next items that show (skipped and muted ones left out). Drives the Wallet's order, chips and headlines too. */
+export function useAttention() {
+  return useUpNext().visible;
 }
 
 export function use524() {

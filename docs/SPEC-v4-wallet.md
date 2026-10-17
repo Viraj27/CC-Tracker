@@ -65,6 +65,9 @@ Long sections may collapse (disclosure) but must be reachable without leaving th
 No data-model changes beyond optional catalog `color`/`ink` per card. No new features. No service worker. Hosting/CI unchanged.
 
 ## 5. Feature parity checklist (all must work after v4)
+
+> v4.1 adds Skip / "Don't remind me" on Up next items; its updated checklist is in [`SPEC-v4.1-skip.md`](SPEC-v4.1-skip.md) §5.
+
 - [ ] 5/24 count, counted list, drop-off dates, forward timeline
 - [ ] Issuer rule checker ("Considering a card?") with provenance
 - [ ] Needs attention: AF within lead time, expiring credits, payments due/past due, rotating activation, unverified facts affecting actions

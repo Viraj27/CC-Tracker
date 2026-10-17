@@ -6,7 +6,7 @@ import type { AttentionItem } from "@/lib/domain/attention";
 import { cardChip, walletOrder } from "@/lib/domain/wallet";
 import { useApp } from "./AppState";
 import { CardDetail } from "./CardDetail";
-import { useAttention, useHoldingViews, type HoldingView } from "./derived";
+import { useHoldingViews, useUpNext, type HoldingView } from "./derived";
 import { UpNextStrip } from "./UpNext";
 import { WalletCard } from "./WalletCard";
 import { PageTitle, PillLink } from "./ui";
@@ -41,7 +41,7 @@ export function Wallet({ selectedId, logBenefitId = null, url }: { selectedId: s
   const { data } = useApp();
   const router = useRouter();
   const views = useHoldingViews();
-  const attention = useAttention();
+  const { visible: attention, hidden } = useUpNext();
   const ordered = useMemo(() => walletOrder(views, attention), [views, attention]);
 
   const [selected, setSelected] = useState(selectedId);
@@ -96,7 +96,7 @@ export function Wallet({ selectedId, logBenefitId = null, url }: { selectedId: s
 
   return (
     <div className="flex flex-col gap-6">
-      <UpNextStrip items={attention} onLog={onLog} />
+      <UpNextStrip items={attention} hidden={hidden} onLog={onLog} />
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-12">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <Stack ordered={ordered} selectedId={current!.holding.id} attention={attention} onSelect={select} />

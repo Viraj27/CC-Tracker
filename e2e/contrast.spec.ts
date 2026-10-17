@@ -36,6 +36,15 @@ test.describe("contrast", () => {
           if (process.env.CONTRAST_REPORT) console.log(JSON.stringify({ scheme, label, page: p, hits }));
           failures.push(...hits.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `${p} ${h.where}` })));
         }
+        // Greyed skipped items (docs/SPEC-v4.1-skip.md): skip one, reveal it, measure the Up next screen again.
+        await gotoReady(page, "/up-next");
+        const lyft = "Demo Reserve: $10 Lyft in-app credit left";
+        await page.getByRole("button", { name: `Skip — ${lyft}` }).click();
+        await page.getByRole("button", { name: `Skip this month — ${lyft}` }).click();
+        await page.getByTestId("show-skipped").click();
+        await expect(page.getByTestId("skipped-item")).toBeVisible();
+        const skipped: Hit[] = await page.evaluate(measure);
+        failures.push(...skipped.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `/up-next (skipped shown) ${h.where}` })));
         expect(failures, JSON.stringify(failures, null, 2)).toEqual([]);
       });
     }

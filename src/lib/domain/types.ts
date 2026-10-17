@@ -78,6 +78,38 @@ export interface RotatingActivation {
   date: string | null;
 }
 
+/** Kinds of Up next item a skip can apply to (mirrors AttentionKind). */
+export type SkipKind = "af" | "credit" | "payment" | "rotating" | "unverified";
+
+/**
+ * "Skip" on one Up next occurrence (docs/SPEC-v4.1-skip.md). Hides only that
+ * occurrence; nothing is marked paid, used or activated. `period` is the
+ * occurrence's period or date (quarter, month, benefit period key, fee date);
+ * together with kind, holding and benefit it forms the stable occurrence key.
+ */
+export interface Dismissal {
+  id: string;
+  holdingId: string;
+  kind: SkipKind;
+  benefitId: string | null;
+  period: string;
+  /** When it was skipped (YYYY-MM-DD). */
+  date: string;
+}
+
+/** What a "Don't remind me" mute silences: a card's rotating activation, or one credit/perk on a card. */
+export type MuteKind = "rotating" | "benefit";
+
+/** A permanent (reversible) mute of a recurring reminder. Never offered for payments or annual fees. */
+export interface ReminderMute {
+  id: string;
+  holdingId: string;
+  kind: MuteKind;
+  /** Set for `benefit`, null for `rotating`. */
+  benefitId: string | null;
+  date: string;
+}
+
 export interface Settings {
   afLeadDays: number;
   creditLeadDays: number;
@@ -104,5 +136,7 @@ export interface UserData {
   lifecycle: LifecycleEvent[];
   points: PointsBalance[];
   activations: RotatingActivation[];
+  dismissals: Dismissal[];
+  mutes: ReminderMute[];
   settings: Settings;
 }

@@ -2,7 +2,8 @@ import type { Card, Catalog, EarnRate, SpendCategory } from "../catalog/schema";
 import { quarterOf } from "./dates";
 import { cardFor, holdingName } from "./holdings";
 import { isActivated, quarterView } from "./rotating";
-import type { Holding, PointsBalance, RotatingActivation, Settings } from "./types";
+import { isMuted } from "./skips";
+import type { Holding, PointsBalance, ReminderMute, RotatingActivation, Settings } from "./types";
 
 export interface RankedCard {
   holdingId: string;
@@ -20,6 +21,8 @@ export interface RankedCard {
   source: "base" | "rotating";
   /** Shown when a rotating bonus applies but the quarter isn't activated. */
   hint?: string;
+  /** A rotating bonus matches this quarter but the owner turned its activation reminders off. */
+  remindersOff?: boolean;
 }
 
 /** Cents-per-point used to compare programs: points balance > settings > catalog default. */
@@ -57,6 +60,7 @@ export function rankCards(
   activations: RotatingActivation[],
   today: string,
   points: PointsBalance[] = [],
+  mutes: ReminderMute[] = [],
 ): RankedCard[] {
   const out: RankedCard[] = [];
   const quarter = quarterOf(today);
@@ -108,6 +112,7 @@ export function rankCards(
         } else if (best) {
           best.hint = `${match.name} earns ${program.rate.value}${program.rate.unit === "percent" ? "%" : "x"} this quarter — activate first.`;
         }
+        if (best && isMuted(mutes, h.id, "rotating")) best.remindersOff = true;
       }
     }
     if (best) out.push(best);

@@ -7,11 +7,14 @@ import type { AttentionItem } from "@/lib/domain/attention";
 import { shortDate } from "@/lib/domain/dates";
 import { dropOffDate } from "@/lib/domain/fiveTwentyFour";
 import { benefitStatus } from "@/lib/domain/periods";
+import { currentAndNextQuarter, isActivated } from "@/lib/domain/rotating";
 import type { AfOutcome, LifecycleType } from "@/lib/domain/types";
 import { cardHeadline } from "@/lib/domain/wallet";
 import { isTemp, tempId, useApp } from "./AppState";
 import { BenefitRow } from "./BenefitRow";
 import { HoldingForm } from "./HoldingForm";
+import { useSetActivated } from "./mutations";
+import { ReminderSwitch } from "./Reminders";
 import { use524, type HoldingView } from "./derived";
 import { Badge, Button, Disclosure, Empty, Field, Label, Provenance, Section, usd } from "./ui";
 import { issuerLabel } from "./WalletCard";
@@ -177,6 +180,9 @@ export function CardDetail({
         )}
       </Disclosure>
 
+      {/* Rotating 5% (cards with a rotating calendar): activation and its reminders. */}
+      {card && h.status === "open" && <RotatingSection holdingId={h.id} programId={card.rotating_program ?? null} />}
+
       {/* 3–6. Benefits */}
       {credits.length > 0 && (
         <Section id="credits" title={`Credits, soonest first · ${credits.length}`}>
@@ -319,6 +325,44 @@ export function CardDetail({
         />
       </Disclosure>
     </article>
+  );
+}
+
+function RotatingSection({ holdingId, programId }: { holdingId: string; programId: string | null }) {
+  const { catalog, data, today } = useApp();
+  const setActivated = useSetActivated();
+  const program = programId ? catalog.rotating.find((r) => r.id === programId) : undefined;
+  if (!program) return null;
+  const quarters = currentAndNextQuarter(program, today);
+  const rate = `${program.rate.value}${program.rate.unit === "percent" ? "%" : "x"}`;
+  return (
+    <Section
+      id="rotating"
+      title={`Rotating ${rate}`}
+      action={<ReminderSwitch holdingId={holdingId} kind="rotating" name={`${program.name} activation`} />}
+    >
+      <ul className="divide-y divide-hairline text-sm">
+        {quarters.map((q, i) => {
+          const active = isActivated(data.activations, holdingId, q.quarter);
+          return (
+            <li key={q.quarter} className="flex flex-col gap-1 py-2.5">
+              <p className="font-mono text-[11px] tracking-wider text-muted uppercase">
+                {i === 0 ? "This quarter" : "Next quarter"} · {q.quarter}
+                {q.entry?.activation_deadline && ` · activate by ${shortDate(q.entry.activation_deadline, today)}`}
+              </p>
+              <p className="font-medium">{q.announced && q.entry ? q.entry.categories.map((c) => c.name).join(", ") : "Not announced"}</p>
+              {q.announced && (
+                <label className="flex min-h-10 cursor-pointer items-center gap-3">
+                  <input type="checkbox" className="h-5 w-5" checked={active} onChange={(e) => setActivated(holdingId, q.quarter, e.target.checked)} />
+                  <span>{q.quarter} activated</span>
+                </label>
+              )}
+              {q.entry && <Provenance fact={q.entry} />}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
   );
 }
 

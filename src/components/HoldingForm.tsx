@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { deleteHolding, saveHolding } from "@/app/actions";
-import type { Holding } from "@/lib/domain/types";
+import { isMuted } from "@/lib/domain/skips";
+import type { Holding, MuteKind } from "@/lib/domain/types";
 import { useApp } from "./AppState";
+import { type MuteChange, useSetMutes } from "./mutations";
 import { Button, Field } from "./ui";
 
 const num = (s: string) => (s.trim() === "" ? null : Number(s));
@@ -33,6 +35,22 @@ export function HoldingForm({
     paymentDueDay: initial?.paymentDueDay?.toString() ?? "",
     notes: initial?.notes ?? "",
   });
+  // Recurring reminders this card can mute ("Don't remind me"); payments and annual fees can't be muted.
+  const setMutes = useSetMutes();
+  const reminderCard = catalog.cards.find((c) => c.id === f.catalogCardId);
+  const reminders: { kind: MuteKind; benefitId: string | null; name: string }[] = initial && reminderCard
+    ? [
+        ...(reminderCard.rotating_program ? [{ kind: "rotating" as const, benefitId: null, name: "Rotating 5% activation" }] : []),
+        ...reminderCard.benefits
+          .filter((b) => b.kind === "credit" || b.kind === "perk")
+          .map((b) => ({ kind: "benefit" as const, benefitId: b.id, name: b.name })),
+      ]
+    : [];
+  const mutedNow = (r: { kind: MuteKind; benefitId: string | null }) => !!initial && isMuted(data.mutes, initial.id, r.kind, r.benefitId);
+  const [remind, setRemind] = useState<Record<string, boolean>>({});
+  const rKey = (r: { kind: MuteKind; benefitId: string | null }) => `${r.kind}:${r.benefitId ?? ""}`;
+  const remindOn = (r: { kind: MuteKind; benefitId: string | null }) => remind[rKey(r)] ?? !mutedNow(r);
+
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((x) => ({ ...x, [k]: e.target.value }));
 
@@ -62,6 +80,10 @@ export function HoldingForm({
           savedId ??= next.holdings.find((h) => !before.has(h.id))?.id;
           return next;
         });
+        const changes: MuteChange[] = reminders
+          .filter((r) => remindOn(r) === mutedNow(r))
+          .map((r) => ({ kind: r.kind, benefitId: r.benefitId, muted: !remindOn(r) }));
+        if (ok && initial && changes.length) await setMutes(initial.id, changes);
         if (ok) onDone(savedId);
       }}
     >
@@ -133,6 +155,23 @@ export function HoldingForm({
       <Field label="Notes">
         <textarea rows={2} value={f.notes} onChange={set("notes")} />
       </Field>
+      {reminders.length > 0 && (
+        <fieldset className="flex flex-col gap-1 sm:col-span-2" data-testid="edit-reminders">
+          <legend className="mb-1 font-mono text-[11px] tracking-wider text-muted uppercase">Up next reminders</legend>
+          <p className="text-xs text-muted">Untick to stop reminding you. Payments and annual fees always remind you (you can still skip one).</p>
+          {reminders.map((r) => (
+            <label key={rKey(r)} className="flex min-h-10 cursor-pointer items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="h-5 w-5"
+                checked={remindOn(r)}
+                onChange={(e) => setRemind((x) => ({ ...x, [rKey(r)]: e.target.checked }))}
+              />
+              <span>Remind me: {r.name}</span>
+            </label>
+          ))}
+        </fieldset>
+      )}
       <div className="flex flex-wrap items-end gap-2 sm:col-span-2">
         <Button type="submit" variant="primary">
           Save
