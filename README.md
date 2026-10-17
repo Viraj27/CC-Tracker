@@ -6,6 +6,20 @@ Runs locally (`npm run dev`, SQLite) or hosted on **Cloudflare Workers + D1 behi
 
 > **Privacy:** this repo contains **no personal data and no secrets**. Your cards, dates, usage and notes live only in the local, gitignored SQLite DB (`prisma/cc-tracker.db`), in your gitignored `seed/my-cards.json`, and (if you deploy) in your own Cloudflare D1 database. Cloudflare credentials are GitHub Actions secrets only. Test fixtures and `examples/demo-seed.json` are obviously fake.
 
+## Screens
+
+The v4 "Wallet" design ([`docs/SPEC-v4-wallet.md`](docs/SPEC-v4-wallet.md)) organises the app around a stack of physical-looking cards. Screenshots (demo seed only, light and dark, desktop and 390px) are in [`docs/screenshots/`](docs/screenshots/).
+
+| Screen | What's there |
+|---|---|
+| **Wallet** (`/`, `/?card=<id>`, `/cards/<id>`) | Header line with open cards, the 5/24 count and the next drop-off. An **Up next** strip (the most urgent items, each with one action: mark paid, activate, log a credit, see downgrade options). The **card stack**: the selected card in full, the others as overlapping strips with a state chip (`PAST DUE`, `FEE IN 30D`, …); click or use the arrow keys to select. Beside it (below on phones) the **selected card's detail**: meta line, a one-sentence headline derived from its state, key figures (annual fee, unused credits, 5/24 drop-off, ROI this AF year), credits soonest first with **Log** (partial amounts, note, date, history), perks, other benefits, protections & insurance, earn rates, downgrade options, AF history, lifecycle log and **Edit card**. Every fact shows its source and checked date. The selection is in the URL, so deep links and Back work. |
+| **Up next** (`/up-next`) | Everything that needs attention, soonest first: annual fees within the lead time, expiring credits, payments due or past due, rotating quarters to activate, and unverified facts behind any of them. |
+| **5/24** (`/eligibility`) | Count, counted cards and drop-off dates, the count going forward, and "Considering a card?" issuer-rule checks. |
+| **Payments**, **Rotating 5%**, **Best card**, **Points**, **Settings** | Mark statements paid (past due highlighted); this and next quarter's categories and activation; open cards ranked for a spend category; points balances and estimated value; lead times, perk values, cents per point, export / import. |
+| **Add card** (`/cards`) | Add a catalog or custom card and list every card, closed and product-changed ones included. With no cards, the Wallet shows a Get started screen. |
+
+On phones (< 1024px) a bottom tab bar has **Wallet · Up next · 5/24 · More**; More links to the other screens. Light and dark follow the system theme. Type is Hanken Grotesk and Space Mono, self-hosted at build time by `next/font`.
+
 ## Setup
 
 Requires Node.js 20+ (developed on 22).
@@ -24,7 +38,7 @@ Other scripts:
 |---|---|
 | `npm run typecheck` | TypeScript check |
 | `npm run catalog:check` | Validate `catalog/` and print a provenance summary |
-| `npm run test:e2e` | Optional Playwright smoke test (throwaway DB). To use an existing Chromium, set `PW_CHROMIUM_PATH=/path/to/chrome` |
+| `npm run test:e2e` | Playwright end-to-end tests (throwaway DB). To use an existing Chromium, set `PW_CHROMIUM_PATH=/path/to/chrome`. Against the Workers build: run `npm run preview`, then `E2E_BASE_URL=http://localhost:8787 npm run test:e2e`. `SCREENSHOTS=1 npm run test:e2e -- screenshots` regenerates `docs/screenshots/` |
 | `npm run build && npm start` | Production build (Node) |
 | `npm run preview` | Build the Cloudflare Worker and run it locally in workerd against a local D1 (http://localhost:8787) |
 | `npm run cf:build` | Build the Worker bundle only (`.open-next/`) |
@@ -72,13 +86,13 @@ catalog/
   rotating/<program>.yaml     # quarterly 5% calendars (chase-freedom, discover-5)
 ```
 
-**Every fact carries provenance:** `source_url` (an official issuer page wherever possible), `last_verified` (YYYY-MM-DD) and `verified`. If a fact could not be confirmed from an official source it is `verified: false` with a `note` explaining why. Unknown amounts are `null`, never guessed. The UI shows a ⚠ Unverified badge and source link next to every fact, and the dashboard flags unverified facts that affect a pending action. The loader rejects missing provenance or an unverified fact without a note.
+**Every fact carries provenance:** `source_url` (an official issuer page wherever possible), `last_verified` (YYYY-MM-DD) and `verified`. If a fact could not be confirmed from an official source it is `verified: false` with a `note` explaining why. Unknown amounts are `null`, never guessed. The UI shows a ⚠ Unverified badge and source link next to every fact, and Up next flags unverified facts that affect a pending action. The loader rejects missing provenance or an unverified fact without a note.
 
 **Community curated:** facts issuers never publish (Chase 5/24, product-change paths) carry `source_type: community`, a community `source_url` and a `note`. The UI shows them with a "Community curated" badge instead of the unverified warning. Omitted `source_type` means `official`.
 
 > Verification note (2026-10-16): catalog facts were re-checked against issuer pages and Guides to Benefits. Remaining non-official items are community curated (5/24, product-change paths); the United Club pass price and United bag fee are still unverified — set your own values in Settings.
 
-Key card fields: `id`, `name`, `issuer`, `network`, `account_type`, `family` (used by issuer rules), `rewards_program`, `rotating_program`, `brand_color`, `annual_fee {amount, first_year_waived}`, `earn_rates[] {categories, rate, unit, conditions, cap}`, `benefits[]`, `downgrade_options[] {target_name, keep, lose}`.
+Key card fields: `id`, `name`, `issuer`, `network`, `account_type`, `family` (used by issuer rules), `rewards_program`, `rotating_program`, `brand_color` and `card_ink` (the Wallet card's fill and text colour: generic colours only, no logos; ink must reach 4.5:1 on the fill), `annual_fee {amount, first_year_waived}`, `earn_rates[] {categories, rate, unit, conditions, cap}`, `benefits[]`, `downgrade_options[] {target_name, keep, lose}`.
 
 Benefit fields: `kind` (`credit` | `perk` | `protection` | `status` | `other`), `name`, `description`, `amount`, `unit` (`USD` | `count`), and `cycle` (`monthly` | `quarterly` | `semiannual` | `calendar_year` | `cardmember_year` | `per_use` | `one_time` | `none`). A `cardmember_year` benefit must also set `anniversary_basis: approval | af_date`; the cycle is always per benefit, never assumed from the AF date. Other fields: `enrollment_required`, `how_to_use`, `perk_default` (perks), `protection {coverage, conditions, how_to_claim}` (protections) and optional `starts_on` / `ends_on`.
 
@@ -112,6 +126,7 @@ The catalog is synced into the DB when the server starts (on Cloudflare: on the 
 - `src/lib/catalog/`: the zod schema and the standalone loader.
 - `src/lib/server/`: database access (`db.ts`: local SQLite under Node, D1 via `@prisma/adapter-d1` on Workers), catalog sync and user-data reads/writes. Bulk writes (catalog sync, import) run as one atomic batch (`dbHandle.ts`), because D1 doesn't support Prisma transactions and limits queries per request.
 - `src/app/actions.ts`: server actions. Each one returns the fresh user-data snapshot.
-- `src/components/AppState.tsx`: one client-side state with optimistic updates. Every view is derived from it, so a change updates the dashboard, ROI, utilization and needs-attention immediately with no reload.
+- `src/components/AppState.tsx`: one client-side state with optimistic updates. Every view is derived from it, so a change updates the Wallet, ROI, utilization and Up next immediately with no reload.
+- `src/components/Wallet.tsx`, `WalletCard.tsx`, `CardDetail.tsx`, `UpNext.tsx`: the Wallet view. Its stack order, card chips and headlines are pure functions in `src/lib/domain/wallet.ts`.
 - `prisma/schema.prisma`: Postgres-compatible (JSON is stored as text). Every user-data table has `profileId`; v1 uses a single profile. `prisma/migrations/` is the single migration history for both local SQLite and D1.
 - `wrangler.jsonc`, `open-next.config.ts`, `.github/workflows/ci.yml`: Cloudflare Workers config and CI/CD. `public/manifest.webmanifest` and `public/icons/`: the PWA.

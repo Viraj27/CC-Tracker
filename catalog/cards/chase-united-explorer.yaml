@@ -6,6 +6,7 @@ account_type: personal
 family: united
 rewards_program: united-mileageplus
 brand_color: "#0033a0"
+card_ink: "#FFFFFF"
 product_page: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
 
 annual_fee:

@@ -11,7 +11,7 @@ The owner rejected the v1 "grid of boxed cards" dashboard. Of ten explored direc
 
 | Token | Value |
 |---|---|
-| Ground (light) | `#E7E5E0` warm grey; text `#15171C`; muted `#6A6C72`; hairline `#D3D1CB` |
+| Ground (light) | `#E7E5E0` warm grey; text `#15171C`; muted `#616369`; hairline `#D3D1CB` |
 | Ground (dark) | Derive an equivalent dark theme (system `prefers-color-scheme`); keep contrast ≥ 4.5:1 |
 | Urgent | `#B4371B` (text), used sparingly for expiring/overdue items |
 | Primary button | pill, `#15171C` bg, `#F4F3EF` text, min height 40–44px |

@@ -15,7 +15,7 @@ interface AppState {
   /**
    * Apply `optimistic` immediately, then run the server action and replace
    * state with its result (or roll back on failure). Everything derived from
-   * `data` — dashboard, ROI, utilization, needs-attention — recomputes at once.
+   * `data` — Wallet, ROI, utilization, Up next — recomputes at once.
    */
   mutate: (optimistic: ((d: UserData) => UserData) | null, action: () => Promise<UserData>) => Promise<boolean>;
   replaceData: (d: UserData) => void;
@@ -25,6 +25,8 @@ const Ctx = createContext<AppState | null>(null);
 
 let tempCounter = 0;
 export const tempId = () => `tmp-${Date.now()}-${tempCounter++}`;
+/** True for an optimistic row the server hasn't saved yet (it can't be deleted until then). */
+export const isTemp = (id: string) => id.startsWith("tmp-");
 
 export function AppProvider({
   catalog,

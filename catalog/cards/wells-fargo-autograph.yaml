@@ -6,6 +6,7 @@ account_type: personal
 family: autograph
 rewards_program: wells-fargo-rewards
 brand_color: "#c8102e"
+card_ink: "#FFFFFF"
 product_page: https://www.wellsfargo.com/credit-cards/autograph-visa/
 
 annual_fee:

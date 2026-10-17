@@ -7,6 +7,7 @@ import { chase524Params, fiveTwentyFourStatus } from "@/lib/domain/fiveTwentyFou
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { cardRoi, cardUtilization, nextAfDate, type RoiResult, type Utilization } from "@/lib/domain/roi";
 import type { Holding } from "@/lib/domain/types";
+import { CUSTOM_CARD_COLOR, inkFor } from "@/lib/cardColors";
 import { useApp } from "./AppState";
 
 export interface HoldingView {
@@ -14,6 +15,10 @@ export interface HoldingView {
   card: Card | null;
   name: string;
   color: string;
+  /** Text colour on the card face. */
+  ink: string;
+  /** Annual fee in USD (0 when none or unknown). */
+  fee: number;
   util: Utilization;
   roi: RoiResult;
   nextAf: { date: string; estimated: boolean };
@@ -25,11 +30,14 @@ export function useHoldingViews(): HoldingView[] {
     () =>
       data.holdings.map((h) => {
         const card = cardFor(h, catalog);
+        const color = card?.brand_color ?? CUSTOM_CARD_COLOR;
         return {
           holding: h,
           card,
           name: holdingName(h, card),
-          color: card?.brand_color ?? "#6b7280",
+          color,
+          ink: inkFor(color, card?.card_ink),
+          fee: card?.annual_fee.amount ?? 0,
           util: cardUtilization(h, card, data.usages, today),
           roi: cardRoi(h, card, data.usages, catalog, data.settings, today),
           nextAf: nextAfDate(h, today),

@@ -6,6 +6,7 @@ account_type: personal
 family: capital-one-venture
 rewards_program: capital-one-miles
 brand_color: "#0d2c4b"
+card_ink: "#FFFFFF"
 product_page: https://www.capitalone.com/credit-cards/venture-x/
 
 annual_fee:

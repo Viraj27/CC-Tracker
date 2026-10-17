@@ -140,6 +140,8 @@ export const CardSchema = z.object({
   rewards_program: z.string(),
   /** Accent color for the UI. Not a fact; no provenance needed. */
   brand_color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  /** Text colour on the Wallet card face (brand_color background); pick one with ≥ 4.5:1 contrast. Not a fact. */
+  card_ink: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   /** Rotating-category program id (catalog/rotating/<id>.yaml), if any. */
   rotating_program: z.string().optional(),
   product_page: z.url(),

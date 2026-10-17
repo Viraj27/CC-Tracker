@@ -21,6 +21,19 @@ export interface AttentionItem {
   href: string;
   /** Past-due payments are highlighted. */
   severity: "critical" | "warning" | "info";
+  /** Structured parts for compact views (the Wallet's Up next strip). */
+  cardName: string;
+  /** The title without the card name, e.g. "$10 Lyft in-app credit left". */
+  label: string;
+  /** USD at stake (fee, credit remaining), when known. */
+  amount: number | null;
+  /** Credits: the benefit to log against. */
+  benefitId?: string;
+  benefitName?: string;
+  /** Payments: the statement month (YYYY-MM) and its due date. */
+  month?: string;
+  /** Rotating: the quarter to activate (YYYY-Qn). */
+  quarter?: string;
 }
 
 const usd = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
@@ -35,6 +48,7 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
       kind: "unverified",
       holdingId,
       title: `Unverified catalog data: ${what}`,
+      label: `Unverified: ${what}`,
       detail: `Affects “${base.title}”. Check the official source before acting.`,
       severity: "info",
     });
@@ -60,6 +74,9 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
           kind: "af",
           holdingId: h.id,
           title: `${name}: ${fee === null ? "annual fee" : `${usd(fee)} annual fee`} posts ${formatDate(date)}${estimated ? " (est.)" : ""}`,
+          cardName: name,
+          label: `${fee === null ? "Annual fee" : `${usd(fee)} annual fee`} posts${estimated ? " (est.)" : ""}`,
+          amount: fee,
           detail: "Call for retention / downgrade / cancel? See downgrade options.",
           daysUntil: days,
           date,
@@ -83,6 +100,11 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         kind: "credit",
         holdingId: h.id,
         title: `${name}: ${usd(s.remaining)} ${b.name} left`,
+        cardName: name,
+        label: `${usd(s.remaining)} ${b.name} left`,
+        amount: s.remaining,
+        benefitId: b.id,
+        benefitName: b.name,
         detail: `Expires ${formatDate(s.period.expiry)}${b.enrollment_required ? " · enrollment required" : ""}`,
         daysUntil: s.daysToExpiry,
         date: s.period.expiry!,
@@ -107,6 +129,10 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         kind: "payment",
         holdingId: h.id,
         title: p.state === "past_due" ? `${name}: payment PAST DUE` : `${name}: payment due ${formatDate(p.dueDate)}`,
+        cardName: name,
+        label: p.state === "past_due" ? "Payment past due" : "Payment due",
+        amount: null,
+        month: p.month,
         detail: p.state === "past_due" ? `Was due ${formatDate(p.dueDate)} — mark paid once settled.` : "Not marked paid yet.",
         daysUntil: p.daysUntilDue,
         date: p.dueDate,
@@ -129,6 +155,10 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
             kind: "rotating",
             holdingId: h.id,
             title: `${name}: activate ${quarter} 5% categories`,
+            cardName: name,
+            label: `Activate ${quarter} 5% categories`,
+            amount: null,
+            quarter,
             detail: `${qv.entry!.categories.map((c) => c.name).join(", ")}${deadline ? ` · activate by ${formatDate(deadline)}` : ""}`,
             daysUntil: days,
             date: deadline ?? today,

@@ -1,0 +1,123 @@
+import { expect, test } from "@playwright/test";
+import { gotoReady, importDemo } from "./helpers";
+
+// WCAG AA text contrast: every visible text run (and input placeholder) against the
+// background it is actually painted on, in both colour schemes, with disclosures open.
+const PAGES = [
+  "/?card=demo-reserve",
+  "/up-next",
+  "/eligibility",
+  "/payments",
+  "/rotating",
+  "/best-card",
+  "/points",
+  "/settings",
+  "/more",
+  "/cards",
+];
+
+type Hit = { color: string; bg: string; ratio: number; text: string; where: string };
+
+test.describe("contrast", () => {
+  for (const scheme of ["light", "dark"] as const) {
+    for (const [label, width] of [
+      ["desktop", 1280],
+      ["390", 390],
+    ] as const) {
+      test(`${scheme} ${label}: text ≥ 4.5:1 on its background`, async ({ page }) => {
+        await importDemo(page);
+        await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+        await page.setViewportSize({ width, height: 900 });
+        const failures: Hit[] = [];
+        for (const p of PAGES) {
+          await gotoReady(page, p);
+          await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
+          const hits: Hit[] = await page.evaluate(measure);
+          if (process.env.CONTRAST_REPORT) console.log(JSON.stringify({ scheme, label, page: p, hits }));
+          failures.push(...hits.filter((h) => h.ratio < 4.5).map((h) => ({ ...h, where: `${p} ${h.where}` })));
+        }
+        expect(failures, JSON.stringify(failures, null, 2)).toEqual([]);
+      });
+    }
+  }
+});
+
+// Runs in the page. Returns one entry per distinct (text colour, background) pair, at its lowest ratio.
+function measure(): Hit[] {
+  type RGBA = [number, number, number, number];
+  const ctx = document.createElement("canvas").getContext("2d")!;
+  const parse = (c: string): RGBA => {
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillStyle = "#000";
+    ctx.fillStyle = c; // normalises oklab/oklch/color-mix etc. to sRGB
+    ctx.fillRect(0, 0, 1, 1);
+    const d = ctx.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2], d[3] / 255];
+  };
+  const over = (top: RGBA, under: RGBA): RGBA => {
+    const a = top[3];
+    return [0, 1, 2].map((i) => top[i] * a + under[i] * (1 - a)).concat(1) as RGBA;
+  };
+  const lum = (c: RGBA) => {
+    const [r, g, b] = c.slice(0, 3).map((v) => {
+      const s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a: RGBA, b: RGBA) => {
+    const [x, y] = [lum(a), lum(b)];
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+  const hex = (c: RGBA) => "#" + c.slice(0, 3).map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+
+  // Background actually behind an element: composite translucent layers down to the first opaque one.
+  const background = (el: Element): RGBA => {
+    const layers: RGBA[] = [];
+    for (let e: Element | null = el; e; e = e.parentElement) {
+      const c = parse(getComputedStyle(e).backgroundColor);
+      if (c[3] > 0) layers.push(c);
+      if (c[3] >= 1) break;
+    }
+    let out: RGBA = layers.at(-1)?.[3] === 1 ? layers.pop()! : [255, 255, 255, 1];
+    while (layers.length) out = over(layers.pop()!, out);
+    return out;
+  };
+  const opacity = (el: Element) => {
+    let o = 1;
+    for (let e: Element | null = el; e; e = e.parentElement) o *= Number(getComputedStyle(e).opacity);
+    return o;
+  };
+  const describe = (el: Element) => {
+    const cls = typeof el.className === "string" ? el.className.split(" ").slice(0, 4).join(".") : "";
+    return `${el.tagName.toLowerCase()}${cls ? "." + cls : ""}`;
+  };
+
+  const pairs = new Map<string, Hit>();
+  const record = (fg: RGBA, el: Element, text: string, alpha: number) => {
+    const bg = background(el);
+    const ink = over([fg[0], fg[1], fg[2], fg[3] * alpha], bg);
+    const r = Math.round(ratio(ink, bg) * 100) / 100;
+    const key = `${hex(ink)}|${hex(bg)}`;
+    const prev = pairs.get(key);
+    if (!prev || r < prev.ratio) pairs.set(key, { color: hex(ink), bg: hex(bg), ratio: r, text: text.slice(0, 40), where: describe(el) });
+  };
+
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const text = n.textContent?.trim();
+    const el = n.parentElement;
+    if (!text || !el || el.closest("script,style,noscript,[aria-hidden=true]")) continue;
+    const rect = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    if (!rect.width || !rect.height || cs.visibility === "hidden" || el.closest("[hidden]")) continue;
+    const o = opacity(el);
+    if (o === 0 || (el as HTMLElement).closest("button:disabled")) continue; // disabled controls are exempt
+    record(parse(cs.color), el, text, o);
+  }
+  document.querySelectorAll("input[placeholder],textarea[placeholder]").forEach((el) => {
+    if (!(el as HTMLElement).offsetParent) return;
+    record(parse(getComputedStyle(el, "::placeholder").color), el, `placeholder: ${el.getAttribute("placeholder")}`, opacity(el));
+  });
+  return [...pairs.values()].sort((a, b) => a.ratio - b.ratio);
+}

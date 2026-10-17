@@ -43,7 +43,7 @@ export default function BestCardPage() {
             role="radio"
             aria-checked={category === c}
             onClick={() => setCategory(c)}
-            className={`rounded-full border px-3 py-1 text-sm ${category === c ? "border-accent bg-accent/10 font-semibold text-accent" : "border-border text-muted hover:text-text"}`}
+            className={`min-h-9 rounded-full border px-3.5 text-sm ${category === c ? "border-transparent bg-btn font-semibold text-btn-text" : "border-hairline text-muted hover:border-text hover:text-text"}`}
           >
             {LABELS[c]}
           </button>
@@ -53,19 +53,23 @@ export default function BestCardPage() {
         {ranked.length === 0 ? (
           <Empty>No open cards.</Empty>
         ) : (
-          <ol className="divide-y divide-border" data-testid="best-card-list">
+          <ol className="divide-y divide-hairline" data-testid="best-card-list">
             {ranked.map((r, i) => (
               <li key={r.holdingId} className="flex items-start gap-3 py-2">
-                <span className="w-5 shrink-0 pt-0.5 text-right text-sm text-muted">{i + 1}</span>
-                <CardSwatch color={r.brandColor} />
+                <span className="w-5 shrink-0 pt-0.5 text-right font-mono text-sm text-muted">{i + 1}</span>
+                <span className="pt-1">
+                  <CardSwatch color={r.brandColor} />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">
                     {r.name}{" "}
-                    <span className="font-bold">
+                    <span className="font-mono font-bold">
                       {r.rate}
                       {r.unit === "percent" ? "%" : "x"}
                     </span>{" "}
-                    <span className="text-xs text-muted">≈ {r.centsPerDollar.toFixed(1)}¢/$ at {r.cpp}¢/pt</span>
+                    <span className="font-mono text-xs text-muted">
+                      ≈ {r.centsPerDollar.toFixed(1)}¢/$ at {r.cpp}¢/pt
+                    </span>
                   </p>
                   <p className="text-sm text-muted">
                     {r.label}

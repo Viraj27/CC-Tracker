@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { CUSTOM_CARD_COLOR, contrastRatio, inkFor } from "@/lib/cardColors";
 import { CatalogError, loadCatalog } from "@/lib/catalog/loader";
 
 const REQUIRED_CARDS = [
@@ -25,6 +26,14 @@ describe("catalog/", () => {
       expect(card.benefits.some((b) => b.kind === "protection"), `${card.id} protections`).toBe(true);
       expect(Array.isArray(card.downgrade_options)).toBe(true);
     }
+  });
+
+  it("every card's Wallet ink reads on its fill (≥ 4.5:1)", () => {
+    for (const card of catalog.cards) {
+      expect(card.card_ink, card.id).toBeDefined();
+      expect(contrastRatio(card.brand_color, inkFor(card.brand_color, card.card_ink)), card.id).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrastRatio(CUSTOM_CARD_COLOR, inkFor(CUSTOM_CARD_COLOR))).toBeGreaterThanOrEqual(4.5);
   });
 
   it("every fact has source_url + last_verified; unverified facts explain why", () => {
