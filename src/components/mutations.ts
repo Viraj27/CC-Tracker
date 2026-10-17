@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { setActivation, setMutes, setPaymentPaid, setSkipped } from "@/app/actions";
+import { addEnrollment, deleteEnrollment, setActivation, setMutes, setPaymentPaid, setSkipped } from "@/app/actions";
 import { muteKey, occurrenceKey, type Occurrence } from "@/lib/domain/skips";
 import type { MuteKind } from "@/lib/domain/types";
 import { tempId, useApp } from "./AppState";
@@ -22,6 +22,28 @@ export function useSetPaid() {
         () => setPaymentPaid({ holdingId, month, dueDate, paid }),
       ),
     [mutate, today],
+  );
+}
+
+/** "Mark enrolled" on a benefit (optimistic), dated today. Used by the benefit sheet and Up next. */
+export function useAddEnrollment() {
+  const { mutate, today } = useApp();
+  return useCallback(
+    (holdingId: string, benefitId: string) =>
+      mutate(
+        (d) => ({ ...d, enrollments: [...d.enrollments, { id: tempId(), holdingId, benefitId, enrolledOn: today }] }),
+        () => addEnrollment({ holdingId, benefitId, enrolledOn: today }),
+      ),
+    [mutate, today],
+  );
+}
+
+/** Undo a "Mark enrolled" (optimistic). */
+export function useDeleteEnrollment() {
+  const { mutate } = useApp();
+  return useCallback(
+    (id: string) => mutate((d) => ({ ...d, enrollments: d.enrollments.filter((e) => e.id !== id) }), () => deleteEnrollment(id)),
+    [mutate],
   );
 }
 

@@ -30,6 +30,17 @@ export interface BenefitUsage {
   note: string | null;
 }
 
+/**
+ * "Mark enrolled" on a benefit that needs enrollment (docs/SPEC-v7-phone-feedback.md §1.2).
+ * Every enrollment is kept; the latest one decides whether it has lapsed.
+ */
+export interface BenefitEnrollment {
+  id: string;
+  holdingId: string;
+  benefitId: string;
+  enrolledOn: string;
+}
+
 export interface PaymentRecord {
   id: string;
   holdingId: string;
@@ -79,7 +90,7 @@ export interface RotatingActivation {
 }
 
 /** Kinds of Up next item a skip can apply to (mirrors AttentionKind). */
-export type SkipKind = "af" | "credit" | "payment" | "rotating" | "unverified";
+export type SkipKind = "af" | "credit" | "payment" | "rotating" | "enroll" | "unverified";
 
 /**
  * "Skip" on one Up next occurrence (docs/SPEC-v4.1-skip.md). Hides only that
@@ -131,6 +142,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export interface UserData {
   holdings: Holding[];
   usages: BenefitUsage[];
+  enrollments: BenefitEnrollment[];
   payments: PaymentRecord[];
   afEvents: AnnualFeeEvent[];
   lifecycle: LifecycleEvent[];

@@ -35,6 +35,8 @@ rules:
     check:
       type: lifetime_family
       families: [sapphire-reserve]
+    applies_to:
+      families: [sapphire-reserve]
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
     verified: true

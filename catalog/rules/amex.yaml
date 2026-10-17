@@ -12,6 +12,15 @@ rules:
     check:
       type: lifetime_family
       families: [delta-skymiles-premium]
+    applies_to:
+      families: [delta-skymiles-premium]
+    nll_waiver:
+      source_type: community
+      note: >-
+        Amex sometimes sends targeted offers whose terms leave out the "have or
+        have had" language (no lifetime language, NLL). Community data points
+        report the bonus paying out on those to past cardmembers. Amex has never
+        stated this as a policy; read the offer's terms.
     source_url: https://www.americanexpress.com/us/credit-cards/card-application/apply/prospect/terms/delta-skymiles-gold-american-express-card/28310-10-0
     last_verified: 2026-10-16
     verified: true

@@ -121,3 +121,48 @@ export function benefitStatus(
 export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+/** The period after `period` (null when `period` has no end, e.g. per-use or ongoing). */
+export function nextPeriod(cycle: Cycle, period: Period, anchor?: Anchor | null): Period | null {
+  if (!period.end) return null;
+  return computePeriod(cycle, addDays(period.end, 1), anchor);
+}
+
+/**
+ * What a credit row shows (docs/SPEC-v7-phone-feedback.md §2):
+ *   open           value left this period (or not period-based)
+ *   used_upcoming  this period is used up; `shown` is the next period, opening on `opensOn`
+ *   used_final     used up and the benefit ends before another period starts
+ *   not_started    `starts_on` is in the future
+ *   ended          past `ends_on`
+ */
+export type CreditState = "open" | "used_upcoming" | "used_final" | "not_started" | "ended";
+
+export interface CreditView {
+  state: CreditState;
+  status: BenefitStatus;
+  /** The period the row describes: the current one, or the next one for `used_upcoming`. */
+  shown: Period;
+  opensOn: string | null;
+}
+
+const PERIODIC: ReadonlySet<Cycle> = new Set(["monthly", "quarterly", "semiannual", "calendar_year", "cardmember_year"]);
+
+export function creditView(benefit: Benefit, holding: Holding, usages: BenefitUsage[], today: string): CreditView {
+  const status = benefitStatus(benefit, holding, usages, today);
+  const base = { status, shown: status.period, opensOn: null };
+  if (benefit.ends_on && today > benefit.ends_on) return { ...base, state: "ended" };
+  if (benefit.starts_on && today < benefit.starts_on) return { ...base, state: "not_started", opensOn: benefit.starts_on };
+  if (!PERIODIC.has(benefit.cycle) || status.remaining === null || status.remaining > 0) return { ...base, state: "open" };
+  const next = nextPeriod(benefit.cycle, status.period, benefitAnchor(benefit, holding));
+  if (!next?.start || (benefit.ends_on && next.start > benefit.ends_on)) return { ...base, state: "used_final" };
+  return { status, state: "used_upcoming", shown: next, opensOn: next.start };
+}
+
+/** Whether a use dated `date` can be logged: on or before today, in an active period with value left. */
+export function canLogOn(benefit: Benefit, holding: Holding, usages: BenefitUsage[], date: string, today: string): boolean {
+  if (date > today || !isBenefitActive(benefit, date)) return false;
+  if (!PERIODIC.has(benefit.cycle) || benefit.amount === null) return true;
+  const s = benefitStatus(benefit, holding, usages, date);
+  return (s.remaining ?? 1) > 0;
+}

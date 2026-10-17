@@ -76,6 +76,7 @@ export function userData(over: Partial<UserData> = {}): UserData {
   return {
     holdings: [],
     usages: [],
+    enrollments: [],
     payments: [],
     afEvents: [],
     lifecycle: [],

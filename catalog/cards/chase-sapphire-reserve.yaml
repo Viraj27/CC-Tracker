@@ -23,16 +23,19 @@ earn_rates:
     rate: 8
     unit: points_per_dollar
     conditions: Booked through Chase Travel (flights, hotels incl. The Edit, car rentals, cruises, activities).
+    channel: portal
+    portal_name: Chase Travel
     source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-earn-8x-points-on-chase-travel-purchases
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
   - categories: [airfare, hotels]
     label: Flights and hotels booked direct
     rate: 4
     unit: points_per_dollar
     conditions: Booked directly with the airline or hotel (travel agencies don't count).
+    channel: direct
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
   - categories: [dining]
     label: Dining worldwide
@@ -95,11 +98,13 @@ benefits:
     unit: USD
     cycle: semiannual
     enrollment_required: true
+    enrollment_lasts: holding
     how_to_use: Activate in your Chase account first — purchases before activation don't count. Credit posts in 1–2 billing cycles.
     ends_on: 2027-12-31
     source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-use-the-$300-stubhub-credit-with-chase-sapphire-reserve
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
+    note: Product page — "One-time activation required on chase.com or the Chase Mobile® app."; available through 12/31/27.
   - id: the-edit-credit
     kind: credit
     name: The Edit hotel credit
@@ -136,11 +141,12 @@ benefits:
     unit: USD
     cycle: monthly
     enrollment_required: true
+    enrollment_lasts: holding
     how_to_use: Activate complimentary DashPass with the card; promos appear in the DoorDash app each month.
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
     verified: true
-    note: Product page — $15 monthly promo on any qualifying order plus two $10 monthly promos for groceries/essentials; available through 12/31/29. DashPass activation by 12/31/29.
+    note: Product page — $15 monthly promo on any qualifying order plus two $10 monthly promos for groceries/essentials; available through 12/31/29. DashPass activation by 12/31/29; one activation, membership runs until 12/31/29 or 12 months, whichever is longer.
   - id: lyft-credit
     kind: credit
     name: Lyft in-app credit
@@ -150,11 +156,13 @@ benefits:
     unit: USD
     cycle: monthly
     enrollment_required: true
+    enrollment_lasts: holding
     how_to_use: Add the card as the Lyft payment method; credit applies in-app.
     ends_on: 2027-09-30
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
+    note: No separate activation — the credit goes to whoever adds the card to the Lyft app first and pays with it (product page).
   - id: peloton-credit
     kind: credit
     name: Peloton membership credit
@@ -164,7 +172,8 @@ benefits:
     unit: USD
     cycle: monthly
     enrollment_required: true
-    how_to_use: Activate the benefit, then pay for an eligible Peloton membership with the card.
+    enrollment_lasts: holding
+    how_to_use: Activate the benefit (one-time, per the product page), then pay for an eligible Peloton membership with the card.
     ends_on: 2027-12-31
     source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-to-earn-10x-points-on-peloton-with-chase-sapphire-reserve
     last_verified: 2026-10-16
@@ -188,18 +197,19 @@ benefits:
     name: Priority Pass Select & Chase Sapphire Lounges
     description: Access to 1,300+ Priority Pass lounges and Chase Sapphire Lounges, with up to two guests.
     cycle: none
-    enrollment_required: true
-    how_to_use: Enroll for Priority Pass through Chase; show the Priority Pass app at the lounge.
-    source_url: https://www.chase.com/sapphire-cards/personal/reserve
-    last_verified: 2026-10-16
+    how_to_use: Membership is activated automatically for the primary cardmember and authorized users; show the Priority Pass app at the lounge.
+    source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
+    last_verified: 2026-10-18
     verified: true
+    note: Product page — "Primary cardmembers and authorized users will have their Priority Pass Select membership automatically activated." (no enrollment step).
   - id: apple-subscriptions
     kind: perk
     name: Apple TV and Apple Music
     description: At least a year of complimentary Apple TV and Apple Music.
     cycle: none
     enrollment_required: true
-    how_to_use: Activate by June 22, 2027.
+    enrollment_lasts: holding
+    how_to_use: One-time activation by June 22, 2027; at least 12 months of Apple TV from activation.
     source_url: https://www.chase.com/personal/credit-cards/education/rewards-benefits/how-are-sapphire-preferred-and-reserve-different
     last_verified: 2026-10-16
     verified: true
@@ -211,8 +221,9 @@ benefits:
     description: Complimentary IHG Platinum Elite status.
     cycle: none
     enrollment_required: true
+    enrollment_lasts: holding
     ends_on: 2027-12-31
-    how_to_use: Activate through your Chase account.
+    how_to_use: Link your IHG One Rewards account once on chase.com or the Chase Mobile app; status runs through 12/31/27.
     source_url: https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve
     last_verified: 2026-10-16
     verified: true

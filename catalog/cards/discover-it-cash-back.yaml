@@ -33,6 +33,7 @@ benefits:
     description: 5% cash back at different places each quarter, up to the quarterly maximum, when activated. See Rotating.
     cycle: quarterly
     enrollment_required: true
+    enrollment_lasts: rotating
     how_to_use: Activate each quarter in the Discover app or website.
     source_url: https://www.discover.com/credit-cards/cash-back/cashback-bonus.html
     last_verified: 2026-10-16

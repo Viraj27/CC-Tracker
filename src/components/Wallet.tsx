@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { AttentionItem } from "@/lib/domain/attention";
 import { cardChip, walletOrder } from "@/lib/domain/wallet";
 import { useApp } from "./AppState";
 import { CardPage } from "./CardPage";
-import { use524, useHoldingViews, useUpNext, type HoldingView } from "./derived";
+import { useHoldingViews, useUpNext, type HoldingView } from "./derived";
 import { UpNextStrip, UpNextTop } from "./UpNext";
 import { WalletCard } from "./WalletCard";
 import { Group, GroupLabel, PageTitle, PillLink, Row } from "./ui";
@@ -24,7 +23,7 @@ function idFromLocation(): string | null {
 }
 
 /**
- * Home. Phone (< 1024px): large title with the 5/24 pill, the top 3 Up next
+ * Home. Phone (< 1024px): large title, the top 3 Up next
  * rows and the card stack; tapping a card pushes its Card page (`/cards/<id>`).
  * Desktop: the Up next strip, the stack on the left and the selected card's
  * page on the right; selection lives in the URL (pushState, no server round
@@ -36,7 +35,6 @@ export function Wallet({ selectedId, logBenefitId = null, url }: { selectedId: s
   const router = useRouter();
   const views = useHoldingViews();
   const { visible: attention, hidden } = useUpNext();
-  const { status } = use524();
   const ordered = useMemo(() => walletOrder(views, attention), [views, attention]);
   const cardScreen = url === "path";
 
@@ -78,20 +76,8 @@ export function Wallet({ selectedId, logBenefitId = null, url }: { selectedId: s
     <div className="flex flex-col gap-2 lg:gap-6">
       {!cardScreen && (
         <div className="lg:hidden">
-          <PageTitle
-            right={
-              <Link
-                href="/eligibility"
-                data-testid="five24-pill"
-                aria-label={`5/24: ${status.count} counted`}
-                className="shrink-0 rounded-full bg-list px-3 py-1 font-mono text-[13px] font-bold"
-              >
-                {status.count}/24
-              </Link>
-            }
-          >
-            Wallet
-          </PageTitle>
+          {/* No 5/24 count here: it means nothing at a glance (docs/SPEC-v7-phone-feedback.md §3). */}
+          <PageTitle>Wallet</PageTitle>
           <UpNextTop items={attention} count={attention.length} />
         </div>
       )}

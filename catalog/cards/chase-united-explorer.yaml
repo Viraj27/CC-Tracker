@@ -71,10 +71,12 @@ benefits:
     unit: USD
     cycle: monthly
     enrollment_required: true
+    enrollment_lasts: calendar_year
     how_to_use: Enroll (yearly opt-in required), then pay for rideshares with the card.
     source_url: https://creditcards.chase.com/travel-credit-cards/united/united-explorer
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
+    note: Product page — "Yearly opt-in is required."; the detailed terms say only "You must enroll". Treated as once per calendar year (the credit's $60 cap is per calendar year).
   - id: instacart-credit
     kind: credit
     name: Instacart credit

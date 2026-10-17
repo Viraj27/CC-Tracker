@@ -7,15 +7,17 @@ import type { Benefit } from "@/lib/catalog/schema";
 import type { AttentionItem } from "@/lib/domain/attention";
 import { shortDate } from "@/lib/domain/dates";
 import { benefitShortName } from "@/lib/domain/holdings";
-import { benefitStatus } from "@/lib/domain/periods";
+import { enrollmentView } from "@/lib/domain/enrollment";
+import { benefitStatus, creditView } from "@/lib/domain/periods";
 import { perkUnitValue } from "@/lib/domain/roi";
 import { currentAndNextQuarter, isActivated } from "@/lib/domain/rotating";
 import type { AfOutcome, LifecycleType } from "@/lib/domain/types";
 import { isTemp, tempId, useApp } from "./AppState";
+import { benefitEndsText, EnrollmentBadge, PeriodLine } from "./BenefitBits";
 import { useHoldingViews, useUpNext, type HoldingView } from "./derived";
 import { HoldingForm } from "./HoldingForm";
 import { LogUse } from "./LogUse";
-import { useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
+import { useAddEnrollment, useDeleteEnrollment, useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
 import { ReminderSwitch } from "./Reminders";
 import { KeyFigures, Sheet, SheetHeader, SheetPrimary, SheetSecondary, useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { Badge, Button, CELL, Empty, FactBadges, Field, Group, GroupBadges, GroupLabel, Label, Provenance, Row, usd } from "./ui";
@@ -122,7 +124,8 @@ function useItemFact(item: AttentionItem, view: HoldingView | undefined) {
   const card = view?.card;
   if (!card) return null;
   switch (item.kind) {
-    case "credit": {
+    case "credit":
+    case "enroll": {
       const b = card.benefits.find((x) => x.id === item.benefitId);
       return b ? { fact: b, description: b.description } : null;
     }
@@ -155,6 +158,7 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
   const sheet = useSheet();
   const setPaid = useSetPaid();
   const setActivated = useSetActivated();
+  const addEnrollment = useAddEnrollment();
   const setSkipped = useSetSkipped();
   const setMutes = useSetMutes();
   const live = visible.find((a) => a.id === snapshot.id);
@@ -179,6 +183,28 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
       body = benefit && view ? <LogUse benefit={benefit} holding={view.holding} /> : null;
       break;
     }
+    case "enroll":
+      figures = [
+        { label: "Card", value: item.cardName },
+        { label: item.daysUntil <= 0 ? "Lapsed" : "Lapses", value: due, urgent },
+      ];
+      body = (
+        <>
+          {benefit?.how_to_use && <p className="mb-3 px-1 text-[15px]">{benefit.how_to_use}</p>}
+          {live && (
+            <SheetPrimary
+              aria-label={`Mark enrolled — ${target}`}
+              onClick={() => {
+                addEnrollment(item.holdingId, item.benefitId!);
+                sheet.close();
+              }}
+            >
+              Mark enrolled
+            </SheetPrimary>
+          )}
+        </>
+      );
+      break;
     case "payment":
       figures = [
         { label: "Card", value: item.cardName },
@@ -330,8 +356,13 @@ function BenefitSheet({ view, benefit }: { view: HoldingView; benefit: Benefit }
   const { visible } = useUpNext();
   const setSkipped = useSetSkipped();
   const sheet = useSheet();
+  const addEnrollment = useAddEnrollment();
+  const deleteEnrollment = useDeleteEnrollment();
   const h = view.holding;
-  const s = benefitStatus(benefit, h, data.usages, today);
+  const cv = creditView(benefit, h, data.usages, today);
+  const s = cv.status;
+  const enrollment = enrollmentView(benefit, h, data.enrollments, today);
+  const ends = benefitEndsText(benefit);
   const isCredit = benefit.kind === "credit";
   const quantified = isCredit && benefit.amount !== null && benefit.cycle !== "per_use" && benefit.cycle !== "none";
   const expiringSoon = s.daysToExpiry !== null && s.daysToExpiry <= data.settings.creditLeadDays && (s.remaining ?? 1) > 0;
@@ -350,20 +381,33 @@ function BenefitSheet({ view, benefit }: { view: HoldingView; benefit: Benefit }
   return (
     <div data-testid="benefit-sheet">
       <SheetHeader title={short} sub={view.name} info={<Provenance flow fact={benefit} description={isCredit ? details : undefined} />} />
-      {(benefit.enrollment_required || !s.active || benefit.ends_on) && (
-        <p className="-mt-1 mb-3 flex gap-2">
-          {benefit.enrollment_required && <Badge tone="accent">Enroll</Badge>}
-          {!s.active && <Badge tone="info">{benefit.ends_on && today > benefit.ends_on ? "Ended" : "Not started"}</Badge>}
-          {s.active && benefit.ends_on && <Badge tone="info">Ends {shortDate(benefit.ends_on, today)}</Badge>}
+      {(enrollment.state === "needed" || enrollment.state === "lapsed" || !s.active || ends) && (
+        <p className="-mt-1 mb-3 flex flex-wrap gap-2" data-testid="benefit-badges">
+          <EnrollmentBadge e={enrollment} />
+          {!s.active && <Badge tone="info">{cv.state === "ended" ? "Ended" : "Not started"}</Badge>}
+          {ends && cv.state !== "ended" && <Badge tone="info">{ends}</Badge>}
         </p>
       )}
       {quantified && (
-        <KeyFigures
-          items={[
-            { label: "Left", value: money(s.remaining), testId: "sheet-left" },
-            { label: "Expires", value: s.period.expiry ? shortDate(s.period.expiry, today) : "—", urgent: expiringSoon },
-          ]}
-        />
+        <>
+          <KeyFigures
+            items={
+              cv.state === "used_upcoming" || cv.state === "not_started"
+                ? [
+                    { label: "Left", value: money(s.active ? s.remaining : 0), testId: "sheet-left" },
+                    { label: "Opens", value: shortDate(cv.opensOn, today) },
+                  ]
+                : [
+                    { label: "Left", value: money(s.remaining), testId: "sheet-left" },
+                    { label: "Expires", value: s.period.expiry ? shortDate(s.period.expiry, today) : "—", urgent: expiringSoon },
+                  ]
+            }
+          />
+          <p className="-mt-2 mb-4 px-1 font-mono text-[11px] tracking-wider text-muted uppercase" data-testid="sheet-period">
+            {cv.state === "used_upcoming" ? "Next: " : ""}
+            <PeriodLine benefit={benefit} cv={cv} cycleLabel={CYCLE_LABEL[benefit.cycle]} today={today} urgent={false} />
+          </p>
+        </>
       )}
       {isCredit && !quantified && (
         <KeyFigures
@@ -386,6 +430,47 @@ function BenefitSheet({ view, benefit }: { view: HoldingView; benefit: Benefit }
           <p>{details}</p>
           {benefit.protection && <ProtectionTerms p={benefit.protection} />}
           {benefit.kind === "perk" && unitValue === null && <p className="mt-1 text-sm text-muted">Set a value per use in Settings.</p>}
+        </div>
+      )}
+      {enrollment.state !== "none" && h.status === "open" && (
+        <div className="mb-4 flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-[14px] bg-list px-4 py-2 text-[15px]" data-testid="enrollment">
+          {enrollment.latest && enrollment.state === "enrolled" ? (
+            <>
+              <span>
+                Enrolled <span className="font-mono">{shortDate(enrollment.latest.enrolledOn, today)}</span>
+                {enrollment.lapsesOn && (
+                  <span className="text-muted">
+                    {" "}
+                    · lapses <span className="font-mono">{shortDate(enrollment.lapsesOn, today)}</span>
+                  </span>
+                )}
+              </span>
+              <button
+                type="button"
+                disabled={isTemp(enrollment.latest.id)}
+                className="min-h-9 text-sm text-muted underline hover:text-text"
+                onClick={() => deleteEnrollment(enrollment.latest!.id)}
+              >
+                undo
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-muted">
+                {enrollment.state === "lapsed" && enrollment.lapsesOn ? (
+                  <>
+                    Enrolled <span className="font-mono">{shortDate(enrollment.latest!.enrolledOn, today)}</span> · lapsed{" "}
+                    <span className="font-mono">{shortDate(enrollment.lapsesOn, today)}</span>
+                  </>
+                ) : (
+                  "Not enrolled yet"
+                )}
+              </span>
+              <Button size="sm" onClick={() => addEnrollment(h.id, benefit.id)}>
+                Mark enrolled
+              </Button>
+            </>
+          )}
         </div>
       )}
       {loggable && <LogUse key={`${benefit.id}-${s.period.key}`} benefit={benefit} holding={h} />}
@@ -566,7 +651,12 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
                 key={b.id}
                 title={b.name}
                 sub={b.kind === "protection" ? b.protection?.coverage ?? "Coverage not confirmed" : CYCLE_LABEL[b.cycle]}
-                badges={<FactBadges fact={b} />}
+                badges={
+                  <>
+                    <EnrollmentBadge e={enrollmentView(b, view.holding, data.enrollments, today)} />
+                    <FactBadges fact={b} />
+                  </>
+                }
                 chevron
                 onClick={() => sheet.push({ type: "benefit", holdingId: h.id, benefitId: b.id })}
               />

@@ -51,6 +51,8 @@ export function cardChip(holding: Holding, attention: AttentionItem[]): string |
       return d === 0 ? "CREDIT TODAY" : `CREDIT ${d}D`;
     case "rotating":
       return "ACTIVATE 5%";
+    case "enroll":
+      return "RE-ENROLL";
     default:
       return null;
   }
@@ -82,6 +84,10 @@ export function cardHeadline(input: {
   }
   if (first?.kind === "payment") return `Payment due ${inDays(first.daysUntil)}.`;
   if (first?.kind === "rotating") return "Activate this quarter's 5% categories.";
+  if (first?.kind === "enroll") {
+    const what = first.benefitName ?? "a benefit";
+    return first.daysUntil <= 0 ? `Enrollment in ${what} lapsed. Re-enroll.` : `Enrollment in ${what} lapses ${inDays(first.daysUntil)}.`;
+  }
   if (fee > 0) {
     return `${usd(realized)} realized against the ${usd(fee)} fee this year.${
       unusedCredits > 0 ? ` ${usd(unusedCredits)} of credits unused.` : ""

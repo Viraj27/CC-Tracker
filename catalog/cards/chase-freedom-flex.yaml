@@ -23,6 +23,8 @@ earn_rates:
     rate: 5
     unit: percent
     conditions: Booked through Chase Travel. Cash back is paid as Ultimate Rewards points.
+    channel: portal
+    portal_name: Chase Travel
     source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
     last_verified: 2026-10-16
     verified: true
@@ -56,6 +58,7 @@ benefits:
     description: 5% cash back on up to $1,500 in combined purchases each quarter in the activated bonus categories. See Rotating.
     cycle: quarterly
     enrollment_required: true
+    enrollment_lasts: rotating
     how_to_use: Activate each quarter by the deadline at ChaseBonus.com or in the Chase Mobile app.
     source_url: https://media.chase.com/news/chase-freedom-2026-q4-categories
     last_verified: 2026-10-16

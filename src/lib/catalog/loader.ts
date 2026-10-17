@@ -119,6 +119,12 @@ export function checkReferences(c: Catalog): void {
       }
     }
   }
+  const families = new Set(c.cards.map((x) => x.family).filter((f): f is string => !!f));
+  for (const r of c.rules) {
+    for (const f of r.applies_to?.families ?? []) {
+      if (!families.has(f)) errors.push(`rule ${r.id}: applies_to family "${f}" is not used by any card`);
+    }
+  }
   for (const r of c.rotating) {
     for (const id of r.card_ids) {
       if (!cardIds.has(id)) errors.push(`rotating ${r.id}: unknown card "${id}"`);

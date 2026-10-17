@@ -90,6 +90,26 @@ export async function deleteUsage(id: string): Promise<UserData> {
   return snapshot();
 }
 
+// ---------------------------------------------------------- enrollment --
+
+const EnrollmentInput = z.object({ holdingId: z.string(), benefitId: z.string(), enrolledOn: isoDate });
+
+/** "Mark enrolled" (docs/SPEC-v7-phone-feedback.md §1.2). Adds to the history; the latest wins. */
+export async function addEnrollment(input: z.input<typeof EnrollmentInput>): Promise<UserData> {
+  const prisma = await prismaClient();
+  const e = EnrollmentInput.parse(input);
+  await ownHolding(e.holdingId);
+  await prisma.benefitEnrollment.create({ data: { ...e, profileId } });
+  return snapshot();
+}
+
+/** Undo a "Mark enrolled". */
+export async function deleteEnrollment(id: string): Promise<UserData> {
+  const prisma = await prismaClient();
+  await prisma.benefitEnrollment.deleteMany({ where: { id, profileId } });
+  return snapshot();
+}
+
 // ------------------------------------------------------------ payments --
 
 export async function setPaymentPaid(input: {
@@ -132,11 +152,11 @@ export async function setActivation(input: { holdingId: string; quarter: string;
 const OccurrenceInput = z
   .object({
     holdingId: z.string(),
-    kind: z.enum(["af", "credit", "payment", "rotating", "unverified"]),
+    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "unverified"]),
     benefitId: z.string().nullable(),
     period: z.string().min(1),
   })
-  .refine((o) => o.kind !== "credit" || o.benefitId, { message: "credit skips need a benefitId" });
+  .refine((o) => (o.kind !== "credit" && o.kind !== "enroll") || o.benefitId, { message: "credit and enroll skips need a benefitId" });
 
 /** Skip one Up next occurrence (or undo it). Never marks anything paid, used or activated. */
 export async function setSkipped(input: z.input<typeof OccurrenceInput> & { skipped: boolean }): Promise<UserData> {
@@ -293,6 +313,7 @@ export async function importData(
       data: await snapshot(),
       summary: `Imported ${data.holdings.length} card(s), ${data.usages.length} benefit use(s), ${data.payments.length} payment(s), ${data.points.length} points balance(s)${
         data.dismissals.length + data.mutes.length ? `, ${data.dismissals.length} skip(s), ${data.mutes.length} reminder mute(s)` : ""
+      }${data.enrollments.length ? `, ${data.enrollments.length} enrollment(s)` : ""
       } (${mode}).`,
     };
   } catch (e) {

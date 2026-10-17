@@ -32,7 +32,7 @@ export default function BestCardPage() {
 
   return (
     <div className="flex flex-col">
-      <PageTitle help="Ranked by estimated value per dollar: rate × your cents per point (set in Settings or Points).">Best card</PageTitle>
+      <PageTitle help="Ranked by estimated value per dollar: rate × your cents per point (set in Settings or Points). Portal-only rates get their own row.">Best card</PageTitle>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pt-1 pb-2 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-wrap lg:px-0" role="radiogroup" aria-label="Spend category">
         {SPEND_CATEGORIES.map((c) => (
           <button
@@ -53,12 +53,14 @@ export default function BestCardPage() {
       ) : (
         <Group data-testid="best-card-list" aria-label={`Best card for ${LABELS[category]}`}>
           {ranked.map((r, i) => (
-            <li key={r.holdingId} className="flex min-h-14 items-center gap-3 px-4 py-2.5">
+            <li key={`${r.holdingId}:${r.channel}`} data-testid={`best-${r.holdingId}-${r.channel}`} className="flex min-h-14 items-center gap-3 px-4 py-2.5">
               <span className="w-4 shrink-0 text-right font-mono text-sm text-muted">{i + 1}</span>
               <CardBar color={r.brandColor} />
               <span className="min-w-0 flex-1">
                 <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span className="truncate font-semibold">{r.name}</span>
+                  {r.channel === "portal" && <Badge tone="accent">Via {r.portalName}</Badge>}
+                  {r.bookedDirect && <Badge tone="info">Booked direct</Badge>}
                   {r.source === "rotating" && <Badge tone="accent">Rotating 5%</Badge>}
                   {r.remindersOff && <Badge tone="info">Reminders off</Badge>}
                   {!r.verified && <Badge tone="warn">⚠︎ Unverified</Badge>}

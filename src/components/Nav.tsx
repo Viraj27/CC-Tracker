@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/payments", label: "Payments" },
   { href: "/rotating", label: "Rotating" },
   { href: "/best-card", label: "Best card" },
+  { href: "/apply", label: "Should I apply?" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
 ];
@@ -24,6 +25,7 @@ export const MORE_LINKS = [
   { href: "/payments", label: "Payments" },
   { href: "/rotating", label: "Rotating 5%" },
   { href: "/best-card", label: "Best card" },
+  { href: "/apply", label: "Should I apply?" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
   { href: "/cards", label: "Add card" },

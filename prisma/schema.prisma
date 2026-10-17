@@ -79,6 +79,7 @@ model Holding {
   updatedAt     DateTime @updatedAt
 
   usages        BenefitUsage[]
+  enrollments   BenefitEnrollment[]
   payments      PaymentRecord[]
   afEvents      AnnualFeeEvent[]
   lifecycle     LifecycleEvent[]
@@ -103,6 +104,19 @@ model BenefitUsage {
   createdAt     DateTime @default(now())
 
   @@index([holdingId, benefitId, periodKey])
+}
+
+// "Mark enrolled" on a benefit that needs enrollment (docs/SPEC-v7-phone-feedback.md §1.2).
+// Full history is kept; the latest row decides whether the enrollment has lapsed.
+model BenefitEnrollment {
+  id         String  @id @default(cuid())
+  profileId  String
+  holdingId  String
+  holding    Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  benefitId  String
+  enrolledOn String // YYYY-MM-DD
+
+  @@index([holdingId, benefitId])
 }
 
 model PaymentRecord {
@@ -176,7 +190,7 @@ model Dismissal {
   holdingId String
   holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
   key       String
-  kind      String // af | credit | payment | rotating | unverified
+  kind      String // af | credit | payment | rotating | enroll | unverified
   benefitId String?
   period    String // quarter, statement month, benefit period key or fee date
   date      String // when it was skipped

@@ -19,9 +19,11 @@ On the CSR card page, StubHub has an **Enroll** badge and an **Ends Dec 31 27** 
 
 ### 1.3 Re-enrollment
 Some benefits need enrolling again after a while. The catalog says how long one enrollment lasts:
-- `enrollment_lasts: "holding" | "period" | { months: n }`, default `holding`.
+- `enrollment_lasts: "holding" | "period" | "calendar_year" | "rotating" | { months: n }`, default `holding`.
   - `holding`: enroll once.
   - `period`: enroll again every cycle period, e.g. every half for a semiannual credit.
+  - `calendar_year`: enroll again every January, e.g. United Explorer's rideshare credit ("Yearly opt-in is required").
+  - `rotating`: quarterly 5% activation, already tracked on the Rotating page. No enrollment badge or Re-enroll row.
   - `{ months: n }`: n months from the enrollment date, e.g. a 12-month activation.
 - **Build-time audit:** check each of the 12 `enrollment_required` benefits in the catalog against its official terms and set `enrollment_lasts`, with provenance in `note`. It's unverified which of them need re-enrollment, so the default is never assumed to be right without checking.
 - **When an enrollment lapses:**
@@ -81,9 +83,9 @@ The 5/24 page ends with **Considering a card?**, a dropdown of issuer *rules* (C
   - Where the evaluator can compute it, add when that changes, e.g. `Eligible from Mar 2028` (family window end) or `Under 5/24 from Jan 15, 2027` (next drop-off). Otherwise no date.
 - **Under the verdict:** one row per applicable rule, showing outcome, reasons and the v5 provenance ⓘ. Footer: `Verify before applying · rules checked <date>`.
 - **No rules apply:** `No issuer rules in the catalog for <card>. That doesn't mean there are none.`
-- **No lifetime language (NLL):** an **Offer has no lifetime language** toggle, off by default. It shows only when the chosen card has a rule marked `waived_by_nll: true`, e.g. the Amex "have or have had" family rule.
+- **No lifetime language (NLL):** an **Offer has no lifetime language** toggle, off by default. It shows only when the chosen card has a rule with an `nll_waiver`, e.g. the Amex "have or have had" family rule.
   - When on, those rules are listed as `Waived by NLL offer`, and the bonus verdict ignores them.
-  - The waiver is community knowledge, not an issuer statement. Rules carrying `waived_by_nll` must have `waived_by_nll_source_type: community` and a `note` pointing to the data points behind it. The toggle's ⓘ reads `Community data points, not an Amex policy`.
+  - The waiver is community knowledge, not an issuer statement. A rule NLL can waive carries `nll_waiver: { source_type: community, note }`, where the note describes the data points behind it. The toggle's ⓘ reads `Community data points, not an Amex policy`.
   - The toggle isn't saved; it's a what-if for the offer in front of the owner.
 
 ### 4.3 Which rules apply to a card
@@ -121,9 +123,9 @@ Re-verify the others (Autograph, United Explorer, Delta Gold) rather than assumi
   - Back-date enablement.
   - `nextPeriod` across year boundaries.
   - Enrollment hides the badge.
-  - Lapse for each `enrollment_lasts` kind (`holding` never lapses; `period` lapses at rollover; `{months}` lapses on the date), the Re-enroll Up next lead time, skip and mute.
+  - Lapse for each `enrollment_lasts` kind (`holding` never lapses; `period` and `calendar_year` lapse at rollover; `{months}` lapses on the date; `rotating` has no badge), the Re-enroll Up next lead time, skip and mute.
   - `applies_to` matching (absent / families / account types).
-  - The NLL toggle waives only `waived_by_nll` rules.
+  - The NLL toggle waives only rules with an `nll_waiver`.
   - Verdict summary and "eligible from" dates.
   - `rankCards` two-row output: portal beats direct (two rows), portal equal to direct (one row), rotating interplay.
 - **Storage:** import/export round trip with `BenefitEnrollment`; an old export imports cleanly.

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { deleteUsage, logUsage } from "@/app/actions";
 import type { Benefit } from "@/lib/catalog/schema";
 import { shortDate } from "@/lib/domain/dates";
-import { benefitAnchor, benefitStatus, computePeriod } from "@/lib/domain/periods";
+import { benefitAnchor, canLogOn, computePeriod, creditView } from "@/lib/domain/periods";
 import type { Holding } from "@/lib/domain/types";
 import { isTemp, tempId, useApp } from "./AppState";
 import { SheetPrimary } from "./Sheet";
@@ -17,23 +17,42 @@ const money = (n: number) => usd(n, Number.isInteger(n) ? 0 : 2);
  * chips ($5, $10, remaining, Other) with the remaining amount pre-selected and
  * a "Log $X" pill; perks: a count (default 1) with a value override. Amount,
  * date and note live under "More options". Then this period's uses, deletable.
+ *
+ * A credit whose period is used up (or not open yet) can't be logged for today:
+ * the pill is disabled and reads "Opens 1 JAN" (docs/SPEC-v7-phone-feedback.md §2).
+ * A past date under More options can still be logged if that period has value left.
  */
 export function LogUse({ benefit, holding }: { benefit: Benefit; holding: Holding }) {
   const { data, today, mutate } = useApp();
-  const s = benefitStatus(benefit, holding, data.usages, today);
+  const cv = creditView(benefit, holding, data.usages, today);
+  const s = cv.status;
   const isCredit = benefit.kind === "credit";
   const perUse = benefit.cycle === "per_use";
+  const closed = isCredit && cv.state !== "open";
   const remaining = isCredit ? (perUse ? benefit.amount ?? 0 : s.remaining ?? benefit.amount ?? 0) : 1;
-  const chips = isCredit ? [...[5, 10].filter((v) => v < remaining), ...(remaining > 0 ? [remaining] : [])] : [];
+  const chips = isCredit && !closed ? [...[5, 10].filter((v) => v < remaining), ...(remaining > 0 ? [remaining] : [])] : [];
 
-  const [amount, setAmount] = useState(String(remaining));
+  // Used up: pre-fill the full amount, ready for a back-dated use in an earlier period.
+  const [amount, setAmount] = useState(String(closed ? benefit.amount ?? 0 : remaining));
   const [more, setMore] = useState(false);
   const [value, setValue] = useState("");
   const [date, setDate] = useState(today);
   const [note, setNote] = useState("");
   const amt = Number(amount);
-  const valid = amount !== "" && Number.isFinite(amt) && amt > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date);
+  const wellFormed = amount !== "" && Number.isFinite(amt) && amt > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date);
+  const loggableOn = !isCredit || (/^\d{4}-\d{2}-\d{2}$/.test(date) && canLogOn(benefit, holding, data.usages, date, today));
+  const valid = wellFormed && loggableOn;
   const custom = !chips.includes(amt);
+  // Why the pill is disabled, when it is for a reason other than a missing amount.
+  const blocked = !isCredit || loggableOn
+    ? null
+    : date > today
+      ? "Date is in the future"
+      : date !== today
+        ? "Nothing left that period"
+        : cv.state === "used_final"
+          ? "Used"
+          : `Opens ${shortDate(cv.opensOn, today)}`;
 
   const periodUses = data.usages.filter((u) => u.holdingId === holding.id && u.benefitId === benefit.id && u.periodKey === s.period.key);
 
@@ -58,10 +77,11 @@ export function LogUse({ benefit, holding }: { benefit: Benefit; holding: Holdin
     }
   };
 
-  if (!s.active) return null;
+  if (cv.state === "ended") return null;
+  if (!s.active && cv.state !== "not_started") return null;
   return (
-    <div className="flex flex-col gap-3">
-      {isCredit && (
+    <div className="flex flex-col gap-3" data-testid="log-use">
+      {isCredit && !closed && (
         <div role="radiogroup" aria-label="Amount" className="flex flex-wrap gap-2">
           {chips.map((v) => (
             <Chip key={v} checked={!more && amt === v} onClick={() => setAmount(String(v))}>
@@ -101,15 +121,15 @@ export function LogUse({ benefit, holding }: { benefit: Benefit; holding: Holdin
             </Field>
           )}
           <Field label="Date">
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} />
           </Field>
           <Field label="Note">
             <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="optional" />
           </Field>
         </div>
       </details>
-      <SheetPrimary disabled={!valid} onClick={submit}>
-        {isCredit ? `Log ${valid ? money(amt) : ""}`.trim() : `Log ${valid ? `×${amt}` : "use"}`}
+      <SheetPrimary disabled={!valid} onClick={submit} data-testid="log-primary">
+        {blocked ?? (isCredit ? `Log ${valid ? money(amt) : ""}`.trim() : `Log ${valid ? `×${amt}` : "use"}`)}
       </SheetPrimary>
 
       {periodUses.length > 0 && (
