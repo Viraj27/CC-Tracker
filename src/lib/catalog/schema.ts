@@ -66,9 +66,14 @@ export const EarnRateSchema = z
     unit: z.enum(["percent", "points_per_dollar", "miles_per_dollar"]),
     conditions: z.string().optional(),
     cap: z.string().optional(),
+    /** Where the purchase must be made: through the issuer's travel portal, booked direct, or anywhere (absent = any). */
+    channel: z.enum(["portal", "direct", "any"]).optional(),
+    /** The portal's name (e.g. "Chase Travel"); required for `channel: portal`. */
+    portal_name: z.string().optional(),
     ...provenance,
   })
-  .refine(requireNoteWhenUnverified, unverifiedNoteMsg);
+  .refine(requireNoteWhenUnverified, unverifiedNoteMsg)
+  .refine((r) => r.channel !== "portal" || !!r.portal_name, { message: "portal earn rates need a portal_name" });
 export type EarnRate = z.infer<typeof EarnRateSchema>;
 
 export const ProtectionTermsSchema = z.object({
@@ -91,6 +96,14 @@ export const BenefitSchema = z
     /** For cardmember_year: which holding date the year is anchored to. */
     anniversary_basis: z.enum(["approval", "af_date"]).optional(),
     enrollment_required: z.boolean().default(false),
+    /**
+     * How long one enrollment lasts (docs/SPEC-v7-phone-feedback.md §1.3): for the life of
+     * the holding, one cycle period, one calendar year, n months, or `rotating` (quarterly
+     * 5% activation, tracked on the Rotating page instead). Absent = `holding`.
+     */
+    enrollment_lasts: z
+      .union([z.enum(["holding", "period", "calendar_year", "rotating"]), z.object({ months: z.number().int().positive() })])
+      .optional(),
     how_to_use: z.string().nullable().default(null),
     /** For perks: id into perk-defaults.yaml for the default $ value per use. */
     perk_default: z.string().optional(),
@@ -200,6 +213,15 @@ export const RuleSchema = z
     effect: z.enum(["approval", "bonus"]),
     description: z.string(),
     check: RuleCheckSchema,
+    /** Which of the issuer's cards the rule applies to; absent = every card from `issuer`. */
+    applies_to: z
+      .object({
+        families: z.array(z.string()).min(1).optional(),
+        account_types: z.array(z.enum(["personal", "business"])).min(1).optional(),
+      })
+      .optional(),
+    /** An offer with no lifetime language (NLL) may waive this rule. Community knowledge only. */
+    nll_waiver: z.object({ source_type: z.literal("community"), note: z.string().min(1) }).optional(),
     ...provenance,
   })
   .refine(requireNoteWhenUnverified, unverifiedNoteMsg);

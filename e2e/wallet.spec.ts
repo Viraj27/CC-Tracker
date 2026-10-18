@@ -130,9 +130,9 @@ test("phone layout at 390px: bottom tabs, large titles, no horizontal scroll", a
 
   const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(await overflow()).toBeLessThanOrEqual(0);
-  // Wallet on phones: large title + 5/24 pill, the top 3 Up next rows, then the stack. No card detail here.
-  await expect(page.getByRole("heading", { level: 1, name: "Wallet" })).toBeVisible();
-  await expect(page.getByTestId("five24-pill")).toHaveText("3/24");
+  // Wallet on phones: large title (no 5/24 pill, docs/SPEC-v7-phone-feedback.md §3), the top 3 Up next rows, then the stack. No card detail here.
+  await expect(page.getByRole("heading", { level: 1, name: "Wallet", exact: true })).toBeVisible();
+  await expect(page.getByTestId("five24-pill")).toHaveCount(0);
   await expect(page.getByTestId("wallet-status")).toBeHidden(); // the long mono header line is desktop-only
   const top = page.getByTestId("up-next-top");
   await expect(top.getByTestId("up-next-item")).toHaveCount(3);

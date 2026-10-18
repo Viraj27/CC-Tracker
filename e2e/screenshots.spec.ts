@@ -4,7 +4,7 @@ import { gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./he
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
-// light + dark, 390px + desktop. Plus 5/24 and the v4.1 skipped views.
+// light + dark, 390px + desktop. Plus 5/24, the v4.1 skipped views and the v7 credit rows, benefit sheet and Should I apply?.
 const out = path.join(__dirname, "..", "docs", "screenshots");
 const LYFT = "Demo Reserve: $10 Lyft in-app credit left";
 
@@ -45,6 +45,24 @@ test.describe("screenshots", () => {
         await sheet(page).getByRole("button", { name: "Source" }).click();
         await shot("sheet");
         await page.keyboard.press("Escape");
+
+        // v7 (docs/SPEC-v7-phone-feedback.md §1–2): credit rows with "Requires enrollment" and
+        // "Benefit ends …", the StubHub sheet, then StubHub used up (greyed, "Opens …").
+        await gotoReady(page, "/cards/demo-reserve");
+        await page.evaluate(() => document.getElementById("credits")!.scrollIntoView({ block: "start" }));
+        await shot("card-credits");
+        await page.getByRole("button", { name: "StubHub / viagogo credit", exact: true }).click();
+        await sheetSettled(page);
+        await shot("benefit-sheet");
+        await sheet(page).getByRole("button", { name: /^Log \$/ }).click();
+        await expect(sheet(page).getByTestId("log-primary")).toBeDisabled();
+        await shot("benefit-sheet-used");
+        await page.keyboard.press("Escape");
+        await expect(sheet(page)).toHaveCount(0);
+        await shot("card-credits-used");
+        await gotoReady(page, "/apply");
+        await page.getByTestId("apply-card").selectOption("capital-one-venture-x");
+        await shot("apply");
 
         // Skipped items (docs/SPEC-v4.1-skip.md): skip the Lyft credit, then "1 skipped · show".
         await gotoReady(page, "/up-next");

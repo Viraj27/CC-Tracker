@@ -14,6 +14,8 @@ rules:
       family: capital-one-venture
       months: 48
       blocks_if_currently_held: false
+    applies_to:
+      families: [capital-one-venture]
     source_url: https://www.capitalone.com/credit-cards/venture-x/
     last_verified: 2026-10-16
     verified: true

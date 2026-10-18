@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { Benefit } from "@/lib/catalog/schema";
 import type { AttentionItem } from "@/lib/domain/attention";
-import { shortDate } from "@/lib/domain/dates";
 import { dropOffDate } from "@/lib/domain/fiveTwentyFour";
+import { enrollmentView } from "@/lib/domain/enrollment";
 import { benefitShortName } from "@/lib/domain/holdings";
-import { benefitStatus } from "@/lib/domain/periods";
+import { creditView, type CreditView } from "@/lib/domain/periods";
 import { currentAndNextQuarter, isActivated } from "@/lib/domain/rotating";
 import { isMuted } from "@/lib/domain/skips";
 import { cardHeadline } from "@/lib/domain/wallet";
 import { useApp } from "./AppState";
+import { benefitEndsText, EnrollmentBadge, isGreyed, PeriodLine } from "./BenefitBits";
 import { benefitsOf, CYCLE_LABEL, LIST_TITLE } from "./CardSheets";
 import { use524, type HoldingView } from "./derived";
 import { canGoBack } from "./Nav";
@@ -81,14 +82,14 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
   const product = card && h.nickname && h.nickname !== card.name ? card.name : null;
   const chip = h.status === "closed" ? "CLOSED" : h.status === "product_changed" ? "CHANGED" : !card ? "CUSTOM" : null;
 
-  // Credits, soonest expiry first (inactive ones last).
+  // Credits: open ones by soonest expiry, then used-up / not-started ones by opening date, then ended.
   const credits = (card?.benefits ?? [])
     .filter((b) => b.kind === "credit")
-    .map((b) => ({ b, s: benefitStatus(b, h, data.usages, today) }))
+    .map((b) => ({ b, cv: creditView(b, h, data.usages, today) }))
     .sort(
       (x, y) =>
-        Number(!x.s.active) - Number(!y.s.active) ||
-        (x.s.period.expiry ?? "9999").localeCompare(y.s.period.expiry ?? "9999") ||
+        STATE_RANK[x.cv.state] - STATE_RANK[y.cv.state] ||
+        (x.cv.opensOn ?? x.cv.shown.expiry ?? "9999").localeCompare(y.cv.opensOn ?? y.cv.shown.expiry ?? "9999") ||
         x.b.name.localeCompare(y.b.name),
     );
 
@@ -173,8 +174,8 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
         <section aria-labelledby="credits-heading" id="credits" className="scroll-mt-24">
           <GroupLabel id="credits-heading">Credits · {credits.length}</GroupLabel>
           <Group>
-            {credits.map(({ b, s }) => (
-              <CreditRow key={b.id} benefit={b} s={s} onOpen={() => sheet.open({ type: "benefit", holdingId: h.id, benefitId: b.id })} />
+            {credits.map(({ b, cv }) => (
+              <CreditRow key={b.id} benefit={b} cv={cv} holding={h} onOpen={() => sheet.open({ type: "benefit", holdingId: h.id, benefitId: b.id })} />
             ))}
           </Group>
         </section>
@@ -240,30 +241,47 @@ function Stat({ label, value, testId }: { label: string; value: React.ReactNode;
   );
 }
 
-/** Credit row: name / mono `CYCLE · EXPIRY` (urgent within lead time) / remaining / ›. */
-function CreditRow({ benefit: b, s, onOpen }: { benefit: Benefit; s: ReturnType<typeof benefitStatus>; onOpen: () => void }) {
+const STATE_RANK: Record<CreditView["state"], number> = { open: 0, used_upcoming: 1, not_started: 1, used_final: 2, ended: 3 };
+
+/**
+ * Credit row (docs/SPEC-v7-phone-feedback.md §1–2): name + enrollment badge /
+ * mono `CYCLE · JUL–DEC · EXPIRES 31 DEC` (urgent within lead time) and the
+ * benefit's own end date / remaining / ›. A used-up credit is greyed and shows
+ * the next period with the date it opens.
+ */
+function CreditRow({ benefit: b, cv, holding, onOpen }: { benefit: Benefit; cv: CreditView; holding: HoldingView["holding"]; onOpen: () => void }) {
   const { data, today } = useApp();
+  const s = cv.status;
   const quantified = b.amount !== null && b.cycle !== "per_use" && b.cycle !== "none";
   const expiringSoon = s.daysToExpiry !== null && s.daysToExpiry <= data.settings.creditLeadDays && (s.remaining ?? 1) > 0;
-  const state = !s.active ? (b.ends_on && today > b.ends_on ? "Ended" : "Not started") : null;
+  const greyed = isGreyed(cv);
+  const ends = cv.state !== "ended" && benefitEndsText(b);
+  const amount = !quantified ? b.amount : cv.state === "used_upcoming" || cv.state === "not_started" ? b.amount : cv.state === "open" ? s.remaining : 0;
   return (
     <Row
       id={`benefit-${b.id}`}
       ariaLabel={b.name}
-      title={benefitShortName(b)}
-      badges={<FactBadges fact={b} />}
+      testId={`credit-row-${b.id}`}
+      title={<span className={greyed ? "text-muted" : ""}>{benefitShortName(b)}</span>}
+      badges={
+        <>
+          <EnrollmentBadge e={enrollmentView(b, holding, data.enrollments, today)} />
+          <FactBadges fact={b} />
+        </>
+      }
       sub={
-        <span className="font-mono text-[11px] tracking-wider uppercase">
-          {CYCLE_LABEL[b.cycle]}
-          {state ? ` · ${state}` : s.period.expiry && (
-            <>
-              {" · "}
-              <span className={expiringSoon ? "font-bold text-urgent" : ""}>{shortDate(s.period.expiry, today)}</span>
-            </>
-          )}
+        <span className="font-mono text-[11px] tracking-wider uppercase" data-testid={`credit-sub-${b.id}`} data-state={cv.state}>
+          <span className="block whitespace-normal">
+            <PeriodLine benefit={b} cv={cv} cycleLabel={CYCLE_LABEL[b.cycle]} today={today} urgent={expiringSoon} />
+          </span>
+          {ends && <span className="block truncate">{ends}</span>}
         </span>
       }
-      amount={<span data-testid={`remaining-${b.id}`}>{quantified ? money(s.remaining) : money(b.amount)}</span>}
+      amount={
+        <span data-testid={`remaining-${b.id}`} className={greyed ? "font-normal text-muted" : ""}>
+          {money(amount)}
+        </span>
+      }
       chevron
       onClick={onOpen}
     />

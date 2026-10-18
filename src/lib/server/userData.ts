@@ -36,9 +36,10 @@ function parseJson<T>(s: string, fallback: T): T {
 export async function loadUserData(prisma: PrismaClient, profileId: string): Promise<UserData> {
   await ensureProfile(prisma, profileId);
   const where = { profileId };
-  const [holdings, usages, payments, afEvents, lifecycle, points, activations, dismissals, mutes, settings] = await Promise.all([
+  const [holdings, usages, enrollments, payments, afEvents, lifecycle, points, activations, dismissals, mutes, settings] = await Promise.all([
     prisma.holding.findMany({ where, orderBy: [{ approvalDate: "asc" }, { id: "asc" }] }),
     prisma.benefitUsage.findMany({ where, orderBy: [{ date: "asc" }, { createdAt: "asc" }] }),
+    prisma.benefitEnrollment.findMany({ where, orderBy: [{ enrolledOn: "asc" }, { id: "asc" }] }),
     prisma.paymentRecord.findMany({ where }),
     prisma.annualFeeEvent.findMany({ where, orderBy: { postedDate: "asc" } }),
     prisma.lifecycleEvent.findMany({ where, orderBy: { date: "asc" } }),
@@ -73,6 +74,12 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
       valueOverride: u.valueOverride,
       date: u.date,
       note: u.note,
+    })),
+    enrollments: enrollments.map((e) => ({
+      id: e.id,
+      holdingId: e.holdingId,
+      benefitId: e.benefitId,
+      enrolledOn: e.enrolledOn,
     })),
     payments: payments.map((p) => ({
       id: p.id,
@@ -176,6 +183,7 @@ export function importStatements(
   }
   for (const h of data.holdings) ops.push(upsertSql("Holding", { ...h, profileId, updatedAt: now }));
   for (const u of data.usages) ops.push(upsertSql("BenefitUsage", { ...u, profileId }));
+  for (const e of data.enrollments) ops.push(upsertSql("BenefitEnrollment", { ...e, profileId }));
   for (const p of data.payments) ops.push(upsertSql("PaymentRecord", { ...p, profileId }, ["holdingId", "statementMonth"]));
   for (const e of data.afEvents) ops.push(upsertSql("AnnualFeeEvent", { ...e, profileId }));
   for (const e of data.lifecycle) ops.push(upsertSql("LifecycleEvent", { ...e, profileId }));

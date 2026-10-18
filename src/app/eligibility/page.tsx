@@ -1,21 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { useApp } from "@/components/AppState";
 import { use524 } from "@/components/derived";
-import { Badge, CELL, Empty, Field, Group, GroupLabel, PageTitle, Provenance, Row } from "@/components/ui";
+import { Badge, CELL, Empty, Group, GroupLabel, PageTitle, Provenance, Row } from "@/components/ui";
 import { shortDate } from "@/lib/domain/dates";
-import { evaluateRule } from "@/lib/domain/rules";
 
 export default function EligibilityPage() {
-  const { catalog, data, today } = useApp();
+  const { today } = useApp();
   const { status, rule } = use524();
-  const [ruleId, setRuleId] = useState(catalog.rules[0]?.id ?? "");
-  const selected = catalog.rules.find((r) => r.id === ruleId);
-  const evaluation = useMemo(
-    () => (selected ? evaluateRule(selected, data.holdings, catalog, today) : null),
-    [selected, data.holdings, catalog, today],
-  );
   const max = Math.max(5, ...status.timeline.map((t) => t.count));
 
   return (
@@ -79,38 +71,9 @@ export default function EligibilityPage() {
         ))}
       </Group>
 
-      <GroupLabel>Considering a card?</GroupLabel>
-      <Group>
-        <li className={CELL}>
-          <Field label="Issuer rule">
-            <select value={ruleId} onChange={(e) => setRuleId(e.target.value)}>
-              {catalog.rules.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.issuer.replace("_", " ")} — {r.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </li>
-        {selected && evaluation && (
-          <li className={`${CELL} flex flex-col gap-1.5 text-sm`} aria-live="polite">
-            <p className="flex flex-wrap items-center gap-2">
-              <Badge tone={evaluation.outcome === "pass" ? "ok" : evaluation.outcome === "fail" ? "danger" : "info"}>
-                {evaluation.outcome === "pass" ? "Pass" : evaluation.outcome === "fail" ? "Fail" : "Check manually"}
-              </Badge>
-              <span className="text-muted">Affects {selected.effect === "bonus" ? "the welcome bonus" : "approval"}</span>
-              <Provenance fact={selected} description={selected.description} />
-            </p>
-            <ul className="flex flex-col gap-0.5">
-              {evaluation.reasons.map((r) => (
-                <li key={r}>{r}</li>
-              ))}
-            </ul>
-            <p className="text-warn">
-              Verify before applying · checked <span className="font-mono">{shortDate(selected.last_verified)}</span>
-            </p>
-          </li>
-        )}
+      {/* The per-card checker lives on its own page (docs/SPEC-v7-phone-feedback.md §4). */}
+      <Group className="mt-5">
+        <Row href="/apply" title="Should I apply?" sub="Pick a card: approval and welcome-bonus verdict" chevron testId="apply-link" />
       </Group>
     </div>
   );

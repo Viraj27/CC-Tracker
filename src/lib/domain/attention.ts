@@ -1,7 +1,8 @@
 import type { Benefit, Catalog } from "../catalog/schema";
 import { addDays, diffDays, formatDate, quarterOf } from "./dates";
 import { benefitShortName, cardFor, holdingName } from "./holdings";
-import { benefitStatus } from "./periods";
+import { enrollmentView } from "./enrollment";
+import { benefitStatus, isBenefitActive } from "./periods";
 import { paymentSchedule } from "./payments";
 import { nextAfDate } from "./roi";
 import { isActivated, quarterView } from "./rotating";
@@ -151,6 +152,38 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
         date: s.period.expiry!,
         href: `${href}#benefit-${b.id}`,
         severity: s.daysToExpiry <= 7 ? "critical" : "warning",
+      };
+      items.push(item);
+      if (!b.verified) unverified(`${card!.name} — ${b.name}`, item);
+    }
+
+    // Re-enrollment due within lead time, or lapsed (docs/SPEC-v7-phone-feedback.md §1.3).
+    // Muted with the benefit's own Reminders switch.
+    for (const b of card?.benefits ?? []) {
+      if (!isBenefitActive(b, today)) continue;
+      const e = enrollmentView(b, h, data.enrollments, today);
+      if (!e.lapsesOn || (e.state !== "enrolled" && e.state !== "lapsed")) continue;
+      const days = diffDays(today, e.lapsesOn);
+      if (days > settings.creditLeadDays) continue;
+      const lapsed = e.state === "lapsed";
+      const item: AttentionItem = {
+        ...occ("enroll", h.id, e.lapsesOn, b.id),
+        periodNoun: null,
+        mute: { kind: "benefit", benefitId: b.id },
+        kind: "enroll",
+        holdingId: h.id,
+        title: `${name}: re-enroll in ${b.name}`,
+        cardName: name,
+        label: `Re-enroll in ${b.name}`,
+        short: `Re-enroll: ${benefitShortName(b)}`,
+        amount: null,
+        benefitId: b.id,
+        benefitName: b.name,
+        detail: `${lapsed ? "Enrollment lapsed" : "Enrollment lapses"} ${formatDate(e.lapsesOn)}${b.how_to_use ? ` · ${b.how_to_use}` : ""}`,
+        daysUntil: days,
+        date: e.lapsesOn,
+        href: `${href}#benefit-${b.id}`,
+        severity: "warning",
       };
       items.push(item);
       if (!b.verified) unverified(`${card!.name} — ${b.name}`, item);

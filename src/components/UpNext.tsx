@@ -8,7 +8,7 @@ import type { HiddenItem } from "@/lib/domain/skips";
 import { skipThisLabel, targetOf } from "./CardSheets";
 import { useApp } from "./AppState";
 import { useHoldingViews } from "./derived";
-import { useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
+import { useAddEnrollment, useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
 import { useSheet } from "./Sheet";
 import { Button, CardBar, CardSwatch, Empty, Group, GroupLabel, Row, usd } from "./ui";
 
@@ -25,12 +25,15 @@ function figures(a: AttentionItem, today: string) {
 function usePrimary(item: AttentionItem): { short: string; long: string; run: () => void } {
   const setPaid = useSetPaid();
   const setActivated = useSetActivated();
+  const addEnrollment = useAddEnrollment();
   const sheet = useSheet();
   switch (item.kind) {
     case "payment":
       return { short: "Paid", long: "Mark paid", run: () => setPaid(item.holdingId, item.month!, item.date, true) };
     case "rotating":
       return { short: "Activate", long: "Activate", run: () => setActivated(item.holdingId, item.quarter!, true) };
+    case "enroll":
+      return { short: "Enrolled", long: "Mark enrolled", run: () => addEnrollment(item.holdingId, item.benefitId!) };
     case "credit":
       // Logging needs an amount: open the credit sheet (chips, remaining pre-selected).
       return { short: "Log", long: "Log", run: () => sheet.open({ type: "item", item }) };

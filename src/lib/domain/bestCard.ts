@@ -19,6 +19,15 @@ export interface RankedCard {
   conditions: string[];
   verified: boolean;
   source: "base" | "rotating";
+  /**
+   * `portal`: earned only when booked through the issuer's portal (`portalName`).
+   * `off`: everywhere else. A card gets a portal row only when it beats its off-portal rate
+   * (docs/SPEC-v7-phone-feedback.md §5).
+   */
+  channel: "portal" | "off";
+  portalName?: string;
+  /** The off-portal row of a card that also has a portal row: "Booked direct". */
+  bookedDirect?: boolean;
   /** Shown when a rotating bonus applies but the quarter isn't activated. */
   hint?: string;
   /** A rotating bonus matches this quarter but the owner turned its activation reminders off. */
@@ -39,11 +48,16 @@ export function centsPerPoint(
   return catalog.programs.find((x) => x.id === programId)?.default_cents_per_point ?? 1;
 }
 
-/** Best base earn rate for a category on a card; falls back to the card's "other" rate. */
-export function baseRate(card: Card, category: SpendCategory): EarnRate | null {
-  const usable = card.earn_rates.filter((r) => r.rate !== null);
+const isPortal = (r: EarnRate) => r.channel === "portal";
+
+/**
+ * Best base earn rate for a category on a card; falls back to the card's "other" rate.
+ * `portal: true` → only portal rates (no fallback); `portal: false` → only rates earned outside a portal.
+ */
+export function baseRate(card: Card, category: SpendCategory, opts: { portal?: boolean } = {}): EarnRate | null {
+  const usable = card.earn_rates.filter((r) => r.rate !== null && (opts.portal === undefined || isPortal(r) === opts.portal));
   const matching = usable.filter((r) => r.categories.includes(category));
-  const pool = matching.length ? matching : usable.filter((r) => r.categories.includes("other"));
+  const pool = matching.length || opts.portal ? matching : usable.filter((r) => r.categories.includes("other"));
   return pool.sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0))[0] ?? null;
 }
 
@@ -69,7 +83,7 @@ export function rankCards(
     const card = cardFor(h, catalog);
     if (!card) continue;
     const cpp = centsPerPoint(card.rewards_program, catalog, settings, points);
-    const base = baseRate(card, category);
+    const base = baseRate(card, category, { portal: false });
     let best: RankedCard | null = base
       ? {
           holdingId: h.id,
@@ -83,6 +97,7 @@ export function rankCards(
           conditions: [base.conditions, base.cap].filter((x): x is string => !!x),
           verified: base.verified,
           source: "base",
+          channel: "off",
         }
       : null;
 
@@ -107,6 +122,7 @@ export function rankCards(
               conditions: [program.rate.cap, "Quarter activated"].filter((x): x is string => !!x),
               verified: program.rate.verified && qv.entry!.verified,
               source: "rotating",
+              channel: "off",
             };
           }
         } else if (best) {
@@ -115,7 +131,28 @@ export function rankCards(
         if (best && isMuted(mutes, h.id, "rotating")) best.remindersOff = true;
       }
     }
+    const portal = baseRate(card, category, { portal: true });
+    if (portal && portal.rate! > (best?.rate ?? 0)) {
+      out.push({
+        holdingId: h.id,
+        name: holdingName(h, card),
+        brandColor: card.brand_color,
+        rate: portal.rate!,
+        unit: portal.unit,
+        centsPerDollar: portal.rate! * cpp,
+        cpp,
+        label: portal.label,
+        conditions: [portal.conditions, portal.cap].filter((x): x is string => !!x),
+        verified: portal.verified,
+        source: "base",
+        channel: "portal",
+        portalName: portal.portal_name,
+      });
+      if (best) best.bookedDirect = true;
+    }
     if (best) out.push(best);
   }
-  return out.sort((a, b) => b.centsPerDollar - a.centsPerDollar || a.name.localeCompare(b.name));
+  return out.sort(
+    (a, b) => b.centsPerDollar - a.centsPerDollar || a.name.localeCompare(b.name) || (a.channel === "portal" ? -1 : 1),
+  );
 }

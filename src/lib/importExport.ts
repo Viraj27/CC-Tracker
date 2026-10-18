@@ -14,10 +14,10 @@ import { muteKey, occurrenceKey } from "./domain/skips";
 
 export const EXPORT_FORMAT = "cc-tracker-export";
 /**
- * 2 (v4.1) adds per-holding `skips` and `mutes`. Version 1 files (no skips or
- * mutes) still import: both lists default to empty.
+ * 2 (v4.1) adds per-holding `skips` and `mutes`; 3 (v7) adds per-holding
+ * `enrollments`. Older files still import: missing lists default to empty.
  */
-export const EXPORT_VERSION = 2;
+export const EXPORT_VERSION = 3;
 
 const monthKey = z.string().regex(/^\d{4}-\d{2}$/, "expected YYYY-MM");
 const nullable = <T extends z.ZodType>(t: T) => t.nullable().optional().default(null);
@@ -30,6 +30,11 @@ const UsageIn = z.object({
   valueOverride: nullable(z.number()),
   date: isoDate,
   note: nullable(z.string()),
+});
+const EnrollmentIn = z.object({
+  id: z.string().optional(),
+  benefitId: z.string(),
+  enrolledOn: isoDate,
 });
 const PaymentIn = z.object({
   id: z.string().optional(),
@@ -66,12 +71,12 @@ const ActivationIn = z.object({
 const SkipIn = z
   .object({
     id: z.string().optional(),
-    kind: z.enum(["af", "credit", "payment", "rotating", "unverified"]),
+    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "unverified"]),
     benefitId: nullable(z.string()),
     period: z.string().min(1),
     date: isoDate,
   })
-  .refine((s) => s.kind !== "credit" || s.benefitId, { message: "credit skips need a benefitId" });
+  .refine((s) => (s.kind !== "credit" && s.kind !== "enroll") || s.benefitId, { message: "credit and enroll skips need a benefitId" });
 const MuteIn = z
   .object({
     id: z.string().optional(),
@@ -97,6 +102,7 @@ const HoldingIn = z
     paymentDueDay: nullable(z.number().int().min(1).max(31)),
     notes: nullable(z.string()),
     usages: z.array(UsageIn).default([]),
+    enrollments: z.array(EnrollmentIn).default([]),
     payments: z.array(PaymentIn).default([]),
     afEvents: z.array(AfEventIn).default([]),
     lifecycle: z.array(LifecycleIn).default([]),
@@ -149,6 +155,7 @@ export function parseImport(raw: unknown): { data: UserData; hasSettings: boolea
   const data: UserData = {
     holdings: [],
     usages: [],
+    enrollments: [],
     payments: [],
     afEvents: [],
     lifecycle: [],
@@ -160,9 +167,10 @@ export function parseImport(raw: unknown): { data: UserData; hasSettings: boolea
   };
   for (const h of f.holdings) {
     const id = h.id ?? stableId("h", h.catalogCardId ?? h.nickname, h.approvalDate);
-    const { usages, payments, afEvents, lifecycle, activations, skips, mutes, ...rest } = h;
+    const { usages, enrollments, payments, afEvents, lifecycle, activations, skips, mutes, ...rest } = h;
     data.holdings.push({ ...rest, id });
     for (const u of usages) data.usages.push({ ...u, holdingId: id, id: u.id ?? stableId("u", id, u) });
+    for (const e of enrollments) data.enrollments.push({ ...e, holdingId: id, id: e.id ?? stableId("en", id, e) });
     for (const p of payments) data.payments.push({ ...p, holdingId: id, id: p.id ?? stableId("p", id, p.statementMonth) });
     for (const e of afEvents) data.afEvents.push({ ...e, holdingId: id, id: e.id ?? stableId("af", id, e) });
     for (const e of lifecycle) data.lifecycle.push({ ...e, holdingId: id, id: e.id ?? stableId("lc", id, e) });
@@ -201,6 +209,7 @@ export function buildExport(data: UserData, exportedAt: string) {
     holdings: data.holdings.map((h) => ({
       ...h,
       usages: data.usages.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
+      enrollments: data.enrollments.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       payments: data.payments.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       afEvents: data.afEvents.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       lifecycle: data.lifecycle.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),

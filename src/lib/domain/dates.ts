@@ -134,3 +134,12 @@ export function dayDate(iso: string, today?: string): string {
   const { y, m, d } = parseIso(iso);
   return `${DOW[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${shortDate(iso, today)}`;
 }
+
+/** A period's months: `OCT`, `JUL–DEC`, with the year when it isn't `today`'s (`JAN–JUN 2027`, `JUN 2026–JUN 2027`). */
+export function periodRange(start: string, end: string, today?: string): string {
+  const a = parseIso(start);
+  const b = parseIso(end);
+  if (a.y !== b.y) return `${MON[a.m - 1]} ${a.y}–${MON[b.m - 1]} ${b.y}`;
+  const year = today !== undefined && parseIso(today).y === a.y ? "" : ` ${a.y}`;
+  return a.m === b.m ? `${MON[a.m - 1]}${year}` : `${MON[a.m - 1]}–${MON[b.m - 1]}${year}`;
+}

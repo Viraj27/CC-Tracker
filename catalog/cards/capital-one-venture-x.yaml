@@ -22,16 +22,20 @@ earn_rates:
     rate: 10
     unit: miles_per_dollar
     conditions: Booked through Capital One Travel.
+    channel: portal
+    portal_name: Capital One Travel
     source_url: https://www.capitalone.com/credit-cards/venture-x/
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
   - categories: [airfare]
     label: Flights and vacation rentals via Capital One Travel
     rate: 5
     unit: miles_per_dollar
     conditions: Booked through Capital One Travel.
+    channel: portal
+    portal_name: Capital One Travel
     source_url: https://www.capitalone.com/credit-cards/venture-x/
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
   - categories: [other]
     label: All other purchases
@@ -83,19 +87,23 @@ benefits:
     description: Access to Capital One Lounges and Landings plus 1,300+ Priority Pass lounges.
     cycle: none
     enrollment_required: true
+    enrollment_lasts: holding
     how_to_use: Enroll in Priority Pass through Capital One (primary cardholder).
     source_url: https://www.capitalone.com/credit-cards/venture-x/
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
+    note: Capital One says eligible cardholders "will need to enroll" but not whether it is one-time; treated as one-time (duration unverified).
   - id: hertz-status
     kind: status
     name: Hertz status upgrade
     description: Complimentary Hertz Gold Plus Rewards status upgrade.
     cycle: none
     enrollment_required: true
+    enrollment_lasts: holding
     source_url: https://www.capitalone.com/credit-cards/venture-x/
-    last_verified: 2026-10-16
+    last_verified: 2026-10-18
     verified: true
+    note: Capital One says cardholders "must enroll" via the Benefits tab but not whether it is one-time; treated as one-time (duration unverified).
   - id: cell-phone-protection
     kind: protection
     name: Cell phone protection
