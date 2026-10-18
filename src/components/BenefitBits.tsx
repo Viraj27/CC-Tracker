@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import type { Benefit } from "@/lib/catalog/schema";
 import { periodRange, shortDate } from "@/lib/domain/dates";
 import type { EnrollmentView } from "@/lib/domain/enrollment";
@@ -26,7 +27,8 @@ export const isGreyed = (cv: CreditView) => cv.state !== "open";
 
 /**
  * The period line, e.g. `SEMIANNUAL · JUL–DEC · EXPIRES 31 DEC`, or for a used-up
- * credit `SEMIANNUAL · JAN–JUN 2027 · OPENS 1 JAN 2027`. `urgent` marks the expiry.
+ * credit `SEMIANNUAL · JAN–JUN 2027 · OPENS 1 JAN`. `urgent` marks the expiry.
+ * The parts are wrap points: callers that allow wrapping get whole parts per line.
  */
 export function PeriodLine({ benefit: b, cv, cycleLabel, today, urgent }: { benefit: Benefit; cv: CreditView; cycleLabel: string; today: string; urgent: boolean }) {
   const p = cv.shown;
@@ -42,7 +44,8 @@ export function PeriodLine({ benefit: b, cv, cycleLabel, today, urgent }: { bene
       break;
     case "used_upcoming":
     case "not_started":
-      tail = `OPENS ${shortDate(cv.opensOn, today)}`;
+      // The range before it already carries the year: `JAN–JUN 2027 · OPENS 1 JAN`.
+      tail = `OPENS ${shortDate(cv.opensOn, range ? cv.opensOn ?? today : today)}`;
       break;
     case "used_final":
       tail = "USED";
@@ -51,11 +54,16 @@ export function PeriodLine({ benefit: b, cv, cycleLabel, today, urgent }: { bene
       tail = "ENDED";
       break;
   }
-  const parts = [cycleLabel.toUpperCase(), cv.state === "ended" || cv.state === "used_final" ? null : range].filter(Boolean);
+  const parts: React.ReactNode[] = [cycleLabel.toUpperCase(), cv.state === "ended" || cv.state === "used_final" ? null : range, tail].filter(Boolean);
+  // Each part stays whole, so a line too long for a 390px row wraps between parts, never inside a date.
   return (
     <>
-      {parts.join(" · ")}
-      {tail && <> · {tail}</>}
+      {parts.map((part, i) => (
+        <Fragment key={i}>
+          {i > 0 && "\u00a0· "}
+          <span className="whitespace-nowrap">{part}</span>
+        </Fragment>
+      ))}
     </>
   );
 }

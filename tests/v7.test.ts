@@ -265,7 +265,8 @@ describe("Best card: portal vs. direct rows", () => {
       ["flat", "off", 2],
     ]);
     const [portal, direct] = rank("airfare");
-    expect(portal).toMatchObject({ portalName: "Demo Travel", bookedDirect: undefined });
+    expect(portal).toMatchObject({ portalName: "Demo Travel" });
+    expect(portal.bookedDirect).toBeUndefined();
     expect(direct).toMatchObject({ bookedDirect: true, label: "Flights and hotels booked direct" });
   });
 

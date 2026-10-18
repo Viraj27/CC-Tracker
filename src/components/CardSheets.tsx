@@ -395,7 +395,8 @@ function BenefitSheet({ view, benefit }: { view: HoldingView; benefit: Benefit }
               cv.state === "used_upcoming" || cv.state === "not_started"
                 ? [
                     { label: "Left", value: money(s.active ? s.remaining : 0), testId: "sheet-left" },
-                    { label: "Opens", value: shortDate(cv.opensOn, today) },
+                    // No year: the period line below carries it, and "1 JAN 2027" doesn't fit half a 390px sheet.
+                    { label: "Opens", value: shortDate(cv.opensOn, cv.opensOn ?? undefined) },
                   ]
                 : [
                     { label: "Left", value: money(s.remaining), testId: "sheet-left" },

@@ -271,7 +271,7 @@ function CreditRow({ benefit: b, cv, holding, onOpen }: { benefit: Benefit; cv: 
       }
       sub={
         <span className="font-mono text-[11px] tracking-wider uppercase" data-testid={`credit-sub-${b.id}`} data-state={cv.state}>
-          <span className="block truncate">
+          <span className="block whitespace-normal">
             <PeriodLine benefit={b} cv={cv} cycleLabel={CYCLE_LABEL[b.cycle]} today={today} urgent={expiringSoon} />
           </span>
           {ends && <span className="block truncate">{ends}</span>}

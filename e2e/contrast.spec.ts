@@ -10,6 +10,7 @@ const PAGES = [
   "/cards/demo-reserve",
   "/up-next",
   "/eligibility",
+  "/apply",
   "/payments",
   "/rotating",
   "/best-card",
@@ -65,6 +66,23 @@ test.describe("contrast", () => {
         await openSheet("edit sheet", () => page.getByRole("button", { name: "Edit", exact: true }).click());
         await gotoReady(page, "/cards/demo-flex");
         await openSheet("rotating sheet", () => page.getByTestId("rotating-row").click());
+
+        // v7 (docs/SPEC-v7-phone-feedback.md): a verdict on Should I apply?, and StubHub used up
+        // (greyed row, sheet with the disabled "Opens …" pill and the enrollment line).
+        await gotoReady(page, "/apply");
+        await page.getByTestId("apply-card").selectOption("capital-one-venture-x");
+        await expect(page.getByTestId("verdict-bonus")).toBeVisible();
+        await check("/apply (verdict)");
+        await gotoReady(page, "/cards/demo-reserve");
+        await page.getByRole("button", { name: "StubHub / viagogo credit", exact: true }).click();
+        await sheetSettled(page);
+        await sheet(page).getByRole("button", { name: "Log $150" }).click();
+        await expect(sheet(page).getByTestId("log-primary")).toBeDisabled();
+        await check("StubHub sheet (used up)");
+        await page.keyboard.press("Escape");
+        await expect(sheet(page)).toHaveCount(0);
+        await expect(page.getByTestId("credit-sub-stubhub-credit")).toHaveAttribute("data-state", /^used_/);
+        await check("/cards/demo-reserve (StubHub greyed)");
 
         // Up next: a swiped row (Skip + action showing), an item sheet, and the greyed skipped list (docs/SPEC-v4.1-skip.md).
         await gotoReady(page, "/up-next");

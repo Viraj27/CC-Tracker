@@ -29,7 +29,7 @@ Some benefits need enrolling again after a while. The catalog says how long one 
 - **When an enrollment lapses:**
   - the badge comes back as **Re-enroll**;
   - the sheet shows `Enrolled Oct 18, 2025 · lapsed Oct 18, 2026` and **Mark enrolled**;
-  - Up next shows a `Re-enroll` row (title / card / benefit). It's raised `creditLeadDays` before the lapse date and stays until marked. It can be skipped and muted per holding, like rotating activation.
+  - Up next shows a `Re-enroll` row (title / card / benefit). It's raised `creditLeadDays` before the lapse date and stays until marked. It can be skipped like rotating activation. It's muted with the benefit's existing **Reminders** switch (mute kind `benefit`, per holding and benefit), not a separate mute: turning a benefit's reminders off silences both its credit and its Re-enroll rows.
 - **Data:** new Prisma model `BenefitEnrollment { id, holdingId, benefitId, enrolledOn }`. Keep the full history (no unique constraint); the latest one decides the state. Include it in import/export, with a schema version bump; older exports import with no enrollments.
 
 ### 1.4 Benefit end date
@@ -39,7 +39,8 @@ Some benefits need enrolling again after a while. The catalog says how long one 
 
 ### 1.5 Period shown plainly
 - The row sub-line becomes `SEMIANNUAL · JUL–DEC · EXPIRES DEC 31`. Within `creditLeadDays` it is urgent, as today.
-- The sheet's **Expires** stat becomes two stats: **Period** (`Jul–Dec 2026`) and **Expires** (`Dec 31, 2026`).
+- The sheet keeps its two key figures, **Left** and **Expires** (**Opens** while greyed), and shows the period as a line under the figures (`SEMIANNUAL · JUL–DEC · EXPIRES 31 DEC`, or `NEXT: SEMIANNUAL · JAN–JUN 2027 · OPENS 1 JAN` while greyed).
+  - *Deviation (as built, deliberate):* this replaces the original plan of swapping **Left** for **Period** and **Expires** stats.
 
 ## 2. Upcoming periods (greyed out)
 ### 2.1 The problem today
