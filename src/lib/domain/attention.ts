@@ -8,6 +8,7 @@ import { nextAfDate } from "./roi";
 import { isActivated, quarterView } from "./rotating";
 import { occurrenceKey, type Occurrence } from "./skips";
 import type { MuteKind, SkipKind, UserData } from "./types";
+import { bonusLabel, expectedPostBy, leftToSpend, offerDeadline, offerFor, offerMetDate, offerStatus, OVERDUE_TAIL_DAYS } from "./welcomeBonus";
 
 export type AttentionKind = SkipKind;
 
@@ -40,6 +41,8 @@ export interface AttentionItem {
   short: string;
   /** USD at stake (fee, credit remaining), when known. */
   amount: number | null;
+  /** Shown in place of `amount` when the stake isn't dollars, e.g. `60K pts`. */
+  amountText?: string;
   /** Credits: the benefit to log against. */
   benefitId?: string;
   benefitName?: string;
@@ -187,6 +190,72 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
       };
       items.push(item);
       if (!b.verified) unverified(`${card!.name} — ${b.name}`, item);
+    }
+
+    // Welcome bonus (docs/SPEC-v6-welcome-bonus.md §3): the spend deadline, then a
+    // bonus that was met but hasn't posted. Skippable; never muted.
+    const offer = offerFor(data.welcomeOffers, h.id);
+    if (offer) {
+      const status = offerStatus(offer, h, today);
+      const deadline = offerDeadline(offer, h);
+      const bonus = bonusLabel(offer);
+      if ((status === "earning" || status === "overdue") && deadline) {
+        const days = diffDays(today, deadline.date);
+        if (days <= settings.subLeadDays && days >= -OVERDUE_TAIL_DAYS) {
+          const left = leftToSpend(offer);
+          const short =
+            status === "overdue"
+              ? "Deadline passed"
+              : left === null || left === 0
+                ? "Confirm bonus met"
+                : `Spend ${usd(left)}${offer.spentSoFar ? " more" : ""}`;
+          items.push({
+            ...occ("sub", h.id, deadline.date),
+            periodNoun: null,
+            mute: null,
+            kind: "sub",
+            holdingId: h.id,
+            title: `${name}: ${short} for the ${bonus} welcome bonus by ${formatDate(deadline.date)}${deadline.estimated ? " (est.)" : ""}`,
+            cardName: name,
+            label: `${short} for the ${bonus} welcome bonus`,
+            short,
+            amount: null,
+            amountText: bonus,
+            detail:
+              status === "overdue"
+                ? "Mark it met if you made the spend in time, or missed."
+                : `Welcome bonus deadline${deadline.estimated ? " (estimated from the approval date; check the issuer's tracker)" : ""}.`,
+            daysUntil: days,
+            date: deadline.date,
+            href: `${href}#bonus`,
+            severity: days <= 7 ? "critical" : "warning",
+          });
+        }
+      }
+      if (status === "met") {
+        const met = offerMetDate(offer, h)!;
+        const by = expectedPostBy(offer, h, settings)!;
+        if (today >= by) {
+          items.push({
+            ...occ("subpost", h.id, met),
+            periodNoun: null,
+            mute: null,
+            kind: "subpost",
+            holdingId: h.id,
+            title: `${name}: ${bonus} welcome bonus not posted yet (expected by ${formatDate(by)})`,
+            cardName: name,
+            label: `${bonus} welcome bonus not posted`,
+            short: "Bonus not posted",
+            amount: null,
+            amountText: bonus,
+            detail: "Check the account, then mark it posted. Contact the issuer if it's missing.",
+            daysUntil: diffDays(today, by),
+            date: by,
+            href: `${href}#bonus`,
+            severity: "warning",
+          });
+        }
+      }
     }
 
     // Payments due within lead time, and past-due ones.

@@ -2,7 +2,7 @@ import type { Card, Catalog, Rule } from "../catalog/schema";
 import { addMonths, formatDate } from "./dates";
 import { countedAccounts } from "./fiveTwentyFour";
 import { cardFor, holdingAccountType, holdingIssuer, holdingName } from "./holdings";
-import type { Holding } from "./types";
+import type { Holding, WelcomeOffer } from "./types";
 
 export type RuleOutcome = "pass" | "fail" | "manual";
 
@@ -14,12 +14,17 @@ export interface RuleEvaluation {
   eligibleFrom?: string;
 }
 
-/** Evaluate an issuer rule against the owner's history as of `today`. */
+/**
+ * Evaluate an issuer rule against the owner's history as of `today`. Bonus
+ * windows count from the day a welcome bonus posted when `offers` knows it,
+ * else from the account's opening date.
+ */
 export function evaluateRule(
   rule: Rule,
   holdings: Holding[],
   catalog: Pick<Catalog, "cards">,
   today: string,
+  offers: WelcomeOffer[] = [],
 ): RuleEvaluation {
   const check = rule.check;
   const name = (h: Holding) => holdingName(h, cardFor(h, catalog));
@@ -56,21 +61,32 @@ export function evaluateRule(
           reasons.push(`Currently hold: ${held.map(name).join(", ")}.`);
         }
       }
+      // A bonus rule counts from the day the bonus posted, when the owner recorded it.
+      const posted = (h: Holding) => (rule.effect === "bonus" ? (offers.find((o) => o.holdingId === h.id)?.postedDate ?? null) : null);
+      const countedFrom = (h: Holding) => posted(h) ?? h.approvalDate;
       const cutoff = addMonths(today, -check.months);
-      const recent = inFamily.filter((h) => h.approvalDate > cutoff);
+      const recent = inFamily.filter((h) => countedFrom(h) > cutoff);
       if (recent.length) {
         pass = false;
         for (const h of recent) {
+          const p = posted(h);
           reasons.push(
-            `${name(h)} opened ${formatDate(h.approvalDate)} — within ${check.months} months until ${formatDate(addMonths(h.approvalDate, check.months))}.`,
+            `${name(h)} ${p ? `bonus posted ${formatDate(p)}` : `opened ${formatDate(h.approvalDate)}`} — within ${check.months} months until ${formatDate(addMonths(countedFrom(h), check.months))}.`,
           );
         }
       }
-      reasons.push(
-        "Uses account opening dates as a stand-in for bonus dates (bonus tracking is out of scope for v1).",
-      );
+      if (rule.effect === "bonus") {
+        const known = inFamily.filter((h) => posted(h)).length;
+        reasons.push(
+          inFamily.length > 0 && known === inFamily.length
+            ? "Counted from the dates the welcome bonuses posted."
+            : known > 0
+              ? "Counted from the bonus posting date where you recorded one, else from the account opening date."
+              : "Uses account opening dates as a stand-in for bonus dates (record a posted welcome bonus to use its date).",
+        );
+      }
       if (pass) return { rule, outcome: "pass", reasons: [`No ${check.family} card currently held or opened in the last ${check.months} months.`, ...reasons] };
-      const from = heldBlocks ? undefined : recent.map((h) => addMonths(h.approvalDate, check.months)).sort().at(-1);
+      const from = heldBlocks ? undefined : recent.map((h) => addMonths(countedFrom(h), check.months)).sort().at(-1);
       return { rule, outcome: "fail", reasons, ...(from ? { eligibleFrom: from } : {}) };
     }
     case "lifetime_family": {
@@ -105,6 +121,7 @@ export function evaluateRule(
         ],
       };
     }
+    case "bonus_clawback_window":
     case "manual":
       return { rule, outcome: "manual", reasons: ["This rule cannot be checked automatically — read the description."] };
   }
@@ -167,10 +184,10 @@ export function checkApplication(
   holdings: Holding[],
   catalog: Pick<Catalog, "cards" | "rules">,
   today: string,
-  opts: { nll: boolean } = { nll: false },
+  opts: { nll: boolean; offers?: WelcomeOffer[] } = { nll: false },
 ): ApplyCheck {
   const evaluations = rulesForCard(card, catalog.rules).map((rule) => ({
-    ...evaluateRule(rule, holdings, catalog, today),
+    ...evaluateRule(rule, holdings, catalog, today, opts.offers),
     waived: opts.nll && !!rule.nll_waiver,
   }));
   return {

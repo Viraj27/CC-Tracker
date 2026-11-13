@@ -89,8 +89,40 @@ export interface RotatingActivation {
   date: string | null;
 }
 
-/** Kinds of Up next item a skip can apply to (mirrors AttentionKind). */
-export type SkipKind = "af" | "credit" | "payment" | "rotating" | "enroll" | "unverified";
+export type BonusUnit = "points" | "miles" | "usd";
+
+/**
+ * A card's welcome bonus offer (docs/SPEC-v6-welcome-bonus.md §2), at most one
+ * per holding. Spend is never logged: `spentSoFar` is an optional figure typed
+ * from the issuer's own tracker. Status and deadline are derived (welcomeBonus.ts).
+ */
+export interface WelcomeOffer {
+  id: string;
+  holdingId: string;
+  bonusAmount: number;
+  bonusUnit: BonusUnit;
+  /** Points program id; null = the card's `rewards_program`. */
+  program: string | null;
+  /** USD; null for "approved = bonus" offers. */
+  minSpend: number | null;
+  windowMonths: number | null;
+  /** Owner-set exact deadline; when null it is estimated from the approval date. */
+  deadline: string | null;
+  spentSoFar: number | null;
+  spentAsOf: string | null;
+  metDate: string | null;
+  postedDate: string | null;
+  /** What actually posted; null = `bonusAmount`. */
+  postedAmount: number | null;
+  outcome: "missed" | null;
+  note: string | null;
+}
+
+/**
+ * Kinds of Up next item a skip can apply to (mirrors AttentionKind). `sub` is
+ * a welcome bonus spend deadline, `subpost` a met bonus that hasn't posted.
+ */
+export type SkipKind = "af" | "credit" | "payment" | "rotating" | "enroll" | "sub" | "subpost" | "unverified";
 
 /**
  * "Skip" on one Up next occurrence (docs/SPEC-v4.1-skip.md). Hides only that
@@ -125,6 +157,12 @@ export interface Settings {
   afLeadDays: number;
   creditLeadDays: number;
   paymentLeadDays: number;
+  /** Welcome bonus: days before the spend deadline it shows in Up next. */
+  subLeadDays: number;
+  /** Welcome bonus: days after "Met" before "Bonus not posted" shows. */
+  subPostingDays: number;
+  /** Count a posted welcome bonus in the headline ROI. */
+  countBonusInRoi: boolean;
   perkValueOverrides: Record<string, number>;
   centsPerPoint: Record<string, number>;
   paymentTrackingStart: string | null;
@@ -134,6 +172,9 @@ export const DEFAULT_SETTINGS: Settings = {
   afLeadDays: 45,
   creditLeadDays: 30,
   paymentLeadDays: 7,
+  subLeadDays: 30,
+  subPostingDays: 56,
+  countBonusInRoi: false,
   perkValueOverrides: {},
   centsPerPoint: {},
   paymentTrackingStart: null,
@@ -143,6 +184,7 @@ export interface UserData {
   holdings: Holding[];
   usages: BenefitUsage[];
   enrollments: BenefitEnrollment[];
+  welcomeOffers: WelcomeOffer[];
   payments: PaymentRecord[];
   afEvents: AnnualFeeEvent[];
   lifecycle: LifecycleEvent[];

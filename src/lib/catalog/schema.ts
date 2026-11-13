@@ -200,6 +200,14 @@ export const RuleCheckSchema = z.discriminatedUnion("type", [
     max_open: z.number().int().positive(),
     counted_account_types: z.array(z.enum(["personal", "business"])),
   }),
+  z.object({
+    /**
+     * Closing or downgrading within `months` of opening risks losing the welcome
+     * bonus (docs/SPEC-v6-welcome-bonus.md §2.1). A warning on the card, never a verdict.
+     */
+    type: z.literal("bonus_clawback_window"),
+    months: z.number().int().positive(),
+  }),
   z.object({ type: z.literal("manual") }),
 ]);
 export type RuleCheck = z.infer<typeof RuleCheckSchema>;
@@ -209,8 +217,12 @@ export const RuleSchema = z
     id: z.string().regex(/^[a-z0-9-]+$/),
     name: z.string(),
     issuer: z.string(),
-    /** What the rule blocks: approval for a card, or only the welcome bonus. */
-    effect: z.enum(["approval", "bonus"]),
+    /**
+     * What the rule blocks: approval for a card, or only the welcome bonus.
+     * `close` rules warn before closing or downgrading a card instead; they use
+     * issuer `any` and never appear in Should I apply?.
+     */
+    effect: z.enum(["approval", "bonus", "close"]),
     description: z.string(),
     check: RuleCheckSchema,
     /** Which of the issuer's cards the rule applies to; absent = every card from `issuer`. */

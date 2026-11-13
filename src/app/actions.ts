@@ -110,6 +110,40 @@ export async function deleteEnrollment(id: string): Promise<UserData> {
   return snapshot();
 }
 
+// -------------------------------------------------------- welcome bonus --
+
+const OfferInput = z.object({
+  holdingId: z.string(),
+  bonusAmount: z.number().positive(),
+  bonusUnit: z.enum(["points", "miles", "usd"]),
+  program: optStr,
+  minSpend: z.number().positive().nullable().optional().default(null),
+  windowMonths: z.number().int().min(1).max(36).nullable().optional().default(null),
+  deadline: isoDate.nullable().optional().default(null),
+  spentSoFar: z.number().nonnegative().nullable().optional().default(null),
+  spentAsOf: isoDate.nullable().optional().default(null),
+  metDate: isoDate.nullable().optional().default(null),
+  postedDate: isoDate.nullable().optional().default(null),
+  postedAmount: z.number().nonnegative().nullable().optional().default(null),
+  outcome: z.literal("missed").nullable().optional().default(null),
+  note: optStr,
+});
+
+/** Create or replace a card's welcome offer (docs/SPEC-v6-welcome-bonus.md): one per holding. */
+export async function saveWelcomeOffer(input: z.input<typeof OfferInput>): Promise<UserData> {
+  const prisma = await prismaClient();
+  const { holdingId, ...o } = OfferInput.parse(input);
+  await ownHolding(holdingId);
+  await prisma.welcomeOffer.upsert({ where: { holdingId }, create: { ...o, holdingId, profileId }, update: o });
+  return snapshot();
+}
+
+export async function deleteWelcomeOffer(holdingId: string): Promise<UserData> {
+  const prisma = await prismaClient();
+  await prisma.welcomeOffer.deleteMany({ where: { holdingId, profileId } });
+  return snapshot();
+}
+
 // ------------------------------------------------------------ payments --
 
 export async function setPaymentPaid(input: {
@@ -152,7 +186,7 @@ export async function setActivation(input: { holdingId: string; quarter: string;
 const OccurrenceInput = z
   .object({
     holdingId: z.string(),
-    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "unverified"]),
+    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "sub", "subpost", "unverified"]),
     benefitId: z.string().nullable(),
     period: z.string().min(1),
   })
@@ -283,6 +317,9 @@ const SettingsInput = z.object({
   afLeadDays: z.number().int().min(0).max(365),
   creditLeadDays: z.number().int().min(0).max(365),
   paymentLeadDays: z.number().int().min(0).max(60),
+  subLeadDays: z.number().int().min(0).max(365),
+  subPostingDays: z.number().int().min(0).max(365),
+  countBonusInRoi: z.boolean(),
   perkValueOverrides: z.record(z.string(), z.number().nonnegative()),
   centsPerPoint: z.record(z.string(), z.number().positive()),
   paymentTrackingStart: z.string().regex(/^\d{4}-\d{2}$/).nullable(),
@@ -314,6 +351,7 @@ export async function importData(
       summary: `Imported ${data.holdings.length} card(s), ${data.usages.length} benefit use(s), ${data.payments.length} payment(s), ${data.points.length} points balance(s)${
         data.dismissals.length + data.mutes.length ? `, ${data.dismissals.length} skip(s), ${data.mutes.length} reminder mute(s)` : ""
       }${data.enrollments.length ? `, ${data.enrollments.length} enrollment(s)` : ""
+      }${data.welcomeOffers.length ? `, ${data.welcomeOffers.length} welcome offer(s)` : ""
       } (${mode}).`,
     };
   } catch (e) {

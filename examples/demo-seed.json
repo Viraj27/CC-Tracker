@@ -20,7 +20,16 @@
           "date": "2026-03-01",
           "note": "Demo train ticket"
         }
-      ]
+      ],
+      "welcomeOffer": {
+        "bonusAmount": 60000,
+        "bonusUnit": "points",
+        "minSpend": 4000,
+        "windowMonths": 3,
+        "metDate": "2025-03-20",
+        "postedDate": "2025-04-10",
+        "note": "Demo offer"
+      }
     },
     {
       "id": "demo-flex",

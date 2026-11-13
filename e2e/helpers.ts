@@ -10,6 +10,30 @@ export async function importDemo(page: Page) {
   await expect(page.getByRole("status")).toContainText("Imported 5 card(s)");
 }
 
+/** The local calendar date `n` days ago, as YYYY-MM-DD. */
+export function daysAgo(n: number): string {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Add a fake Delta Gold card with a welcome offer (60K miles for $3,000 in 3 months)
+ * through the Add card form; ends on its card page. `approvalDate` is YYYY-MM-DD.
+ */
+export async function addCardWithOffer(page: Page, approvalDate: string) {
+  await gotoReady(page, "/cards");
+  await page.getByLabel("Card product (catalog)").selectOption("amex-delta-skymiles-gold");
+  await page.getByLabel("Approval date", { exact: true }).fill(approvalDate);
+  await page.getByTestId("offer-fieldset").locator("summary").click();
+  await page.getByLabel("Bonus", { exact: true }).fill("60000");
+  await page.getByLabel("Bonus unit").selectOption("miles");
+  await page.getByLabel(/^Minimum spend/).fill("3000");
+  await page.getByLabel("Months to spend").fill("3");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByTestId("bonus-row")).toBeVisible();
+}
+
 /** Navigate and wait until the client has loaded its data and rendered the page heading. */
 export async function gotoReady(page: Page, url: string) {
   await page.goto(url);

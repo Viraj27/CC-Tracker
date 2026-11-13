@@ -1,10 +1,11 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
-// light + dark, 390px + desktop. Plus 5/24, the v4.1 skipped views and the v7 credit rows, benefit sheet and Should I apply?.
+// light + dark, 390px + desktop. Plus 5/24, the v4.1 skipped views, the v7 credit rows, benefit sheet and Should I apply?,
+// and the v6 welcome bonus (card row, sheet, Up next row).
 const out = path.join(__dirname, "..", "docs", "screenshots");
 const LYFT = "Demo Reserve: $10 Lyft in-app credit left";
 
@@ -80,6 +81,19 @@ test.describe("screenshots", () => {
           await page.getByTestId("up-next-strip").evaluate((el) => (el.scrollLeft = el.scrollWidth));
           await shot("up-next-strip-skipped");
         }
+
+        // v6 (docs/SPEC-v6-welcome-bonus.md): a fake card 68 days old with a 3-month offer, so its
+        // estimated deadline is about three weeks out: the card row, its sheet, and the Up next row.
+        await addCardWithOffer(page, daysAgo(68));
+        await page.waitForLoadState("networkidle");
+        await shot("bonus-card");
+        await page.getByTestId("bonus-row").getByRole("button").click();
+        await sheetSettled(page);
+        await shot("bonus-sheet");
+        await page.keyboard.press("Escape");
+        await gotoReady(page, "/up-next");
+        await page.getByTestId("attention-list").getByText(/^Spend \$3,000$/).scrollIntoViewIfNeeded();
+        await shot("up-next-bonus");
       });
     }
   }

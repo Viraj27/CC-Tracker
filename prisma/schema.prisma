@@ -86,8 +86,33 @@ model Holding {
   activations   RotatingActivation[]
   dismissals    Dismissal[]
   reminderMutes ReminderMute[]
+  welcomeOffer  WelcomeOffer?
 
   @@index([profileId])
+}
+
+// A card's welcome bonus offer (docs/SPEC-v6-welcome-bonus.md §2): at most one
+// per holding. Spend is never logged; `spentSoFar` is an optional typed figure.
+model WelcomeOffer {
+  id           String  @id @default(cuid())
+  profileId    String
+  holdingId    String  @unique
+  holding      Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  bonusAmount  Float
+  bonusUnit    String // points | miles | usd
+  // Points program id (catalog programs.yaml); null = the card's rewards_program.
+  program      String?
+  minSpend     Float?
+  windowMonths Int?
+  // Owner-set exact deadline (YYYY-MM-DD); when null it is derived from approvalDate + windowMonths.
+  deadline     String?
+  spentSoFar   Float?
+  spentAsOf    String?
+  metDate      String?
+  postedDate   String?
+  postedAmount Float?
+  outcome      String? // missed
+  note         String?
 }
 
 model BenefitUsage {
@@ -190,7 +215,7 @@ model Dismissal {
   holdingId String
   holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
   key       String
-  kind      String // af | credit | payment | rotating | enroll | unverified
+  kind      String // af | credit | payment | rotating | enroll | sub | subpost | unverified
   benefitId String?
   period    String // quarter, statement month, benefit period key or fee date
   date      String // when it was skipped
@@ -221,6 +246,11 @@ model Settings {
   afLeadDays         Int     @default(45)
   creditLeadDays     Int     @default(30)
   paymentLeadDays    Int     @default(7)
+  // Welcome bonus: deadline lead time, and days after "Met" before "Bonus not posted" shows.
+  subLeadDays        Int     @default(30)
+  subPostingDays     Int     @default(56)
+  // Count a posted welcome bonus in the headline ROI (off: it would swamp first-year ROI).
+  countBonusInRoi    Boolean @default(false)
   // JSON: { [perkDefaultId]: usd }
   perkValueOverrides String  @default("{}")
   // JSON: { [program]: cents }

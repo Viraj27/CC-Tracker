@@ -53,6 +53,10 @@ export function cardChip(holding: Holding, attention: AttentionItem[]): string |
       return "ACTIVATE 5%";
     case "enroll":
       return "RE-ENROLL";
+    case "sub":
+      return first.daysUntil < 0 ? "BONUS LATE" : d === 0 ? "BONUS TODAY" : `BONUS · ${d}D`;
+    case "subpost":
+      return "BONUS DUE";
     default:
       return null;
   }
@@ -88,6 +92,14 @@ export function cardHeadline(input: {
     const what = first.benefitName ?? "a benefit";
     return first.daysUntil <= 0 ? `Enrollment in ${what} lapsed. Re-enroll.` : `Enrollment in ${what} lapses ${inDays(first.daysUntil)}.`;
   }
+  if (first?.kind === "sub") {
+    return first.daysUntil < 0
+      ? "The welcome bonus deadline has passed. Mark it met or missed."
+      : first.short.startsWith("Spend")
+        ? `${first.short} ${inDays(first.daysUntil)} for the ${first.amountText} welcome bonus.`
+        : `The ${first.amountText} welcome bonus deadline is ${inDays(first.daysUntil)}. Mark it met once it is.`;
+  }
+  if (first?.kind === "subpost") return `The ${first.amountText} welcome bonus hasn't posted yet.`;
   if (fee > 0) {
     return `${usd(realized)} realized against the ${usd(fee)} fee this year.${
       unusedCredits > 0 ? ` ${usd(unusedCredits)} of credits unused.` : ""

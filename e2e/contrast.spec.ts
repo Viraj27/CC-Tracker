@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
 
 // WCAG AA text contrast: every visible text run (and input placeholder) against the
 // background it is actually painted on, in both colour schemes, with disclosures and
@@ -99,6 +99,22 @@ test.describe("contrast", () => {
         await page.getByTestId("show-skipped").click();
         await expect(page.getByTestId("skipped-item")).toBeVisible();
         await check("/up-next (skipped shown)");
+
+        // v6 (docs/SPEC-v6-welcome-bonus.md): the card's bonus row, the offer sheet with its estimate
+        // note open, the close guard on Downgrade options, and the deadline row in Up next.
+        await addCardWithOffer(page, daysAgo(68));
+        await check("card page (welcome bonus row)");
+        await openSheet("offer sheet", async () => {
+          await page.getByTestId("bonus-row").getByRole("button").click();
+          await sheet(page).getByRole("button", { name: "About the estimate" }).click();
+        });
+        await openSheet("downgrade sheet (close guard)", async () => {
+          await page.getByTestId("drill-downgrade").click();
+          await expect(sheet(page).getByTestId("close-guard")).toBeVisible();
+        });
+        await gotoReady(page, "/up-next");
+        await expect(page.getByTestId("attention-list").getByText(/^Spend \$3,000$/)).toBeVisible();
+        await check("/up-next (welcome bonus)");
         expect(failures, JSON.stringify(failures, null, 2)).toEqual([]);
       });
     }
