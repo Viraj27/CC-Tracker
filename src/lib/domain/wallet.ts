@@ -46,6 +46,8 @@ export function cardChip(holding: Holding, attention: AttentionItem[]): string |
     case "payment":
       return first.daysUntil < 0 ? "PAST DUE" : d === 0 ? "DUE TODAY" : `DUE IN ${d}D`;
     case "af":
+      if (first.afPhase === "watch") return "WATCH FEE";
+      if (first.afPhase === "decide") return d === 0 ? "DECIDE TODAY" : `DECIDE · ${d}D`;
       return d === 0 ? "FEE TODAY" : `FEE IN ${d}D`;
     case "credit":
       return d === 0 ? "CREDIT TODAY" : `CREDIT ${d}D`;
@@ -78,6 +80,12 @@ export function cardHeadline(input: {
   const pastDue = items.find((a) => a.kind === "payment" && a.daysUntil < 0);
   if (pastDue) return "Payment is past due. Mark it paid once it's settled.";
   const first = items[0];
+  if (first?.kind === "af" && first.afPhase === "watch") return "The annual fee should post soon. Mark it posted when it does.";
+  if (first?.kind === "af" && first.afPhase === "decide") {
+    return first.short === "Decide soon"
+      ? "The annual fee posted. Keep, downgrade or close soon."
+      : `The annual fee posted. Keep, downgrade or close ${inDays(first.daysUntil)} to get it back.`;
+  }
   if (first?.kind === "af") {
     return `Fee posts ${inDays(first.daysUntil)}. ${
       unusedCredits > 0 ? `Use the ${usd(unusedCredits)} of credits left first.` : "Keep, downgrade or cancel?"

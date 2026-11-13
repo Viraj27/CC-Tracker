@@ -1,10 +1,10 @@
 import type { Benefit, Catalog } from "../catalog/schema";
-import { addDays, diffDays, formatDate, quarterOf } from "./dates";
+import { afCycle, type AfPhase } from "./annualFee";
+import { diffDays, formatDate, monthDay, quarterOf } from "./dates";
 import { benefitShortName, cardFor, holdingName } from "./holdings";
 import { enrollmentView } from "./enrollment";
 import { benefitStatus, isBenefitActive } from "./periods";
 import { paymentSchedule } from "./payments";
-import { nextAfDate } from "./roi";
 import { isActivated, quarterView } from "./rotating";
 import { occurrenceKey, type Occurrence } from "./skips";
 import type { MuteKind, SkipKind, UserData } from "./types";
@@ -43,6 +43,8 @@ export interface AttentionItem {
   amount: number | null;
   /** Shown in place of `amount` when the stake isn't dollars, e.g. `60K pts`. */
   amountText?: string;
+  /** Annual fee items: where the cycle is. */
+  afPhase?: AfPhase;
   /** Credits: the benefit to log against. */
   benefitId?: string;
   benefitName?: string;
@@ -98,36 +100,56 @@ export function buildAttention(catalog: Catalog, data: UserData, today: string):
     const name = holdingName(h, card);
     const href = `/cards/${h.id}`;
 
-    // Annual fee posting within lead time.
-    const fee = card?.annual_fee.amount ?? null;
-    if (card && fee !== 0) {
-      const { date, estimated } = nextAfDate(h, today);
-      const days = diffDays(today, date);
-      const windowStart = addDays(date, -settings.afLeadDays);
-      const handled =
-        data.afEvents.some((e) => e.holdingId === h.id && e.postedDate >= windowStart && e.postedDate <= date) ||
-        data.lifecycle.some((e) => e.holdingId === h.id && e.date >= windowStart && e.date <= date);
-      if (days <= settings.afLeadDays && !handled) {
-        const item: AttentionItem = {
-          ...occ("af", h.id, date),
-          periodNoun: null,
-          mute: null,
-          kind: "af",
-          holdingId: h.id,
-          title: `${name}: ${fee === null ? "annual fee" : `${usd(fee)} annual fee`} posts ${formatDate(date)}${estimated ? " (est.)" : ""}`,
-          cardName: name,
-          label: `${fee === null ? "Annual fee" : `${usd(fee)} annual fee`} posts${estimated ? " (est.)" : ""}`,
+    // Annual fee (docs/SPEC-v6.1-annual-fee-decision.md): upcoming, then "watch for the
+    // fee" after the anniversary, then the refund window once it posted. Skippable; never muted.
+    const cycle = afCycle(h, card, data, settings, catalog, today);
+    if (card && cycle) {
+      const fee = cycle.event?.amount ?? card.annual_fee.amount;
+      const feeText = fee === null ? "annual fee" : `${usd(fee)} annual fee`;
+      const days = diffDays(today, cycle.date);
+      const base = { periodNoun: null, mute: null, kind: "af" as const, holdingId: h.id, cardName: name, amount: fee, daysUntil: days, date: cycle.date, afPhase: cycle.phase };
+      let item: AttentionItem;
+      if (cycle.phase === "upcoming") {
+        const est = cycle.estimated ? " (est.)" : "";
+        item = {
+          ...base,
+          ...occ("af", h.id, cycle.date),
+          title: `${name}: ${feeText} posts ${formatDate(cycle.date)}${est}`,
+          label: `${fee === null ? "Annual fee" : `${usd(fee)} annual fee`} posts${est}`,
           short: "Annual fee",
-          amount: fee,
           detail: "Call for retention / downgrade / cancel? See downgrade options.",
-          daysUntil: days,
-          date,
           href: `${href}#downgrade`,
           severity: days <= 7 ? "critical" : "warning",
         };
-        items.push(item);
-        if (!card.annual_fee.verified) unverified(`${card.name} annual fee`, item);
+      } else if (cycle.phase === "watch") {
+        item = {
+          ...base,
+          ...occ("af", h.id, `watch@${cycle.anniversary}`),
+          title: `${name}: watch for the ${feeText} (expected by ${formatDate(cycle.date)})`,
+          label: `Watch for the ${feeText}`,
+          short: "Watch for fee",
+          detail: "Mark it posted when it shows on the account. The refund window counts from then.",
+          href: `${href}#af-history`,
+          severity: "warning",
+        };
+      } else {
+        const placeholder = cycle.window!.source === "placeholder";
+        const short = placeholder ? "Decide soon" : `Decide by ${monthDay(cycle.date)}`;
+        item = {
+          ...base,
+          ...occ("af", h.id, `decide@${cycle.event!.postedDate}`),
+          title: `${name}: ${feeText} posted ${formatDate(cycle.event!.postedDate)}. ${placeholder ? "Decide soon" : `Decide by ${formatDate(cycle.date)}`}`,
+          label: `${short}: keep, downgrade or close (${feeText})`,
+          short,
+          detail: placeholder
+            ? "The refund window for this issuer is not in the catalog."
+            : `Closing within ${cycle.window!.days} days of the fee posting refunds it.`,
+          href: `${href}#af-history`,
+          severity: days <= 5 ? "critical" : "warning",
+        };
       }
+      items.push(item);
+      if (!card.annual_fee.verified) unverified(`${card.name} annual fee`, item);
     }
 
     // Credits expiring within lead time with value left.

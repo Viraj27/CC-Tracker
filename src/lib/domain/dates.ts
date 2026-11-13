@@ -118,6 +118,11 @@ export function formatDate(iso: string | null | undefined): string {
   return `${months[m - 1]} ${d}, ${y}`;
 }
 
+/** `Dec 14`: a date inside a sentence or a row title. */
+export function monthDay(iso: string): string {
+  return formatDate(iso).split(",")[0];
+}
+
 const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 

@@ -115,6 +115,22 @@ test.describe("contrast", () => {
         await gotoReady(page, "/up-next");
         await expect(page.getByTestId("attention-list").getByText(/^Spend \$3,000$/)).toBeVisible();
         await check("/up-next (welcome bonus)");
+
+        // v6.1 (docs/SPEC-v6.1-annual-fee-decision.md): the day after Demo Venture X's anniversary:
+        // the "Watch for fee" row and sheet, then the refund-window sheet with its source open.
+        await page.clock.setFixedTime(new Date(2026, 10, 21, 12));
+        await gotoReady(page, "/up-next");
+        const watch = page.getByTestId("attention-list").getByRole("button", { name: "Demo Venture X: Watch for the $395 annual fee", exact: true });
+        await expect(watch).toBeVisible();
+        await check("/up-next (watch for fee)");
+        await watch.click();
+        await sheetSettled(page);
+        await check("fee sheet (watch)");
+        await sheet(page).getByRole("button", { name: /^Fee posted — / }).click();
+        await expect(sheet(page).getByTestId("af-panel")).toHaveAttribute("data-phase", "decide");
+        await check("fee sheet (decide)");
+        await page.keyboard.press("Escape");
+        await check("/up-next (decide)");
         expect(failures, JSON.stringify(failures, null, 2)).toEqual([]);
       });
     }

@@ -50,6 +50,7 @@ export function holding(over: Partial<Holding> & Pick<Holding, "id">): Holding {
     closedDate: null,
     productChangedFromId: null,
     afMonth: null,
+    afRefundDays: null,
     afDay: null,
     paymentDueDay: null,
     notes: null,
@@ -62,6 +63,7 @@ export function catalog(over: Partial<Catalog> = {}): Catalog {
     hash: "test",
     cards: [],
     rules: [],
+    afPolicies: [],
     perkDefaults: [],
     programs: [
       { id: "test-points", name: "Test Points", kind: "points", default_cents_per_point: 1 },

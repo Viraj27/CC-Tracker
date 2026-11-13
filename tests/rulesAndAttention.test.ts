@@ -84,10 +84,12 @@ describe("needs attention", () => {
       "credit:h1:q-credit:2026-Q4", // 21 days left
       "credit:h1:y-credit:2026",
       "unverified:h1:y-credit:credit@2026", // keyed by the occurrence it annotates
+      "af:h1:watch@2026-11-20", // v6.1: the fee is watched for after the anniversary
+      "unverified:h1:af@watch@2026-11-20",
     ]);
     expect(items[0]).toMatchObject({ kind: "payment", severity: "critical", daysUntil: -51 });
     const ids = items.map((i) => i.id);
-    expect(ids.some((i) => i.startsWith("af:"))).toBe(false); // next AF is Nov 2027
+    expect(ids.filter((i) => i.startsWith("af:"))).toEqual(["af:h1:watch@2026-11-20"]); // next AF is Nov 2027
   });
 
   it("AF within lead time prompts for retention; unverified AF is flagged", () => {

@@ -239,9 +239,25 @@ export const RuleSchema = z
   .refine(requireNoteWhenUnverified, unverifiedNoteMsg);
 export type Rule = z.infer<typeof RuleSchema>;
 
+/**
+ * How long after the annual fee posts a cancel still refunds it in full
+ * (docs/SPEC-v6.1-annual-fee-decision.md §4). One per issuer, mostly
+ * community-sourced: issuers rarely publish it.
+ */
+export const AfPolicySchema = z
+  .object({
+    refund_days: z.number().int().positive(),
+    /** Counted from the fee's posting date, or from the closing date of the statement it is on. */
+    basis: z.enum(["posting", "statement"]),
+    ...provenance,
+  })
+  .refine(requireNoteWhenUnverified, unverifiedNoteMsg);
+export type AfPolicy = z.infer<typeof AfPolicySchema> & { issuer: string };
+
 export const RulesFileSchema = z.object({
   issuer: z.string(),
-  rules: z.array(RuleSchema),
+  annual_fee_policy: AfPolicySchema.optional(),
+  rules: z.array(RuleSchema).default([]),
 });
 
 // ------------------------------------------------------- perks & programs --
@@ -313,6 +329,8 @@ export interface Catalog {
   hash: string;
   cards: Card[];
   rules: Rule[];
+  /** Annual fee refund windows, one per issuer that has one in the catalog. */
+  afPolicies: AfPolicy[];
   perkDefaults: PerkDefault[];
   programs: Program[];
   rotating: RotatingProgram[];

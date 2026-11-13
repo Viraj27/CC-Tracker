@@ -16,12 +16,13 @@ try {
     card.downgrade_options.forEach(count);
   }
   c.rules.forEach(count);
+  c.afPolicies.forEach(count);
   c.perkDefaults.forEach(count);
   for (const r of c.rotating) {
     count(r.rate);
     r.quarters.forEach(count);
   }
-  console.log(`catalog OK — ${c.cards.length} cards, ${c.rules.length} rules, ${facts} facts (${unverified} unverified)`);
+  console.log(`catalog OK — ${c.cards.length} cards, ${c.rules.length} rules, ${c.afPolicies.length} fee policies, ${facts} facts (${unverified} unverified)`);
   console.log(`hash ${c.hash}`);
 } catch (e) {
   console.error((e as Error).message);

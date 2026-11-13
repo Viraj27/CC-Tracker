@@ -64,7 +64,7 @@ const AfEventIn = z.object({
   id: z.string().optional(),
   postedDate: isoDate,
   amount: z.number(),
-  outcome: z.enum(["paid", "retention_offer", "downgraded", "closed"]),
+  outcome: z.enum(["pending", "paid", "retention_offer", "downgraded", "closed"]),
   note: nullable(z.string()),
 });
 const LifecycleIn = z.object({
@@ -116,6 +116,7 @@ const HoldingIn = z
     productChangedFromId: nullable(z.string()),
     afMonth: nullable(z.number().int().min(1).max(12)),
     afDay: nullable(z.number().int().min(1).max(31)),
+    afRefundDays: nullable(z.number().int().min(1).max(365)),
     paymentDueDay: nullable(z.number().int().min(1).max(31)),
     notes: nullable(z.string()),
     usages: z.array(UsageIn).default([]),
@@ -140,6 +141,7 @@ const PointsIn = z.object({
 
 const SettingsIn = z.object({
   afLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.afLeadDays),
+  afWatchDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.afWatchDays),
   creditLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.creditLeadDays),
   paymentLeadDays: z.number().int().min(0).max(60).default(DEFAULT_SETTINGS.paymentLeadDays),
   subLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.subLeadDays),

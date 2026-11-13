@@ -1,4 +1,16 @@
 issuer: capital_one
+annual_fee_policy:
+  refund_days: 30
+  basis: posting
+  source_type: community
+  source_url: https://milestomemories.com/credit-card-issuer-annual-fee-rules/
+  last_verified: 2026-11-13
+  verified: true
+  note: >-
+    Applies to closing the card only. Community reports (Miles to Memories
+    2026, Doctor of Credit 2022) say Capital One refunds nothing on a
+    downgrade once the fee has posted, even inside 30 days; downgrade before
+    the fee posts instead.
 rules:
   - id: capital-one-venture-48
     name: Venture / Venture X bonus — 48 months

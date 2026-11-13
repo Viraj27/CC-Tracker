@@ -5,7 +5,7 @@ import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, sheet
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
 // light + dark, 390px + desktop. Plus 5/24, the v4.1 skipped views, the v7 credit rows, benefit sheet and Should I apply?,
-// and the v6 welcome bonus (card row, sheet, Up next row).
+// the v6 welcome bonus (card row, sheet, Up next row) and the v6.1 annual fee sheets (watch, decide).
 const out = path.join(__dirname, "..", "docs", "screenshots");
 const LYFT = "Demo Reserve: $10 Lyft in-app credit left";
 
@@ -94,6 +94,22 @@ test.describe("screenshots", () => {
         await gotoReady(page, "/up-next");
         await page.getByTestId("attention-list").getByText(/^Spend \$3,000$/).scrollIntoViewIfNeeded();
         await shot("up-next-bonus");
+
+        // v6.1 (docs/SPEC-v6.1-annual-fee-decision.md): the day after Demo Venture X's anniversary
+        // (clock pinned to Nov 21, 2026): the Watch for fee sheet, the refund-window sheet, the Decide row.
+        await page.clock.setFixedTime(new Date(2026, 10, 21, 12));
+        await gotoReady(page, "/up-next");
+        await page.getByTestId("attention-list").getByRole("button", { name: "Demo Venture X: Watch for the $395 annual fee", exact: true }).click();
+        await sheetSettled(page);
+        await shot("fee-watch-sheet");
+        await sheet(page).getByRole("button", { name: /^Fee posted — / }).click();
+        await expect(sheet(page).getByTestId("af-panel")).toHaveAttribute("data-phase", "decide");
+        await sheet(page).getByTestId("af-refund-window").getByRole("button", { name: "Source" }).click();
+        await shot("fee-decide-sheet");
+        await page.keyboard.press("Escape");
+        await expect(sheet(page)).toHaveCount(0);
+        await page.getByTestId("attention-list").getByText("Decide by Dec 21").scrollIntoViewIfNeeded();
+        await shot("up-next-fee");
       });
     }
   }

@@ -40,6 +40,7 @@ const HoldingInput = z
     productChangedFromId: optStr,
     afMonth: z.number().int().min(1).max(12).nullable().optional().default(null),
     afDay: z.number().int().min(1).max(31).nullable().optional().default(null),
+    afRefundDays: z.number().int().min(1).max(365).nullable().optional().default(null),
     paymentDueDay: z.number().int().min(1).max(31).nullable().optional().default(null),
     notes: optStr,
   })
@@ -238,11 +239,13 @@ export async function setMutes(input: { holdingId: string; mutes: z.input<typeof
 
 // -------------------------------------------------- AF & lifecycle log --
 
+const AfOutcomeInput = z.enum(["pending", "paid", "retention_offer", "downgraded", "closed"]);
+
 const AfInput = z.object({
   holdingId: z.string(),
   postedDate: isoDate,
   amount: z.number().nonnegative(),
-  outcome: z.enum(["paid", "retention_offer", "downgraded", "closed"]),
+  outcome: AfOutcomeInput,
   note: optStr,
 });
 
@@ -251,6 +254,13 @@ export async function addAfEvent(input: z.input<typeof AfInput>): Promise<UserDa
   const e = AfInput.parse(input);
   await ownHolding(e.holdingId);
   await prisma.annualFeeEvent.create({ data: { ...e, profileId } });
+  return snapshot();
+}
+
+/** Record the decision on a posted fee: Keep, Retention offer, Downgrade, Close (or back to pending). */
+export async function setAfOutcome(id: string, outcome: z.input<typeof AfOutcomeInput>): Promise<UserData> {
+  const prisma = await prismaClient();
+  await prisma.annualFeeEvent.updateMany({ where: { id, profileId }, data: { outcome: AfOutcomeInput.parse(outcome) } });
   return snapshot();
 }
 
@@ -271,11 +281,18 @@ const LifecycleInput = z.object({
   details: optStr,
 });
 
-export async function addLifecycleEvent(input: z.input<typeof LifecycleInput>): Promise<UserData> {
+/**
+ * `resolveAf`: a posted, undecided fee event this retention call settles
+ * (outcome `retention_offer`), saved in the same request so one can't land without the other.
+ */
+export async function addLifecycleEvent(input: z.input<typeof LifecycleInput>, resolveAf?: string): Promise<UserData> {
   const prisma = await prismaClient();
   const e = LifecycleInput.parse(input);
   await ownHolding(e.holdingId);
   await prisma.lifecycleEvent.create({ data: { ...e, profileId } });
+  if (resolveAf) {
+    await prisma.annualFeeEvent.updateMany({ where: { id: z.string().parse(resolveAf), profileId, holdingId: e.holdingId }, data: { outcome: "retention_offer" } });
+  }
   return snapshot();
 }
 
@@ -315,6 +332,7 @@ export async function deletePoints(id: string): Promise<UserData> {
 
 const SettingsInput = z.object({
   afLeadDays: z.number().int().min(0).max(365),
+  afWatchDays: z.number().int().min(0).max(365),
   creditLeadDays: z.number().int().min(0).max(365),
   paymentLeadDays: z.number().int().min(0).max(60),
   subLeadDays: z.number().int().min(0).max(365),

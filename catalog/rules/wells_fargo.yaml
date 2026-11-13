@@ -1,0 +1,13 @@
+issuer: wells_fargo
+annual_fee_policy:
+  refund_days: 60
+  basis: posting
+  source_type: community
+  source_url: https://milestomemories.com/credit-card-issuer-annual-fee-rules/
+  last_verified: 2026-11-13
+  verified: true
+  note: >-
+    Community-sourced: Miles to Memories (updated 2026-04-22) and Travel on
+    Points (2024) both say a card closed within 60 days of the fee being
+    charged gets it refunded. Downgrades are not covered by either.
+rules: []

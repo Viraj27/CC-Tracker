@@ -44,6 +44,9 @@ function usePrimary(item: AttentionItem): { short: string; long: string; run: ()
       // Logging needs an amount: open the credit sheet (chips, remaining pre-selected).
       return { short: "Log", long: "Log", run: () => sheet.open({ type: "item", item }) };
     case "af":
+      // After the anniversary the sheet has the action: log the posting, then decide.
+      if (item.afPhase === "watch") return { short: "Fee posted", long: "Fee posted", run: () => sheet.open({ type: "item", item }) };
+      if (item.afPhase === "decide") return { short: "Decide", long: "Decide", run: () => sheet.open({ type: "item", item }) };
       return { short: "Options", long: "Options", run: () => sheet.open({ type: "list", holdingId: item.holdingId, list: "downgrade" }) };
     default:
       return { short: "Review", long: "Review", run: () => sheet.open({ type: "item", item }) };

@@ -171,6 +171,25 @@ function storageSuite(name: string, open: () => Promise<{ db: Db; batches: () =>
       await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
     });
 
+    it("stores a pending fee event, the per-card refund window and the watch setting; the catalog keeps its fee policies", async () => {
+      const file = JSON.parse(JSON.stringify(demo));
+      file.holdings[0].afRefundDays = 45;
+      file.holdings[0].afEvents = [{ postedDate: "2026-11-18", amount: 795, outcome: "pending" }];
+      file.settings = { afWatchDays: 60 };
+      const { data, hasSettings } = parseImport(file);
+      await writeImport(db, PROFILE, data, "replace", hasSettings);
+      const first = await loadUserData(db.prisma, PROFILE);
+      expect(first.holdings.find((h) => h.id === file.holdings[0].id)?.afRefundDays).toBe(45);
+      expect(first.afEvents).toEqual([{ id: data.afEvents[0].id, holdingId: file.holdings[0].id, postedDate: "2026-11-18", amount: 795, outcome: "pending", note: null }]);
+      expect(first.settings.afWatchDays).toBe(60);
+      const again = parseImport(JSON.parse(JSON.stringify(buildExport(first, "2026-11-20T00:00:00.000Z"))));
+      await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(first);
+      expect((await readCatalogFromDb(db.prisma))?.afPolicies).toEqual(catalog.afPolicies);
+      expect(catalog.afPolicies.map((p) => p.issuer).sort()).toEqual(["amex", "capital_one", "chase", "wells_fargo"]);
+      await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
+    });
+
     it("a catalog reload never touches user data", async () => {
       const before = await loadUserData(db.prisma, PROFILE);
       expect(await syncCatalog(db, { ...catalog, hash: "changed", cards: catalog.cards.slice(1) })).toBe(true);

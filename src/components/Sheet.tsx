@@ -13,7 +13,8 @@ export type SheetRoute =
   | { type: "benefit"; holdingId: string; benefitId: string }
   | { type: "roi"; holdingId: string }
   | { type: "rotating"; holdingId: string }
-  | { type: "list"; holdingId: string; list: ListKind }
+  /** `resolveAf`: the lifecycle log opened from "Retention offer"; saving a call records that outcome on this fee event. */
+  | { type: "list"; holdingId: string; list: ListKind; resolveAf?: string }
   | { type: "offer"; holdingId: string }
   /** `offer`: open with the Welcome offer fieldset expanded ("Edit offer"). */
   | { type: "edit"; holdingId: string; offer?: boolean };

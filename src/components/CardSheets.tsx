@@ -21,6 +21,7 @@ import { useAddEnrollment, useDeleteEnrollment, useSetActivated, useSetMutes, us
 import { ReminderSwitch } from "./Reminders";
 import { bonusLogEntry, offerFor } from "@/lib/domain/welcomeBonus";
 import { CloseGuardWarning, OfferPanel } from "./WelcomeBonus";
+import { AfPanel, useAfCycle } from "./AnnualFee";
 import { KeyFigures, Sheet, SheetHeader, SheetPrimary, SheetSecondary, useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { Badge, Button, CELL, Empty, FactBadges, Field, Group, GroupBadges, GroupLabel, Label, Provenance, Row, usd } from "./ui";
 
@@ -40,6 +41,7 @@ export const LIFECYCLE_LABEL: Record<LifecycleType, string> = {
   closure: "Closure",
 };
 const AF_OUTCOME_LABEL: Record<AfOutcome, string> = {
+  pending: "Posted · deciding",
   paid: "Paid",
   retention_offer: "Retention offer",
   downgraded: "Downgraded",
@@ -114,7 +116,7 @@ function SheetContent({ route }: { route: SheetRoute }) {
     case "rotating":
       return <RotatingSheet view={view} />;
     case "list":
-      return <ListSheet view={view} list={route.list} />;
+      return <ListSheet view={view} list={route.list} resolveAf={route.resolveAf} />;
     case "offer":
       return (
         <div data-testid="offer-sheet">
@@ -172,7 +174,8 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
   const addEnrollment = useAddEnrollment();
   const setSkipped = useSetSkipped();
   const setMutes = useSetMutes();
-  const live = visible.find((a) => a.id === snapshot.id);
+  // A fee item moves through phases (watch → decide) while its sheet is open: follow the card's current one.
+  const live = visible.find((a) => a.id === snapshot.id) ?? (snapshot.kind === "af" ? visible.find((a) => a.kind === "af" && a.holdingId === snapshot.holdingId) : undefined);
   const hiddenItem = hidden.find((h) => h.item.id === snapshot.id);
   const item = live ?? hiddenItem?.item ?? snapshot;
   const view = views.find((v) => v.holding.id === item.holdingId);
@@ -234,15 +237,8 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
       );
       break;
     case "af":
-      figures = [
-        { label: "Fee", value: money(item.amount) },
-        { label: "Posts", value: due, urgent },
-      ];
-      body = (
-        <SheetPrimary aria-label={`See options — ${target}`} onClick={() => sheet.push({ type: "list", holdingId: item.holdingId, list: "downgrade" })}>
-          See options
-        </SheetPrimary>
-      );
+      // The fee panel carries the figures and the phase's actions (See options, Fee posted, Keep…).
+      body = view ? <AfPanel view={view} onDone={sheet.close} /> : null;
       break;
     case "sub":
     case "subpost":
@@ -655,11 +651,12 @@ export function benefitsOf(view: HoldingView, list: "perks" | "other" | "protect
   return all.filter((b) => b.kind === "status" || b.kind === "other");
 }
 
-function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
+function ListSheet({ view, list, resolveAf }: { view: HoldingView; list: ListKind; resolveAf?: string }) {
   const sheet = useSheet();
   const { data, mutate, today } = useApp();
   const card = view.card;
   const h = view.holding;
+  const cycle = useAfCycle(view);
   let body: React.ReactNode;
   switch (list) {
     case "perks":
@@ -739,6 +736,11 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
               ))}
             </Group>
           )}
+          {cycle?.phase === "decide" && (
+            <SheetSecondary className="mt-1" aria-label={`Record the product change — ${view.name}`} onClick={() => sheet.push({ type: "edit", holdingId: h.id })}>
+              Record the product change
+            </SheetSecondary>
+          )}
           <GroupLabel>Retention</GroupLabel>
           <Group>
             <Row title="Fee history" chevron onClick={() => sheet.push({ type: "list", holdingId: h.id, list: "fees" })} />
@@ -751,6 +753,11 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
       const events = data.afEvents.filter((e) => e.holdingId === h.id);
       body = (
         <>
+          {cycle && cycle.phase !== "upcoming" ? (
+            <div className="mb-4">
+              <AfPanel view={view} />
+            </div>
+          ) : (
           <KeyFigures
             items={[
               { label: "Fee", value: card ? (card.annual_fee.amount === null ? "?" : money(card.annual_fee.amount)) : "—" },
@@ -760,6 +767,7 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
               },
             ]}
           />
+          )}
           {card?.annual_fee.first_year_waived && <p className="-mt-2 mb-3 px-1 text-sm text-muted">First year waived</p>}
           <GroupLabel>Events</GroupLabel>
           <Group className="mb-4">
@@ -826,7 +834,7 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
               ))
             )}
           </Group>
-          <LifecycleForm holdingId={h.id} cardName={view.name} />
+          <LifecycleForm holdingId={h.id} cardName={view.name} resolveAf={resolveAf} />
         </>
       );
       break;
@@ -922,8 +930,9 @@ function AfForm({ holdingId, defaultAmount, defaultDate }: { holdingId: string; 
   );
 }
 
-function LifecycleForm({ holdingId, cardName }: { holdingId: string; cardName: string }) {
+function LifecycleForm({ holdingId, cardName, resolveAf }: { holdingId: string; cardName: string; resolveAf?: string }) {
   const { mutate, today } = useApp();
+  const sheet = useSheet();
   const [type, setType] = useState<LifecycleType>("retention_call");
   const [date, setDate] = useState(today);
   const [offer, setOffer] = useState("");
@@ -946,7 +955,17 @@ function LifecycleForm({ holdingId, cardName }: { holdingId: string; cardName: s
           toCard: type === "product_change" ? toCard || null : null,
           details: details || null,
         };
-        mutate((d) => ({ ...d, lifecycle: [...d.lifecycle, { id: tempId(), ...ev }] }), () => addLifecycleEvent(ev));
+        // Opened from the fee's "Retention offer": the call is the decision.
+        const settles = resolveAf && type === "retention_call" ? resolveAf : undefined;
+        mutate(
+          (d) => ({
+            ...d,
+            lifecycle: [...d.lifecycle, { id: tempId(), ...ev }],
+            afEvents: settles ? d.afEvents.map((x) => (x.id === settles ? { ...x, outcome: "retention_offer" as const } : x)) : d.afEvents,
+          }),
+          () => addLifecycleEvent(ev, settles),
+        );
+        if (settles) sheet.close();
         setOffer("");
         setDetails("");
         setToCard("");
