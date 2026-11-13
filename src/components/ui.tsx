@@ -220,15 +220,8 @@ export function Badge({
 
 type Fact = { source_url: string; last_verified: string; verified: boolean; source_type?: "official" | "community"; note?: string };
 
-/** The warnings that are never hidden: Community curated, or ⚠ Unverified. */
+/** The warnings that are never hidden: ⚠ Unverified (also for an unchecked community fact), or Community curated. */
 export function FactBadges({ fact }: { fact: Pick<Fact, "verified" | "source_type" | "note"> }) {
-  if (fact.source_type === "community") {
-    return (
-      <Badge tone="info" title={fact.note}>
-        Community curated
-      </Badge>
-    );
-  }
   if (!fact.verified) {
     return (
       <Badge tone="warn" title={fact.note}>
@@ -237,13 +230,20 @@ export function FactBadges({ fact }: { fact: Pick<Fact, "verified" | "source_typ
       </Badge>
     );
   }
+  if (fact.source_type === "community") {
+    return (
+      <Badge tone="info" title={fact.note}>
+        Community curated
+      </Badge>
+    );
+  }
   return null;
 }
 
 /** Badges for a group of facts (e.g. on a drill-in row): Unverified if any is, Community if any is. */
 export function GroupBadges({ facts }: { facts: Pick<Fact, "verified" | "source_type">[] }) {
-  const unverified = facts.some((f) => f.source_type !== "community" && !f.verified);
-  const community = facts.some((f) => f.source_type === "community");
+  const unverified = facts.some((f) => !f.verified);
+  const community = facts.some((f) => f.source_type === "community" && f.verified);
   return (
     <>
       {unverified && <FactBadges fact={{ verified: false }} />}

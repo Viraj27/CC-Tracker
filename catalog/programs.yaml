@@ -26,3 +26,74 @@ programs:
     name: Wells Fargo Rewards
     kind: points
     default_cents_per_point: 1
+  # Programs below were added for catalog stubs (docs/SPEC-v6.2-catalog.md).
+  # Hotel points are worth well under a cent each by most published valuations,
+  # so their defaults are lower; like every value here they are assumptions.
+  - id: cash-back
+    name: Cash back
+    kind: cash
+    default_cents_per_point: 1
+  - id: amex-membership-rewards
+    name: Amex Membership Rewards
+    kind: points
+    default_cents_per_point: 1
+  - id: citi-thankyou
+    name: Citi ThankYou Points
+    kind: points
+    default_cents_per_point: 1
+  - id: bank-of-america-points
+    name: Bank of America Points
+    kind: points
+    default_cents_per_point: 1
+  - id: us-bank-points
+    name: U.S. Bank Points
+    kind: points
+    default_cents_per_point: 1
+  - id: southwest-rapid-rewards
+    name: Southwest Rapid Rewards
+    kind: points
+    default_cents_per_point: 1
+  - id: american-aadvantage
+    name: American AAdvantage
+    kind: miles
+    default_cents_per_point: 1
+  - id: alaska-atmos-rewards
+    name: Alaska Atmos Rewards
+    kind: points
+    default_cents_per_point: 1
+  - id: jetblue-trueblue
+    name: JetBlue TrueBlue
+    kind: points
+    default_cents_per_point: 1
+  - id: avios
+    name: Avios
+    kind: points
+    default_cents_per_point: 1
+  - id: aeroplan
+    name: Air Canada Aeroplan
+    kind: points
+    default_cents_per_point: 1
+  - id: world-of-hyatt
+    name: World of Hyatt
+    kind: points
+    default_cents_per_point: 1
+  - id: marriott-bonvoy
+    name: Marriott Bonvoy
+    kind: points
+    default_cents_per_point: 0.7
+  - id: hilton-honors
+    name: Hilton Honors
+    kind: points
+    default_cents_per_point: 0.5
+  - id: ihg-one-rewards
+    name: IHG One Rewards
+    kind: points
+    default_cents_per_point: 0.5
+  - id: wyndham-rewards
+    name: Wyndham Rewards
+    kind: points
+    default_cents_per_point: 0.8
+  - id: choice-privileges
+    name: Choice Privileges
+    kind: points
+    default_cents_per_point: 0.6

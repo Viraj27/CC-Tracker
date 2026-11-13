@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useId, useState } from "react";
 import type { Benefit } from "@/lib/catalog/schema";
 import type { AttentionItem } from "@/lib/domain/attention";
 import { dropOffDate } from "@/lib/domain/fiveTwentyFour";
@@ -19,9 +19,29 @@ import { benefitsOf, CYCLE_LABEL, LIST_TITLE } from "./CardSheets";
 import { use524, type HoldingView } from "./derived";
 import { canGoBack } from "./Nav";
 import { useSheet, type ListKind, type SheetRoute } from "./Sheet";
-import { FactBadges, Group, GroupBadges, GroupLabel, Row, usd } from "./ui";
+import { FactBadges, Group, GroupBadges, GroupLabel, InfoToggle, Row, usd } from "./ui";
 import { issuerLabel } from "./WalletCard";
 import { OfferRow } from "./WelcomeBonus";
+
+/** A held card the catalog only has basic facts for (docs/SPEC-v6.2-catalog.md §3.3). */
+function StubNotice({ name, productPage }: { name: string; productPage: string }) {
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  return (
+    <p role="note" data-testid="stub-notice" className="mt-3 flex flex-wrap items-center gap-x-1.5 rounded-[14px] border border-text/20 px-4 py-2 text-[15px]">
+      <span className="min-w-0 flex-1">Basic card info only</span>
+      <InfoToggle open={open} onToggle={() => setOpen((o) => !o)} controls={id} label="About basic card info" />
+      <span id={id} hidden={!open} className="block basis-full pb-1 text-left text-sm text-muted">
+        The catalog has {name}&apos;s issuer, annual fee and product family, so 5/24, fee reminders and issuer rules work. Its credits, earn rates and protections
+        have not been researched yet, so none are listed and it is left out of Best card. See the{" "}
+        <a className="underline decoration-dotted underline-offset-2" href={productPage} target="_blank" rel="noreferrer">
+          issuer&apos;s page
+        </a>
+        .
+      </span>
+    </p>
+  );
+}
 
 const money = (n: number | null | undefined) => (n === null || n === undefined ? "—" : usd(n, Number.isInteger(n) ? 0 : 2));
 /** `15 JAN 27`: fits a stat cell at 390px. */
@@ -102,7 +122,7 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
       const items = benefitsOf(view, list);
       return { list, count: items.length, badges: <GroupBadges facts={items} />, hidden: items.length === 0 };
     }),
-    { list: "earn", count: card?.earn_rates.length ?? 0, badges: card && <GroupBadges facts={card.earn_rates} />, hidden: !card },
+    { list: "earn", count: card?.earn_rates.length ?? 0, badges: card && <GroupBadges facts={card.earn_rates} />, hidden: !card || card.earn_rates.length === 0 },
     { list: "downgrade", count: card?.downgrade_options.length ?? 0, badges: card && <GroupBadges facts={card.downgrade_options} />, hidden: !card },
     { list: "fees", count: data.afEvents.filter((e) => e.holdingId === h.id).length },
     { list: "lifecycle", count: data.lifecycle.filter((e) => e.holdingId === h.id).length + (bonusLogEntry(offerFor(data.welcomeOffers, h.id), h) ? 1 : 0) },
@@ -174,6 +194,7 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
       </div>
 
       <OfferRow view={view} />
+      {card?.depth === "stub" && <StubNotice name={card.name} productPage={card.product_page} />}
 
       {credits.length > 0 && (
         <section aria-labelledby="credits-heading" id="credits" className="scroll-mt-24">

@@ -19,8 +19,10 @@ describe("catalog/", () => {
   const catalog = loadCatalog(path.join(process.cwd(), "catalog"));
 
   it("contains all 7 v1 cards with earn rates, benefits and protections", () => {
-    expect(catalog.cards.map((c) => c.id).sort()).toEqual([...REQUIRED_CARDS].sort());
-    for (const card of catalog.cards) {
+    // The researched cards; stubs (docs/SPEC-v6.2-catalog.md) are covered in catalogImport.test.ts.
+    const full = catalog.cards.filter((c) => c.depth === "full");
+    expect(full.map((c) => c.id).sort()).toEqual([...REQUIRED_CARDS].sort());
+    for (const card of full) {
       expect(card.earn_rates.length, card.id).toBeGreaterThan(0);
       expect(card.benefits.length, card.id).toBeGreaterThan(0);
       expect(card.benefits.some((b) => b.kind === "protection"), `${card.id} protections`).toBe(true);
@@ -30,7 +32,7 @@ describe("catalog/", () => {
 
   it("every card's Wallet ink reads on its fill (≥ 4.5:1)", () => {
     for (const card of catalog.cards) {
-      expect(card.card_ink, card.id).toBeDefined();
+      if (card.depth === "full") expect(card.card_ink, card.id).toBeDefined();
       expect(contrastRatio(card.brand_color, inkFor(card.brand_color, card.card_ink)), card.id).toBeGreaterThanOrEqual(4.5);
     }
     expect(contrastRatio(CUSTOM_CARD_COLOR, inkFor(CUSTOM_CARD_COLOR))).toBeGreaterThanOrEqual(4.5);

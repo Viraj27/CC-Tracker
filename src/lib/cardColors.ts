@@ -21,3 +21,24 @@ export function inkFor(fill: string, ink?: string): string {
   if (ink) return ink;
   return contrastRatio(fill, "#FFFFFF") >= contrastRatio(fill, "#15171C") ? "#FFFFFF" : "#15171C";
 }
+
+/**
+ * Default fill per issuer for catalog stubs (docs/SPEC-v6.2-catalog.md §3.2).
+ * Generic colours, not issuer artwork; a researched card sets its own `brand_color`.
+ */
+export const ISSUER_CARD_COLORS: Record<string, string> = {
+  chase: "#1F4E8C",
+  amex: "#2E6F9E",
+  capital_one: "#8A2432",
+  citi: "#0F5E7A",
+  bank_of_america: "#A1273A",
+  us_bank: "#2B3F73",
+  barclays: "#1B7C9E",
+  wells_fargo: "#B5451F",
+  discover: "#C2571A",
+};
+
+/** A stub's fill: its issuer's default, else the custom-card grey. */
+export function issuerCardColor(issuer: string): string {
+  return ISSUER_CARD_COLORS[issuer] ?? CUSTOM_CARD_COLOR;
+}

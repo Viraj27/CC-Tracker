@@ -22,7 +22,8 @@ try {
     count(r.rate);
     r.quarters.forEach(count);
   }
-  console.log(`catalog OK — ${c.cards.length} cards, ${c.rules.length} rules, ${c.afPolicies.length} fee policies, ${facts} facts (${unverified} unverified)`);
+  const stubs = c.cards.filter((x) => x.depth === "stub").length;
+  console.log(`catalog OK — ${c.cards.length} cards (${c.cards.length - stubs} full, ${stubs} stub), ${c.rules.length} rules, ${c.afPolicies.length} fee policies, ${facts} facts (${unverified} unverified)`);
   console.log(`hash ${c.hash}`);
 } catch (e) {
   console.error((e as Error).message);

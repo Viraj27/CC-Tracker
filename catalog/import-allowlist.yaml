@@ -1,0 +1,217 @@
+# Which cards `npm run catalog:import` keeps as stubs (docs/SPEC-v6.2-catalog.md §3.2, §4).
+# One entry per card: the dataset's cardId, our catalog id (the file name) and a display name.
+# Trim or extend freely, then re-run the import. Removing an entry does not delete its file.
+# `family` is set only where an issuer rule in catalog/rules/ uses it.
+# A card that is already researched (depth: full) can be listed too: it then only gets `public_offer`.
+# This is a list of products anyone might consider, not of cards anyone holds.
+cards:
+  # Chase
+  - card_id: 57f8a819c3bb4c6aa494016703281f35
+    id: chase-sapphire-preferred
+    name: "Chase Sapphire Preferred"
+  - card_id: 3a9ea798ce73485fc8456280fd4b1816
+    id: chase-freedom-unlimited
+    name: "Chase Freedom Unlimited"
+  - card_id: c80cdb77c3eda940e2a36abb4f943c69
+    id: chase-ink-business-preferred
+    name: "Chase Ink Business Preferred"
+  - card_id: 8ec7f405d03afa62eaeea7e197a29e8a
+    id: chase-ink-business-cash
+    name: "Chase Ink Business Cash"
+  - card_id: 4a1c1e46f145b76fcc72ebd391fc5766
+    id: chase-ink-business-unlimited
+    name: "Chase Ink Business Unlimited"
+  - card_id: 5d8c589d1e7c1294d04fa6e4a2685624
+    id: chase-sapphire-reserve-business
+    name: "Chase Sapphire Reserve for Business"
+  - card_id: 4071699fe4b21cafb02cf8b2c9c57c86
+    id: chase-united-gateway
+    name: "United Gateway Card"
+  - card_id: 34ab99720941eaa2a1671e5b3a996b19
+    id: chase-united-quest
+    name: "United Quest Card"
+  - card_id: d2517ce6b72999e14f50c399347100ed
+    id: chase-united-club
+    name: "United Club Card"
+  - card_id: 8101f7827e3a1e797b09653f117b72d9
+    id: chase-united-business
+    name: "United Business Card"
+  - card_id: 32a0c8c7eda25330e2c176589e386d7f
+    id: chase-southwest-plus
+    name: "Southwest Rapid Rewards Plus"
+  - card_id: 76e73a4afe8dfc1f8f1be1e345d7eca8
+    id: chase-southwest-premier
+    name: "Southwest Rapid Rewards Premier"
+  - card_id: 169256a9988f3161381ee6a9ebe6667e
+    id: chase-southwest-priority
+    name: "Southwest Rapid Rewards Priority"
+  - card_id: 6a4a30b866d4d37216b9d586a15ad1cc
+    id: chase-marriott-bonvoy-boundless
+    name: "Marriott Bonvoy Boundless"
+  - card_id: 40192e08e31f059d91a108ff09ec5dd5
+    id: chase-ihg-premier
+    name: "IHG One Rewards Premier"
+  - card_id: d378a38b56d4c9bd5e1ad184a6ce84f0
+    id: chase-world-of-hyatt
+    name: "World of Hyatt Card"
+  - card_id: 0d9d833e7298ab0f1892a4035686fa06
+    id: chase-world-of-hyatt-business
+    name: "World of Hyatt Business Card"
+    account_type: business
+  - card_id: 7662e34a89a906b869b93bb12a2e1b3b
+    id: chase-aeroplan
+    name: "Aeroplan Card"
+  - card_id: 7b06f0b6a307509b71862ffa5933ef0b
+    id: chase-british-airways
+    name: "British Airways Visa Signature"
+  - card_id: f4d8c429f58f9f74944a9108bcae4a22
+    id: chase-amazon-prime
+    name: "Prime Visa"
+  # American Express
+  - card_id: ec1872dfd8a65491a33bae2da4dd487f
+    id: amex-platinum
+    name: "American Express Platinum Card"
+  - card_id: cafe43d37256bec116dff4be6cced2cf
+    id: amex-gold
+    name: "American Express Gold Card"
+  - card_id: ad9a96ed5f730a79d0171f1f8ca92d0c
+    id: amex-green
+    name: "American Express Green Card"
+  - card_id: 04abf9273e03fbe626fe80a9ffd53523
+    id: amex-blue-cash-preferred
+    name: "Blue Cash Preferred Card"
+  - card_id: 6980c320c341292b63273e4362601aa8
+    id: amex-blue-cash-everyday
+    name: "Blue Cash Everyday Card"
+  - card_id: 90436ebe63417596fbc6cb5b7e5a2e8c
+    id: amex-delta-skymiles-blue
+    name: "Delta SkyMiles Blue American Express Card"
+  - card_id: bdf4ae17ff6808592f785fff3ae81a2a
+    id: amex-delta-skymiles-platinum
+    name: "Delta SkyMiles Platinum American Express Card"
+    family: delta-skymiles-premium
+  - card_id: 2a3949c2232cf6646a59531728264a5c
+    id: amex-delta-skymiles-reserve
+    name: "Delta SkyMiles Reserve American Express Card"
+    family: delta-skymiles-premium
+  - card_id: 0710239dc6fbd92077bce7118572e217
+    id: amex-hilton-honors
+    name: "Hilton Honors American Express Card"
+  - card_id: f6c6aa50b533b758df7be5151d805571
+    id: amex-hilton-honors-surpass
+    name: "Hilton Honors American Express Surpass Card"
+  - card_id: 59c1e4c423d078c91e9b7c51d72e893d
+    id: amex-hilton-honors-aspire
+    name: "Hilton Honors American Express Aspire Card"
+  - card_id: 653b14a655f4edc9bfc0332e9370e139
+    id: amex-marriott-bonvoy-bevy
+    name: "Marriott Bonvoy Bevy American Express Card"
+  - card_id: 4d2115812f09d194440ef99b1a5210cd
+    id: amex-marriott-bonvoy-brilliant
+    name: "Marriott Bonvoy Brilliant American Express Card"
+  - card_id: 656a6a4296d40de4c62cc3ec888e5018
+    id: amex-business-platinum
+    name: "Business Platinum Card from American Express"
+  - card_id: 191f603ca5af9306d5db0fb208e9a646
+    id: amex-business-gold
+    name: "American Express Business Gold Card"
+  - card_id: a851f08b98f839a01a7e8fa367d8b8be
+    id: amex-blue-business-plus
+    name: "Blue Business Plus Credit Card"
+  # Capital One
+  - card_id: 4a7a8036e514f187ca7c41b31925251e
+    id: capital-one-venture
+    name: "Capital One Venture"
+    family: capital-one-venture
+  - card_id: d0298263cc453d34160558a93fd1bcb2
+    id: capital-one-ventureone
+    name: "Capital One VentureOne"
+  - card_id: 2d16431e0caee645b420cc3d3255b2ee
+    id: capital-one-savor
+    name: "Capital One Savor"
+  - card_id: 66f7413248c7f2c61ce1e8008685eac2
+    id: capital-one-quicksilver
+    name: "Capital One Quicksilver"
+  - card_id: 1d2ff07648fdd4b06d89ef0309f1c4cb
+    id: capital-one-venture-x-business
+    name: "Capital One Venture X Business"
+  # Citi
+  - card_id: d7e2e5b5e595ca6510c101349c914513
+    id: citi-strata-premier
+    name: "Citi Strata Premier"
+  - card_id: 19c94f90056968ebde2882f7bb0f1010
+    id: citi-strata-elite
+    name: "Citi Strata Elite"
+  - card_id: cbc737da5cbd44575dec6325bbbd8688
+    id: citi-strata
+    name: "Citi Strata"
+  - card_id: 06b9a384d710e73db7f0ded7613c9c4b
+    id: citi-double-cash
+    name: "Citi Double Cash"
+  - card_id: 49fe6c73c0e823a89346979f50d5b981
+    id: citi-custom-cash
+    name: "Citi Custom Cash"
+  - card_id: a497d6ba509538db9e3e4a3e5e313fe9
+    id: citi-aadvantage-platinum-select
+    name: "Citi / AAdvantage Platinum Select"
+  - card_id: c6b04cf07dd821ddcfba3dbe398a4b31
+    id: citi-aadvantage-globe
+    name: "Citi / AAdvantage Globe"
+  - card_id: 3543149f6555df6f7e4974923c55d853
+    id: citi-aadvantage-executive
+    name: "Citi / AAdvantage Executive"
+  # Bank Of America
+  - card_id: eb8bc1a6f86dc471aa0deeca619fbf59
+    id: bank-of-america-premium-rewards
+    name: "Bank of America Premium Rewards"
+  - card_id: 20594480e9f5656485a12e13389f60c7
+    id: bank-of-america-premium-rewards-elite
+    name: "Bank of America Premium Rewards Elite"
+  - card_id: f2461735a56702c428c209486e2f9e55
+    id: bank-of-america-customized-cash
+    name: "Bank of America Customized Cash Rewards"
+  - card_id: 98db04658d4deee69293bd67bd2fd341
+    id: bank-of-america-unlimited-cash
+    name: "Bank of America Unlimited Cash Rewards"
+  - card_id: fecfaab2c32f3edd5d97eafd8f3f19d6
+    id: bank-of-america-travel-rewards
+    name: "Bank of America Travel Rewards"
+  - card_id: 12a1230229f936ee5f7b2d333e796ab8
+    id: bank-of-america-atmos-ascent
+    name: "Atmos Rewards Ascent"
+  - card_id: 2878b32104d7bf242496a8af56f33952
+    id: bank-of-america-atmos-summit
+    name: "Atmos Rewards Summit"
+  # Us Bank
+  - card_id: 9a35bfe5845f7f9909244b1e3549b7e1
+    id: us-bank-altitude-connect
+    name: "U.S. Bank Altitude Connect"
+  - card_id: b523a3cc7d6d355737b1c4dda1eb7a04
+    id: us-bank-altitude-go
+    name: "U.S. Bank Altitude Go"
+  - card_id: 78726438553c1f6b63383f3bac6df57b
+    id: us-bank-cash-plus
+    name: "U.S. Bank Cash+"
+  - card_id: 8de694e89b9c26c9f72fc7450c66665b
+    id: us-bank-shopper-cash
+    name: "U.S. Bank Shopper Cash Rewards"
+  # Barclays
+  - card_id: fafac50a80daae929873eca389fafd15
+    id: barclays-jetblue-plus
+    name: "JetBlue Plus Card"
+  - card_id: d760441e47fada8604f084285fbaeb39
+    id: barclays-jetblue
+    name: "JetBlue Card"
+  - card_id: b910f422064772c65840288c632cf900
+    id: barclays-wyndham-earner-plus
+    name: "Wyndham Rewards Earner Plus"
+  # Wells Fargo
+  - card_id: df2960b75b50536daa6e05a33479b198
+    id: wells-fargo-active-cash
+    name: "Wells Fargo Active Cash"
+  - card_id: d1fcd95962c94d1b56d691fda30acead
+    id: wells-fargo-autograph-journey
+    name: "Wells Fargo Autograph Journey"
+  - card_id: c68bed03d88b439b70c905e490757271
+    id: wells-fargo-choice-privileges-select
+    name: "Choice Privileges Select"

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, sheet, sheetSettled, startStubCard } from "./helpers";
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
@@ -94,6 +94,14 @@ test.describe("screenshots", () => {
         await gotoReady(page, "/up-next");
         await page.getByTestId("attention-list").getByText(/^Spend \$3,000$/).scrollIntoViewIfNeeded();
         await shot("up-next-bonus");
+
+        // v6.2 (docs/SPEC-v6.2-catalog.md): a stub card: Add card with the public-offer hint, its card page.
+        await startStubCard(page, daysAgo(20));
+        await page.getByTestId("public-offer").scrollIntoViewIfNeeded();
+        await shot("stub-add");
+        await saveStubCard(page);
+        await page.waitForLoadState("networkidle");
+        await shot("stub-card");
 
         // v6.1 (docs/SPEC-v6.1-annual-fee-decision.md): the day after Demo Venture X's anniversary
         // (clock pinned to Nov 21, 2026): the Watch for fee sheet, the refund-window sheet, the Decide row.
