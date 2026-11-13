@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, sheet, sheetSettled, startStubCard } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, setDemoSpend, sheet, sheetSettled, startStubCard } from "./helpers";
 
 // WCAG AA text contrast: every visible text run (and input placeholder) against the
 // background it is actually painted on, in both colour schemes, with disclosures and
@@ -115,6 +115,21 @@ test.describe("contrast", () => {
         await gotoReady(page, "/up-next");
         await expect(page.getByTestId("attention-list").getByText(/^Spend \$3,000$/)).toBeVisible();
         await check("/up-next (welcome bonus)");
+
+        // v8 (docs/SPEC-v8-find-a-card.md): the Spending group, Find a card (both goals, Not right now
+        // and Issuers open), and a candidate's breakdown sheet with its source open.
+        await setDemoSpend(page);
+        await check("/settings (spending)");
+        await gotoReady(page, "/find-card");
+        await page.getByTestId("find-goal").selectOption("bonus");
+        await expect(page.getByTestId("find-ranked")).toBeVisible();
+        await check("/find-card (welcome bonus)");
+        await openSheet("candidate sheet", () => page.getByTestId("candidate-chase-sapphire-preferred").getByRole("button").click());
+        await page.getByTestId("find-goal").selectOption("everyday");
+        await check("/find-card (everyday value)");
+        await openSheet("candidate sheet (researched card)", () => page.getByTestId("candidate-chase-united-explorer").getByRole("button").click());
+        await page.getByTestId("find-goal").selectOption("bonus");
+        await page.waitForLoadState("networkidle");
 
         // v6.2 (docs/SPEC-v6.2-catalog.md): a stub card: the public-offer hint (ⓘ open), the card page's
         // basic-info notice (ⓘ open), and the "Not ranked" line on Best card.

@@ -190,6 +190,25 @@ function storageSuite(name: string, open: () => Promise<{ db: Db; batches: () =>
       await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
     });
 
+    it("stores the spend profile and Find a card's criteria; saving one keeps the other", async () => {
+      const file = JSON.parse(JSON.stringify(demo));
+      file.settings = { spendProfile: { dining: 500, groceries: 600.5 }, findCardCriteria: { goal: "everyday", maxFee: 250, excludedIssuers: ["amex"] } };
+      const { data, hasSettings } = parseImport(file);
+      await writeImport(db, PROFILE, data, "replace", hasSettings);
+      const first = await loadUserData(db.prisma, PROFILE);
+      expect(first.settings.spendProfile).toEqual({ dining: 500, groceries: 600.5 });
+      expect(first.settings.findCardCriteria).toEqual({ goal: "everyday", maxFee: 250, excludedIssuers: ["amex"] });
+      // What the criteria-only save does: one column, the profile untouched.
+      await db.prisma.settings.update({ where: { profileId: PROFILE }, data: { findCardCriteria: JSON.stringify({ accountType: "both" }) } });
+      const second = await loadUserData(db.prisma, PROFILE);
+      expect(second.settings.findCardCriteria).toEqual({ accountType: "both" });
+      expect(second.settings.spendProfile).toEqual({ dining: 500, groceries: 600.5 });
+      const again = parseImport(JSON.parse(JSON.stringify(buildExport(second, "2026-11-13T00:00:00.000Z"))));
+      await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(second);
+      await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
+    });
+
     it("a catalog reload never touches user data", async () => {
       const before = await loadUserData(db.prisma, PROFILE);
       expect(await syncCatalog(db, { ...catalog, hash: "changed", cards: catalog.cards.slice(1) })).toBe(true);

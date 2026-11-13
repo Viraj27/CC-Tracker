@@ -4,6 +4,8 @@ import { useState } from "react";
 import { exportData, importData, saveSettings } from "@/app/actions";
 import { useApp } from "@/components/AppState";
 import { Button, Field, Group, GroupLabel, PageTitle, Provenance, usd } from "@/components/ui";
+import type { SpendCategory } from "@/lib/catalog/schema";
+import { SPEND_COMMON, SPEND_LABELS, SPEND_MORE } from "@/lib/domain/spend";
 
 export default function SettingsPage() {
   const { catalog, data, mutate } = useApp();
@@ -18,6 +20,7 @@ export default function SettingsPage() {
     countBonusInRoi: s.countBonusInRoi,
     paymentTrackingStart: s.paymentTrackingStart ?? "",
     perk: Object.fromEntries(Object.entries(s.perkValueOverrides).map(([k, v]) => [k, String(v)])) as Record<string, string>,
+    spend: Object.fromEntries(Object.entries(s.spendProfile).map(([k, v]) => [k, String(v)])) as Record<string, string>,
     cpp: Object.fromEntries(Object.entries(s.centsPerPoint).map(([k, v]) => [k, String(v)])) as Record<string, string>,
   });
   const [saved, setSaved] = useState(false);
@@ -33,6 +36,24 @@ export default function SettingsPage() {
           {hint && <span className="block text-xs text-muted">{hint}</span>}
         </span>
         <input type="number" min={0} className="w-24 text-right font-mono" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+      </label>
+    </li>
+  );
+
+  const spendField = (c: SpendCategory) => (
+    <li key={c}>
+      <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
+        <span>{SPEND_LABELS[c]}</span>
+        <input
+          type="number"
+          min={0}
+          step="any"
+          inputMode="decimal"
+          className="w-28 text-right font-mono"
+          placeholder="0"
+          value={form.spend[c] ?? ""}
+          onChange={(e) => setForm({ ...form, spend: { ...form.spend, [c]: e.target.value } })}
+        />
       </label>
     </li>
   );
@@ -55,6 +76,9 @@ export default function SettingsPage() {
             paymentTrackingStart: form.paymentTrackingStart || null,
             perkValueOverrides: numMap(form.perk),
             centsPerPoint: numMap(form.cpp),
+            spendProfile: Object.fromEntries(Object.entries(numMap(form.spend)).filter(([, v]) => v > 0)),
+            // Find a card saves its own criteria; keep whatever it last stored.
+            findCardCriteria: data.settings.findCardCriteria,
           };
           const ok = await mutate((d) => ({ ...d, settings: next }), () => saveSettings(next));
           setSaved(ok);
@@ -89,6 +113,24 @@ export default function SettingsPage() {
               </span>
               <input type="checkbox" className="h-5 w-5 shrink-0" checked={form.countBonusInRoi} onChange={(e) => setForm({ ...form, countBonusInRoi: e.target.checked })} />
             </label>
+          </li>
+        </Group>
+
+        <GroupLabel id="spending">Spending (USD per month)</GroupLabel>
+        <p className="mb-2 px-1 text-sm text-muted">Rough numbers are fine. Find a card uses them to judge whether a bonus is within reach and what a card would add.</p>
+        <Group data-testid="spend-profile">
+          {SPEND_COMMON.map(spendField)}
+          <li>
+            <details open={SPEND_MORE.some((c) => form.spend[c]) || undefined}>
+              <summary className="flex min-h-12 cursor-pointer items-center px-4 text-[15px] font-medium text-muted hover:text-text">More categories</summary>
+              <ul className="divide-y divide-hairline border-t border-hairline">{SPEND_MORE.map(spendField)}</ul>
+            </details>
+          </li>
+          <li className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5 text-muted">
+            <span>Total per month</span>
+            <span className="font-mono" data-testid="spend-total">
+              {usd(Object.values(numMap(form.spend)).reduce((a, b) => a + b, 0))}
+            </span>
           </li>
         </Group>
 

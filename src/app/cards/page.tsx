@@ -34,8 +34,10 @@ function Cards() {
       <GroupLabel>{editing ? `Edit · ${views.find((v) => v.holding === editing)?.name}` : "New card"}</GroupLabel>
       <div className="rounded-[14px] bg-list p-4">
         <HoldingForm
-          key={editing?.id ?? "new"}
+          key={editing?.id ?? `new:${params.get("card") ?? ""}`}
           initial={editing}
+          presetCardId={editing ? undefined : (params.get("card") ?? undefined)}
+          presetOffer={params.get("offer") === "1"}
           onDone={(id) => router.push(id ? `/cards/${id}` : "/")}
           onDeleted={() => router.push("/")}
         />

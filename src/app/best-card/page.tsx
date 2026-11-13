@@ -5,23 +5,10 @@ import { useApp } from "@/components/AppState";
 import { Badge, CardBar, Empty, Group, GroupLabel, PageTitle } from "@/components/ui";
 import { SPEND_CATEGORIES, type SpendCategory } from "@/lib/catalog/schema";
 import { rankCards } from "@/lib/domain/bestCard";
+import { SPEND_LABELS } from "@/lib/domain/spend";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 
-const LABELS: Record<SpendCategory, string> = {
-  dining: "Dining",
-  groceries: "Groceries",
-  gas: "Gas / EV",
-  travel: "Travel (general)",
-  airfare: "Airfare",
-  hotels: "Hotels",
-  transit: "Transit / rideshare",
-  drugstores: "Drugstores",
-  streaming: "Streaming",
-  phone: "Phone plan",
-  online: "Online shopping",
-  entertainment: "Entertainment",
-  other: "Everything else",
-};
+const LABELS = SPEND_LABELS;
 
 export default function BestCardPage() {
   const { catalog, data, today } = useApp();

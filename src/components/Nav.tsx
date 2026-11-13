@@ -8,14 +8,16 @@ import { useApp } from "./AppState";
 import { use524 } from "./derived";
 import { PillLink } from "./ui";
 
-const LINKS = [
+/** Desktop header links. `short` is what shows when the full label would not fit the row; the link keeps its full name. */
+const LINKS: { href: string; label: string; short?: string }[] = [
   { href: "/", label: "Wallet" },
   { href: "/up-next", label: "Up next" },
   { href: "/eligibility", label: "5/24" },
   { href: "/payments", label: "Payments" },
   { href: "/rotating", label: "Rotating" },
   { href: "/best-card", label: "Best card" },
-  { href: "/apply", label: "Should I apply?" },
+  { href: "/apply", label: "Should I apply?", short: "Apply?" },
+  { href: "/find-card", label: "Find a card", short: "Find card" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
 ];
@@ -26,6 +28,7 @@ export const MORE_LINKS = [
   { href: "/rotating", label: "Rotating 5%" },
   { href: "/best-card", label: "Best card" },
   { href: "/apply", label: "Should I apply?" },
+  { href: "/find-card", label: "Find a card" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
   { href: "/cards", label: "Add card" },
@@ -87,9 +90,10 @@ export function Nav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`shrink-0 rounded-full px-3 py-1.5 ${active ? "bg-text/[0.07] font-semibold text-text" : "text-muted hover:text-text"}`}
+                aria-label={l.short ? l.label : undefined}
+                className={`shrink-0 rounded-full px-2.5 py-1.5 ${active ? "bg-text/[0.07] font-semibold text-text" : "text-muted hover:text-text"}`}
               >
-                {l.label}
+                {l.short ?? l.label}
               </Link>
             );
           })}

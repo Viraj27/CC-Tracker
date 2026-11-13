@@ -7,7 +7,7 @@
  */
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { isoDate } from "./catalog/schema";
+import { isoDate, SPEND_CATEGORIES } from "./catalog/schema";
 import type { UserData } from "./domain/types";
 import { DEFAULT_SETTINGS } from "./domain/types";
 import { muteKey, occurrenceKey } from "./domain/skips";
@@ -16,9 +16,10 @@ export const EXPORT_FORMAT = "cc-tracker-export";
 /**
  * 2 (v4.1) adds per-holding `skips` and `mutes`; 3 (v7) adds per-holding
  * `enrollments`; 4 (v6) adds a per-holding `welcomeOffer` and the welcome
- * bonus settings. Older files still import: what's missing gets its default.
+ * bonus settings; 5 (v6.1, v8) adds the `pending` fee outcome, the per-card
+ * refund window, `afWatchDays`, the spend profile and Find a card's criteria. Older files still import: what's missing gets its default.
  */
-export const EXPORT_VERSION = 4;
+export const EXPORT_VERSION = 5;
 
 const monthKey = z.string().regex(/^\d{4}-\d{2}$/, "expected YYYY-MM");
 const nullable = <T extends z.ZodType>(t: T) => t.nullable().optional().default(null);
@@ -150,6 +151,17 @@ const SettingsIn = z.object({
   perkValueOverrides: z.record(z.string(), z.number().nonnegative()).default({}),
   centsPerPoint: z.record(z.string(), z.number().positive()).default({}),
   paymentTrackingStart: nullable(monthKey),
+  spendProfile: z.partialRecord(z.enum(SPEND_CATEGORIES), z.number().nonnegative()).default({}),
+  findCardCriteria: z
+    .object({
+      accountType: z.enum(["personal", "business", "both"]),
+      goal: z.enum(["bonus", "everyday"]),
+      program: z.string(),
+      maxFee: z.number().nonnegative().nullable(),
+      excludedIssuers: z.array(z.string()),
+    })
+    .partial()
+    .default({}),
 });
 
 export const ImportSchema = z.object({

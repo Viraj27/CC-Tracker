@@ -10,7 +10,7 @@ import { isTemp, useApp } from "./AppState";
 import { useHoldingViews } from "./derived";
 import { type MuteChange, useDeleteOffer, useSaveOffer, useSetMutes } from "./mutations";
 import { Button, Field } from "./ui";
-import { CloseGuardWarning, OfferFieldset, offerFormOf, offerFromForm } from "./WelcomeBonus";
+import { CloseGuardWarning, OfferFieldset, offerFormOf, offerFromForm, publicOfferForm } from "./WelcomeBonus";
 
 const num = (s: string) => (s.trim() === "" ? null : Number(s));
 
@@ -18,9 +18,15 @@ const num = (s: string) => (s.trim() === "" ? null : Number(s));
 export function HoldingForm({
   initial,
   openOffer = false,
+  presetCardId,
+  presetOffer = false,
   onDone,
   onDeleted,
 }: {
+  /** Add card from Find a card: start with this catalog card picked… */
+  presetCardId?: string;
+  /** …and its public offer already in the Welcome offer fields (still editable, saved only with the card). */
+  presetOffer?: boolean;
   initial?: Holding;
   /** Start with the Welcome offer fieldset expanded. */
   openOffer?: boolean;
@@ -29,7 +35,7 @@ export function HoldingForm({
 }) {
   const { catalog, data, mutate } = useApp();
   const [f, setF] = useState({
-    catalogCardId: initial?.catalogCardId ?? "",
+    catalogCardId: initial?.catalogCardId ?? (presetCardId && catalog.cards.some((c) => c.id === presetCardId) ? presetCardId : ""),
     nickname: initial?.nickname ?? "",
     issuer: initial?.issuer ?? "",
     accountType: initial?.accountType ?? "",
@@ -45,7 +51,10 @@ export function HoldingForm({
   });
   // The optional welcome offer (docs/SPEC-v6-welcome-bonus.md §5).
   const existingOffer = initial ? offerFor(data.welcomeOffers, initial.id) : null;
-  const [offer, setOffer] = useState(() => offerFormOf(existingOffer));
+  const [offer, setOffer] = useState(() => {
+    const preset = !initial && presetOffer ? catalog.cards.find((c) => c.id === presetCardId)?.public_offer : undefined;
+    return preset ? { ...offerFormOf(null), ...publicOfferForm(preset) } : offerFormOf(existingOffer);
+  });
   const saveOffer = useSaveOffer();
   const setOutcome = useSetAfOutcome();
   const deleteOffer = useDeleteOffer();
@@ -194,7 +203,7 @@ export function HoldingForm({
         publicOffer={existingOffer ? undefined : reminderCard?.public_offer}
         value={offer}
         onChange={setOffer}
-        open={openOffer}
+        open={openOffer || (!initial && presetOffer)}
         onRemove={
           existingOffer && initial
             ? async () => {

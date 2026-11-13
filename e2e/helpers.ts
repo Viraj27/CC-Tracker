@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { expect, type Locator, type Page } from "@playwright/test";
 
@@ -101,3 +102,31 @@ export async function saveStubCard(page: Page) {
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByTestId("stub-notice")).toBeVisible();
 }
+
+/**
+ * Like `importDemo`, but the file also carries `settings`, so settings left behind by an earlier
+ * test (the specs share one database) are replaced too. Defaults apply to whatever is not given.
+ */
+export async function importDemoWithSettings(page: Page, settings: Record<string, unknown> = {}) {
+  const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "examples", "demo-seed.json"), "utf8"));
+  // A fresh database tracks payments from the current month; keep that, or every earlier month turns past due.
+  settings = { paymentTrackingStart: daysAgo(0).slice(0, 7), ...settings };
+  await page.goto("/settings");
+  await page.getByLabel("Replace all my data").check();
+  page.once("dialog", (d) => d.accept());
+  await page.getByLabel("Import JSON file").setInputFiles({ name: "demo-seed.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ ...seed, settings })) });
+  await expect(page.getByRole("status")).toContainText("Imported 5 card(s)");
+}
+
+/** Type the demo spend profile in Settings: $400 dining, $600 groceries, $1,000 everything else. */
+export async function setDemoSpend(page: Page) {
+  await gotoReady(page, "/settings");
+  const group = page.getByTestId("spend-profile");
+  await group.getByLabel("Dining").fill("400");
+  await group.getByLabel("Groceries").fill("600");
+  await group.getByLabel("Everything else").fill("1000");
+  await expect(page.getByTestId("spend-total")).toHaveText("$2,000");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await page.waitForLoadState("networkidle");
+}
+

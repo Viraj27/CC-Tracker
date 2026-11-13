@@ -1,4 +1,5 @@
 /** Plain user-data shapes shared by server, client and the pure domain logic. */
+import type { SpendCategory } from "../catalog/schema";
 
 export type HoldingStatus = "open" | "closed" | "product_changed";
 export type AccountType = "personal" | "business";
@@ -171,6 +172,22 @@ export interface Settings {
   perkValueOverrides: Record<string, number>;
   centsPerPoint: Record<string, number>;
   paymentTrackingStart: string | null;
+  /** Find a card: rough monthly USD per spend category, typed once. Blank categories are absent. */
+  spendProfile: Partial<Record<SpendCategory, number>>;
+  /** Find a card: the page's criteria as last left; missing keys take their defaults. */
+  findCardCriteria: Partial<FindCardCriteria>;
+}
+
+/** Find a card's filters (docs/SPEC-v8-find-a-card.md §2.2). */
+export interface FindCardCriteria {
+  accountType: "personal" | "business" | "both";
+  goal: "bonus" | "everyday";
+  /** A program id, `cash` for any cash-back program, or `any`. */
+  program: string;
+  /** USD; null = no limit. */
+  maxFee: number | null;
+  /** Issuer ids left out (empty = every issuer). */
+  excludedIssuers: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -184,6 +201,8 @@ export const DEFAULT_SETTINGS: Settings = {
   perkValueOverrides: {},
   centsPerPoint: {},
   paymentTrackingStart: null,
+  spendProfile: {},
+  findCardCriteria: {},
 };
 
 export interface UserData {
