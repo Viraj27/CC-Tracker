@@ -171,6 +171,8 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
           paymentTrackingStart: settings.paymentTrackingStart,
           spendProfile: parseJson(settings.spendProfile, {}),
           findCardCriteria: parseJson(settings.findCardCriteria, {}),
+          dismissedDeals: parseJson(settings.dismissedDeals, []),
+          dealsSeenAt: settings.dealsSeenAt,
         }
       : { ...DEFAULT_SETTINGS },
   };
@@ -190,6 +192,8 @@ export function settingsRow(s: Settings) {
     paymentTrackingStart: s.paymentTrackingStart,
     spendProfile: JSON.stringify(s.spendProfile),
     findCardCriteria: JSON.stringify(s.findCardCriteria),
+    dismissedDeals: JSON.stringify(s.dismissedDeals),
+    dealsSeenAt: s.dealsSeenAt,
   };
 }
 

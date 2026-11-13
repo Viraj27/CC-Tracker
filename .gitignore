@@ -16,3 +16,4 @@ playwright-report/
 .wrangler/
 .dev.vars*
 src/generated/
+.e2e-catalog/

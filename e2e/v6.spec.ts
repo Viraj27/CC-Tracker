@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { addCardWithOffer, gotoReady, importDemo, sheet, sheetSettled } from "./helpers";
+import { addCardWithOffer, gotoReady, importDemo, saved, sheet, sheetSettled } from "./helpers";
 
 // v6 welcome bonus (docs/SPEC-v6-welcome-bonus.md §7): 390px and desktop, both themes. Demo seed only.
 // The browser clock is pinned to Nov 22, 2026; the fake card is approved Sep 14, so its estimated
@@ -42,10 +42,11 @@ for (const [label, width, height] of [
         await expect(sheet(page).getByRole("button", { name: `Skip this one — ${TARGET}` })).toBeVisible();
         // "Spent so far" is optional and only changes the wording.
         await sheet(page).getByLabel(/^Spent so far/).fill("1800");
-        await sheet(page).getByLabel(/^Spent so far/).press("Enter");
+        await saved(page, () => sheet(page).getByLabel(/^Spent so far/).press("Enter"));
         await expect(sheet(page).getByTestId("offer-line")).toContainText("$1,200 left");
         expect(await overflow(page)).toBeLessThanOrEqual(0);
-        await sheet(page).getByRole("button", { name: /^Mark met — / }).click();
+        // The sheet closes at once; the save has to land before the full page load below.
+        await saved(page, () => sheet(page).getByRole("button", { name: /^Mark met — / }).click());
         await expect(sheet(page)).toHaveCount(0);
         await expect(page.getByTestId("attention-list").getByText("Spend $1,200 more")).toHaveCount(0);
 
@@ -56,13 +57,13 @@ for (const [label, width, height] of [
         await expect(nudge).toContainText("Bonus not posted");
         await nudge.click();
         await sheetSettled(page);
-        await sheet(page).getByRole("button", { name: /^Mark posted — / }).first().click();
+        await saved(page, () => sheet(page).getByRole("button", { name: /^Mark posted — / }).first().click());
         await expect(sheet(page)).toHaveCount(0);
         await expect(page.getByTestId("attention-list").getByText("Bonus not posted")).toHaveCount(0);
 
         // The row leaves the card page; the result is in the lifecycle log.
         await page.goto(await cardUrl(page));
-        await expect(page.getByTestId("card-detail")).toBeVisible();
+        await expect(page.getByTestId("card-detail").first()).toBeVisible();
         await expect(page.getByTestId("bonus-row")).toHaveCount(0);
         await page.getByTestId("drill-lifecycle").click();
         await sheetSettled(page);

@@ -1,11 +1,11 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, setDemoSpend, sheet, sheetSettled, startStubCard } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saved, saveStubCard, setDemoSpend, sheet, sheetSettled, startStubCard } from "./helpers";
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
 // light + dark, 390px + desktop. Plus 5/24, the v4.1 skipped views, the v7 credit rows, benefit sheet and Should I apply?,
-// the v6 welcome bonus (card row, sheet, Up next row) and the v6.1 annual fee sheets (watch, decide).
+// the v6 welcome bonus (card row, sheet, Up next row), the v6.1 annual fee sheets (watch, decide) and v9 Deals.
 const out = path.join(__dirname, "..", "docs", "screenshots");
 const LYFT = "Demo Reserve: $10 Lyft in-app credit left";
 
@@ -109,6 +109,25 @@ test.describe("screenshots", () => {
         await shot("find-card-sheet");
         await page.keyboard.press("Escape");
         await expect(sheet(page)).toHaveCount(0);
+
+        // v9 (docs/SPEC-v9-daily-refresh.md): Deals from the made-up e2e feed, What changed, and the chip on a changed card.
+        await gotoReady(page, "/deals");
+        // Bring back anything an earlier spec dismissed.
+        if (await page.getByTestId("deals-show-dismissed").count()) {
+          await page.getByTestId("deals-show-dismissed").click();
+          while (await page.getByRole("button", { name: /^Restore — / }).count()) {
+            await saved(page, () => page.getByRole("button", { name: /^Restore — / }).first().click());
+          }
+        }
+        await expect(page.getByTestId("deals-yours").getByTestId("deal-chase-offers-grocery")).toBeVisible();
+        await shot("deals");
+        await page.getByTestId("deals-changed").scrollIntoViewIfNeeded();
+        await page.getByTestId("change-row").first().getByRole("button", { name: "Source" }).click();
+        await page.getByTestId("deals-changed").evaluate((el) => el.scrollIntoView({ block: "center" }));
+        await shot("deals-changed");
+        await gotoReady(page, "/cards/demo-reserve");
+        await expect(page.getByTestId("changed-chip")).toBeVisible();
+        await shot("card-changed");
 
         // v6.2 (docs/SPEC-v6.2-catalog.md): a stub card: Add card with the public-offer hint, its card page.
         await startStubCard(page, daysAgo(20));

@@ -14,6 +14,7 @@ import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getPlatformProxy } from "wrangler";
 import { loadCatalog } from "@/lib/catalog/loader";
+import { fixtureFeed } from "../e2e/feedFixture";
 import { buildExport, parseImport } from "@/lib/importExport";
 import { readCatalogFromDb, syncCatalog } from "@/lib/server/catalogStore";
 import { type D1Like, type Db, d1Db, prismaDb } from "@/lib/server/dbHandle";
@@ -206,6 +207,33 @@ function storageSuite(name: string, open: () => Promise<{ db: Db; batches: () =>
       const again = parseImport(JSON.parse(JSON.stringify(buildExport(second, "2026-11-13T00:00:00.000Z"))));
       await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
       expect(await loadUserData(db.prisma, PROFILE)).toEqual(second);
+      await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
+    });
+
+    it("stores dismissed deals and the last feed seen; the catalog cache keeps the feed", async () => {
+      const file = JSON.parse(JSON.stringify(demo));
+      file.settings = { dismissedDeals: ["deal-a", "deal-b"], dealsSeenAt: "2026-11-13T06:00:00Z" };
+      const { data, hasSettings } = parseImport(file);
+      await writeImport(db, PROFILE, data, "replace", hasSettings);
+      const first = await loadUserData(db.prisma, PROFILE);
+      expect(first.settings.dismissedDeals).toEqual(["deal-a", "deal-b"]);
+      expect(first.settings.dealsSeenAt).toBe("2026-11-13"); // stored as a date: D1 would hand a date-time back as a Date
+      // What dismissing one more does: one column, the seen date untouched.
+      await db.prisma.settings.update({ where: { profileId: PROFILE }, data: { dismissedDeals: JSON.stringify(["deal-a"]) } });
+      const second = await loadUserData(db.prisma, PROFILE);
+      expect(second.settings.dismissedDeals).toEqual(["deal-a"]);
+      expect(second.settings.dealsSeenAt).toBe("2026-11-13");
+      const again = parseImport(JSON.parse(JSON.stringify(buildExport(second, "2026-11-13T00:00:00.000Z"))));
+      await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(second);
+      expect((await readCatalogFromDb(db.prisma))?.feed).toEqual(catalog.feed);
+      // A feed that changes is a new content hash, and replaces the cached one.
+      const feed = fixtureFeed("2026-11-13");
+      const withFeed = { ...catalog, hash: `${catalog.hash}-feed`, feed: { ...feed, deals: feed.deals.filter((d) => d.id !== "expired-deal") } };
+      expect(await syncCatalog(db, withFeed)).toBe(true);
+      expect((await readCatalogFromDb(db.prisma))?.feed).toEqual(withFeed.feed);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(second);
+      expect(await syncCatalog(db, catalog)).toBe(true);
       await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
     });
 

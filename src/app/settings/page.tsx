@@ -79,6 +79,8 @@ export default function SettingsPage() {
             spendProfile: Object.fromEntries(Object.entries(numMap(form.spend)).filter(([, v]) => v > 0)),
             // Find a card saves its own criteria; keep whatever it last stored.
             findCardCriteria: data.settings.findCardCriteria,
+            dismissedDeals: data.settings.dismissedDeals,
+            dealsSeenAt: data.settings.dealsSeenAt,
           };
           const ok = await mutate((d) => ({ ...d, settings: next }), () => saveSettings(next));
           setSaved(ok);

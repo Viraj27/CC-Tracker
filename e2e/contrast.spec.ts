@@ -18,6 +18,9 @@ const PAGES = [
   "/settings",
   "/more",
   "/cards",
+  // v9: the made-up e2e feed (e2e/feedFixture.ts), all groups and What changed with every ⓘ open.
+  "/deals",
+  "/deals?card=chase-sapphire-reserve",
 ];
 
 type Hit = { color: string; bg: string; ratio: number; text: string; where: string };
@@ -47,6 +50,14 @@ test.describe("contrast", () => {
         for (const p of PAGES) {
           await gotoReady(page, p);
           await check(p);
+        }
+        // Desktop header: the More menu, open.
+        if (label === "desktop") {
+          await page.getByTestId("nav-more").click();
+          await expect(page.getByTestId("nav-more-menu")).toBeVisible();
+          await check("header More menu");
+          await page.keyboard.press("Escape");
+          await expect(page.getByTestId("nav-more-menu")).toHaveCount(0);
         }
 
         // Sheets (docs/SPEC-v5-app-pass.md §3.4): a credit, a drill-in list and a benefit, ROI, rotating, an Up next item.

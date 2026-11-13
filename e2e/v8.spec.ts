@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady, importDemoWithSettings, setDemoSpend, sheet, sheetSettled } from "./helpers";
+import { gotoReady, importDemoWithSettings, saved, setDemoSpend, sheet, sheetSettled } from "./helpers";
 
 // v8 Find a card (docs/SPEC-v8-find-a-card.md §7): 390px and desktop, both themes. Demo seed only:
 // it holds Demo Reserve, Flex, Venture X and Autograph, so those never show as candidates, and the
@@ -60,9 +60,8 @@ for (const [label, width, height] of [
         expect(new Set(reach).size).toBeGreaterThan(1);
 
         // Card type: Both adds business cards; Personal removes them again. The choice survives a reload.
-        await page.getByTestId("find-type").selectOption("both");
+        await saved(page, () => page.getByTestId("find-type").selectOption("both"));
         await expect(candidate(page, "chase-ink-business-preferred")).toBeVisible();
-        await page.waitForLoadState("networkidle");
         await page.reload();
         await expect(page.getByTestId("find-type")).toHaveValue("both");
         await page.getByTestId("find-type").selectOption("personal");

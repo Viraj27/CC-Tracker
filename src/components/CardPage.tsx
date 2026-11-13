@@ -17,6 +17,7 @@ import { useApp } from "./AppState";
 import { benefitEndsText, EnrollmentBadge, isGreyed, PeriodLine } from "./BenefitBits";
 import { benefitsOf, CYCLE_LABEL, LIST_TITLE } from "./CardSheets";
 import { use524, type HoldingView } from "./derived";
+import { cardChangedChip } from "@/lib/domain/deals";
 import { canGoBack } from "./Nav";
 import { useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { FactBadges, Group, GroupBadges, GroupLabel, InfoToggle, Row, usd } from "./ui";
@@ -82,6 +83,8 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
   const sheet = useSheet();
   const router = useRouter();
   const { holding: h, card, roi, util } = view;
+  // `CHANGED NOV 12`: the daily refresh changed a fact on this card in the last 30 days.
+  const changed = cardChangedChip(catalog.feed.changelog, card?.id ?? null, today);
 
   // Deep links: #downgrade, #edit, #benefit-<id>… open their sheet; ?log=<benefit> opens that credit.
   useEffect(() => {
@@ -194,6 +197,17 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
       </div>
 
       <OfferRow view={view} />
+      {changed && (
+        <p className="mt-3 px-1">
+          <Link
+            href={`/deals?card=${card!.id}#changed`}
+            data-testid="changed-chip"
+            className="inline-flex min-h-9 items-center rounded-full border border-text/30 px-3 font-mono text-[11px] font-bold tracking-wider hover:border-text"
+          >
+            {changed} ›
+          </Link>
+        </p>
+      )}
       {card?.depth === "stub" && <StubNotice name={card.name} productPage={card.product_page} />}
 
       {credits.length > 0 && (

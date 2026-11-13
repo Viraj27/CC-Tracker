@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady, importDemo, sheet, sheetSettled } from "./helpers";
+import { gotoReady, importDemo, saved, sheet, sheetSettled } from "./helpers";
 
 // v6.1 annual fee after it posts (docs/SPEC-v6.1-annual-fee-decision.md §7): 390px and desktop, both themes.
 // Demo seed only: Demo Venture X ($395) has its anniversary on Nov 20. The browser clock is pinned to
@@ -81,10 +81,9 @@ for (const [label, width, height] of [
         await expect(form.getByLabel("Type")).toHaveValue("retention_call");
         await form.getByLabel("Offer").fill("Demo $100 statement credit");
         await form.getByLabel("Accepted?").selectOption("yes");
-        await form.getByRole("button", { name: "Add event" }).click();
+        await saved(page, () => form.getByRole("button", { name: "Add event" }).click());
         await expect(sheet(page)).toHaveCount(0);
         await expect(list(page).getByText(/Decide by|Watch for fee/)).toHaveCount(0);
-        await page.waitForLoadState("networkidle");
 
         await gotoReady(page, "/cards/demo-venture-x#af-history");
         await sheetSettled(page);
