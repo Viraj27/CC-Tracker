@@ -19,6 +19,8 @@ import { HoldingForm } from "./HoldingForm";
 import { LogUse } from "./LogUse";
 import { useAddEnrollment, useDeleteEnrollment, useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
 import { ReminderSwitch } from "./Reminders";
+import { bonusLogEntry, offerFor } from "@/lib/domain/welcomeBonus";
+import { CloseGuardWarning, OfferPanel } from "./WelcomeBonus";
 import { KeyFigures, Sheet, SheetHeader, SheetPrimary, SheetSecondary, useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { Badge, Button, CELL, Empty, FactBadges, Field, Group, GroupBadges, GroupLabel, Label, Provenance, Row, usd } from "./ui";
 
@@ -76,6 +78,8 @@ function routeTitle(r: SheetRoute, views: HoldingView[]): string {
       return "ROI";
     case "rotating":
       return "Rotating";
+    case "offer":
+      return "Welcome bonus";
     case "edit":
       return "Edit";
   }
@@ -111,8 +115,15 @@ function SheetContent({ route }: { route: SheetRoute }) {
       return <RotatingSheet view={view} />;
     case "list":
       return <ListSheet view={view} list={route.list} />;
+    case "offer":
+      return (
+        <div data-testid="offer-sheet">
+          <SheetHeader title="Welcome bonus" sub={view.name} />
+          <OfferPanel view={view} />
+        </div>
+      );
     case "edit":
-      return <EditSheet view={view} />;
+      return <EditSheet view={view} openOffer={route.offer} />;
   }
 }
 
@@ -233,6 +244,11 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
         </SheetPrimary>
       );
       break;
+    case "sub":
+    case "subpost":
+      // The offer panel carries its own figures and actions (Met, Posted, Missed, Edit offer).
+      body = view ? <OfferPanel view={view} onDone={sheet.close} /> : null;
+      break;
     case "rotating": {
       const program = catalog.rotating.find((r) => r.id === view?.card?.rotating_program);
       const entry = program && currentAndNextQuarter(program, today)[0].entry;
@@ -286,7 +302,7 @@ function ItemSheet({ snapshot }: { snapshot: AttentionItem }) {
         sub={item.cardName}
         info={fact && <Provenance flow fact={fact.fact} description={fact.description} />}
       />
-      <KeyFigures items={figures} />
+      {figures.length > 0 && <KeyFigures items={figures} />}
       {body}
       <div className="mt-2 flex flex-wrap justify-center gap-x-4">
         {hiddenItem ? (
@@ -547,11 +563,19 @@ function RoiSheet({ view }: { view: HoldingView }) {
         ]}
       />
       <GroupLabel>Breakdown</GroupLabel>
-      {roi.breakdown.length > 0 ? (
+      {roi.breakdown.length > 0 || roi.bonus ? (
         <Group>
           {roi.breakdown.map((b) => (
             <Row key={b.benefitId} title={b.name} sub={`×${b.uses}`} amount={money(b.value)} />
           ))}
+          {roi.bonus && (
+            <Row
+              testId="roi-bonus"
+              title="Welcome bonus"
+              sub={`${roi.bonus.label} · one time${roi.bonus.counted ? "" : " · not in the total"}`}
+              amount={<span className={roi.bonus.counted ? "" : "font-normal text-muted"}>{money(roi.bonus.value)}</span>}
+            />
+          )}
         </Group>
       ) : (
         <Group>
@@ -690,6 +714,7 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
     case "downgrade":
       body = (
         <>
+          <CloseGuardWarning view={view} className="mb-3" />
           {!card || card.downgrade_options.length === 0 ? (
             <Empty>No annual fee or no known downgrade paths.</Empty>
           ) : (
@@ -764,10 +789,21 @@ function ListSheet({ view, list }: { view: HoldingView; list: ListKind }) {
     }
     case "lifecycle": {
       const events = data.lifecycle.filter((e) => e.holdingId === h.id);
+      // The settled welcome bonus is part of the card's history; it is changed from its own sheet.
+      const bonus = bonusLogEntry(offerFor(data.welcomeOffers, h.id), h);
       body = (
         <>
           <Group className="mb-4">
-            {events.length === 0 ? (
+            {bonus && (
+              <li className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-2 text-sm" data-testid="bonus-log">
+                {bonus.date && <span className="font-mono text-xs tracking-wider uppercase">{shortDate(bonus.date, today)}</span>}
+                <span className="font-semibold">{bonus.text}</span>
+                <button type="button" className="ml-auto min-h-9 text-xs text-muted underline hover:text-text" onClick={() => sheet.push({ type: "offer", holdingId: h.id })}>
+                  details
+                </button>
+              </li>
+            )}
+            {events.length === 0 && !bonus ? (
               <li className={CELL}>
                 <Empty>No retention calls, product changes or closures logged.</Empty>
               </li>
@@ -816,7 +852,7 @@ function DeleteButton({ onClick, disabled }: { onClick: () => void; disabled: bo
   );
 }
 
-function EditSheet({ view }: { view: HoldingView }) {
+function EditSheet({ view, openOffer = false }: { view: HoldingView; openOffer?: boolean }) {
   const sheet = useSheet();
   const router = useRouter();
   const { today } = useApp();
@@ -830,7 +866,8 @@ function EditSheet({ view }: { view: HoldingView }) {
       <div className="rounded-[14px] bg-list p-4">
         <HoldingForm
           initial={view.holding}
-          onDone={() => sheet.close()}
+          openOffer={openOffer}
+          onDone={() => (openOffer && sheet.stack.length > 1 ? sheet.back() : sheet.close())}
           onDeleted={() => {
             sheet.close();
             router.push("/");

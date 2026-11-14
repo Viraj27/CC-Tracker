@@ -1,6 +1,6 @@
 import type { HoldingView } from "./derived";
 
-const URGENT_CHIPS = /^(PAST DUE|DUE TODAY|FEE TODAY|CREDIT TODAY)$|^(DUE IN|FEE IN|CREDIT) [0-7]D$/;
+const URGENT_CHIPS = /^(PAST DUE|DUE TODAY|FEE TODAY|CREDIT TODAY|BONUS TODAY|BONUS LATE)$|^(DUE IN|FEE IN|CREDIT|BONUS ·) [0-7]D$/;
 
 export function issuerLabel(v: Pick<HoldingView, "holding" | "card">): string {
   return (v.card?.issuer ?? v.holding.issuer ?? "custom").replaceAll("_", " ");

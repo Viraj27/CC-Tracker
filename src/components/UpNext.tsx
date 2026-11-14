@@ -10,6 +10,7 @@ import { useApp } from "./AppState";
 import { useHoldingViews } from "./derived";
 import { useAddEnrollment, useSetActivated, useSetMutes, useSetPaid, useSetSkipped } from "./mutations";
 import { useSheet } from "./Sheet";
+import { useOfferActions } from "./WelcomeBonus";
 import { Button, CardBar, CardSwatch, Empty, Group, GroupLabel, Row, usd } from "./ui";
 
 export const daysLabel = (d: number) => (d < 0 ? `${-d}D LATE` : d === 0 ? "TODAY" : `IN ${d}D`);
@@ -18,7 +19,7 @@ const money = (n: number) => usd(n, Number.isInteger(n) ? 0 : 2);
 
 /** Right-hand figures of an item row: amount over date (days late/left when there is no amount). */
 function figures(a: AttentionItem, today: string) {
-  return { amount: a.amount !== null ? money(a.amount) : daysLabel(a.daysUntil), date: shortDate(a.date, today), urgent: a.severity === "critical" };
+  return { amount: a.amountText ?? (a.amount !== null ? money(a.amount) : daysLabel(a.daysUntil)), date: shortDate(a.date, today), urgent: a.severity === "critical" };
 }
 
 /** The item's primary action: short visible label, the v4.1 accessible name, and what it does. */
@@ -26,8 +27,13 @@ function usePrimary(item: AttentionItem): { short: string; long: string; run: ()
   const setPaid = useSetPaid();
   const setActivated = useSetActivated();
   const addEnrollment = useAddEnrollment();
+  const offer = useOfferActions();
   const sheet = useSheet();
   switch (item.kind) {
+    case "sub":
+      return { short: "Met", long: "Mark met", run: () => offer.met(item.holdingId) };
+    case "subpost":
+      return { short: "Posted", long: "Mark posted", run: () => offer.posted(item.holdingId) };
     case "payment":
       return { short: "Paid", long: "Mark paid", run: () => setPaid(item.holdingId, item.month!, item.date, true) };
     case "rotating":
@@ -255,7 +261,7 @@ export function UpNextStrip({ items, hidden = [] }: { items: AttentionItem[]; hi
                 </span>
               </button>
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-sm font-bold">{a.amount !== null ? money(a.amount) : ""}</span>
+                <span className="font-mono text-sm font-bold">{a.amountText ?? (a.amount !== null ? money(a.amount) : "")}</span>
                 <AttentionActions item={a} />
               </div>
             </li>

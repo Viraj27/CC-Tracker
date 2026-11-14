@@ -8,6 +8,7 @@ import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { splitAttention } from "@/lib/domain/skips";
 import { cardRoi, cardUtilization, nextAfDate, type RoiResult, type Utilization } from "@/lib/domain/roi";
 import type { Holding } from "@/lib/domain/types";
+import { offerFor, roiBonus } from "@/lib/domain/welcomeBonus";
 import { CUSTOM_CARD_COLOR, inkFor } from "@/lib/cardColors";
 import { useApp } from "./AppState";
 
@@ -40,7 +41,15 @@ export function useHoldingViews(): HoldingView[] {
           ink: inkFor(color, card?.card_ink),
           fee: card?.annual_fee.amount ?? 0,
           util: cardUtilization(h, card, data.usages, today),
-          roi: cardRoi(h, card, data.usages, catalog, data.settings, today),
+          roi: cardRoi(
+            h,
+            card,
+            data.usages,
+            catalog,
+            data.settings,
+            today,
+            roiBonus(offerFor(data.welcomeOffers, h.id), h, card, catalog, data.settings, data.points, today),
+          ),
           nextAf: nextAfDate(h, today),
         };
       }),

@@ -3,6 +3,7 @@ import { localToday } from "../domain/dates";
 import type {
   AccountType,
   AfOutcome,
+  BonusUnit,
   HoldingStatus,
   LifecycleType,
   MuteKind,
@@ -36,7 +37,7 @@ function parseJson<T>(s: string, fallback: T): T {
 export async function loadUserData(prisma: PrismaClient, profileId: string): Promise<UserData> {
   await ensureProfile(prisma, profileId);
   const where = { profileId };
-  const [holdings, usages, enrollments, payments, afEvents, lifecycle, points, activations, dismissals, mutes, settings] = await Promise.all([
+  const [holdings, usages, enrollments, payments, afEvents, lifecycle, points, activations, dismissals, mutes, welcomeOffers, settings] = await Promise.all([
     prisma.holding.findMany({ where, orderBy: [{ approvalDate: "asc" }, { id: "asc" }] }),
     prisma.benefitUsage.findMany({ where, orderBy: [{ date: "asc" }, { createdAt: "asc" }] }),
     prisma.benefitEnrollment.findMany({ where, orderBy: [{ enrolledOn: "asc" }, { id: "asc" }] }),
@@ -47,6 +48,7 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
     prisma.rotatingActivation.findMany({ where }),
     prisma.dismissal.findMany({ where, orderBy: { key: "asc" } }),
     prisma.reminderMute.findMany({ where, orderBy: { key: "asc" } }),
+    prisma.welcomeOffer.findMany({ where, orderBy: { holdingId: "asc" } }),
     prisma.settings.findUnique({ where }),
   ]);
   return {
@@ -80,6 +82,23 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
       holdingId: e.holdingId,
       benefitId: e.benefitId,
       enrolledOn: e.enrolledOn,
+    })),
+    welcomeOffers: welcomeOffers.map((o) => ({
+      id: o.id,
+      holdingId: o.holdingId,
+      bonusAmount: o.bonusAmount,
+      bonusUnit: o.bonusUnit as BonusUnit,
+      program: o.program,
+      minSpend: o.minSpend,
+      windowMonths: o.windowMonths,
+      deadline: o.deadline,
+      spentSoFar: o.spentSoFar,
+      spentAsOf: o.spentAsOf,
+      metDate: o.metDate,
+      postedDate: o.postedDate,
+      postedAmount: o.postedAmount,
+      outcome: o.outcome === "missed" ? "missed" : null,
+      note: o.note,
     })),
     payments: payments.map((p) => ({
       id: p.id,
@@ -142,6 +161,9 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
           afLeadDays: settings.afLeadDays,
           creditLeadDays: settings.creditLeadDays,
           paymentLeadDays: settings.paymentLeadDays,
+          subLeadDays: settings.subLeadDays,
+          subPostingDays: settings.subPostingDays,
+          countBonusInRoi: settings.countBonusInRoi,
           perkValueOverrides: parseJson(settings.perkValueOverrides, {}),
           centsPerPoint: parseJson(settings.centsPerPoint, {}),
           paymentTrackingStart: settings.paymentTrackingStart,
@@ -155,6 +177,9 @@ export function settingsRow(s: Settings) {
     afLeadDays: s.afLeadDays,
     creditLeadDays: s.creditLeadDays,
     paymentLeadDays: s.paymentLeadDays,
+    subLeadDays: s.subLeadDays,
+    subPostingDays: s.subPostingDays,
+    countBonusInRoi: s.countBonusInRoi,
     perkValueOverrides: JSON.stringify(s.perkValueOverrides),
     centsPerPoint: JSON.stringify(s.centsPerPoint),
     paymentTrackingStart: s.paymentTrackingStart,
@@ -184,6 +209,7 @@ export function importStatements(
   for (const h of data.holdings) ops.push(upsertSql("Holding", { ...h, profileId, updatedAt: now }));
   for (const u of data.usages) ops.push(upsertSql("BenefitUsage", { ...u, profileId }));
   for (const e of data.enrollments) ops.push(upsertSql("BenefitEnrollment", { ...e, profileId }));
+  for (const o of data.welcomeOffers) ops.push(upsertSql("WelcomeOffer", { ...o, profileId }, ["holdingId"]));
   for (const p of data.payments) ops.push(upsertSql("PaymentRecord", { ...p, profileId }, ["holdingId", "statementMonth"]));
   for (const e of data.afEvents) ops.push(upsertSql("AnnualFeeEvent", { ...e, profileId }));
   for (const e of data.lifecycle) ops.push(upsertSql("LifecycleEvent", { ...e, profileId }));

@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 import { deleteHolding, saveHolding } from "@/app/actions";
+import { offerFor } from "@/lib/domain/welcomeBonus";
 import { isMuted } from "@/lib/domain/skips";
 import type { Holding, MuteKind } from "@/lib/domain/types";
 import { useApp } from "./AppState";
-import { type MuteChange, useSetMutes } from "./mutations";
+import { useHoldingViews } from "./derived";
+import { type MuteChange, useDeleteOffer, useSaveOffer, useSetMutes } from "./mutations";
 import { Button, Field } from "./ui";
+import { CloseGuardWarning, OfferFieldset, offerFormOf, offerFromForm } from "./WelcomeBonus";
 
 const num = (s: string) => (s.trim() === "" ? null : Number(s));
 
 /** Add or edit a holding: every holding field, catalog or custom (non-catalog) cards. */
 export function HoldingForm({
   initial,
+  openOffer = false,
   onDone,
   onDeleted,
 }: {
   initial?: Holding;
+  /** Start with the Welcome offer fieldset expanded. */
+  openOffer?: boolean;
   onDone: (savedId?: string) => void;
   onDeleted?: () => void;
 }) {
@@ -35,6 +41,12 @@ export function HoldingForm({
     paymentDueDay: initial?.paymentDueDay?.toString() ?? "",
     notes: initial?.notes ?? "",
   });
+  // The optional welcome offer (docs/SPEC-v6-welcome-bonus.md §5).
+  const existingOffer = initial ? offerFor(data.welcomeOffers, initial.id) : null;
+  const [offer, setOffer] = useState(() => offerFormOf(existingOffer));
+  const saveOffer = useSaveOffer();
+  const deleteOffer = useDeleteOffer();
+  const view = useHoldingViews().find((v) => v.holding.id === initial?.id);
   // Recurring reminders this card can mute ("Don't remind me"); payments and annual fees can't be muted.
   const setMutes = useSetMutes();
   const reminderCard = catalog.cards.find((c) => c.id === f.catalogCardId);
@@ -84,6 +96,9 @@ export function HoldingForm({
           .filter((r) => remindOn(r) === mutedNow(r))
           .map((r) => ({ kind: r.kind, benefitId: r.benefitId, muted: !remindOn(r) }));
         if (ok && initial && changes.length) await setMutes(initial.id, changes);
+        const typed = offerFromForm(offer, existingOffer);
+        const offerChanged = JSON.stringify(offer) !== JSON.stringify(offerFormOf(existingOffer));
+        if (ok && savedId && typed && offerChanged) await saveOffer(savedId, typed);
         if (ok) onDone(savedId);
       }}
     >
@@ -129,6 +144,7 @@ export function HoldingForm({
           <input type="date" value={f.closedDate} onChange={set("closedDate")} />
         </Field>
       )}
+      {view && initial?.status === "open" && f.status !== "open" && <CloseGuardWarning view={view} className="sm:col-span-2" />}
       <Field label="Product-changed from" hint="Set on the new product so 5/24 counts the account once.">
         <select value={f.productChangedFromId} onChange={set("productChangedFromId")}>
           <option value="">—</option>
@@ -155,6 +171,19 @@ export function HoldingForm({
       <Field label="Notes">
         <textarea rows={2} value={f.notes} onChange={set("notes")} />
       </Field>
+      <OfferFieldset
+        value={offer}
+        onChange={setOffer}
+        open={openOffer}
+        onRemove={
+          existingOffer && initial
+            ? async () => {
+                if (!confirm("Remove this card's welcome offer?")) return;
+                if (await deleteOffer(initial.id)) setOffer(offerFormOf(null));
+              }
+            : undefined
+        }
+      />
       {reminders.length > 0 && (
         <fieldset className="flex flex-col gap-1 sm:col-span-2" data-testid="edit-reminders">
           <legend className="mb-1 font-mono text-[11px] tracking-wider text-muted uppercase">Up next reminders</legend>

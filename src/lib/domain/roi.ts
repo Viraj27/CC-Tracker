@@ -56,6 +56,19 @@ export interface RoiResult {
   /** realized / AF; null when there is no fee. */
   ratio: number | null;
   breakdown: { benefitId: string; name: string; value: number; uses: number }[];
+  /**
+   * A welcome bonus that posted in this AF year (docs/SPEC-v6-welcome-bonus.md §6).
+   * A one-time line: in `realized` only when `counted`.
+   */
+  bonus: RoiBonus | null;
+}
+
+export interface RoiBonus {
+  /** USD; null when the points program has no value to use. */
+  value: number | null;
+  /** e.g. `60K pts`. */
+  label: string;
+  counted: boolean;
 }
 
 export function cardRoi(
@@ -65,6 +78,7 @@ export function cardRoi(
   catalog: Pick<Catalog, "perkDefaults">,
   settings: Pick<Settings, "perkValueOverrides">,
   today: string,
+  bonus: RoiBonus | null = null,
 ): RoiResult {
   const { start, end } = afYear(holding, today);
   const annualFee = card?.annual_fee.amount ?? 0;
@@ -79,7 +93,7 @@ export function cardRoi(
     map.set(u.benefitId, row);
   }
   const breakdown = [...map.values()].sort((a, b) => b.value - a.value);
-  const realized = round2(breakdown.reduce((s, r) => s + r.value, 0));
+  const realized = round2(breakdown.reduce((s, r) => s + r.value, 0) + (bonus?.counted ? (bonus.value ?? 0) : 0));
   return {
     start,
     end,
@@ -88,6 +102,7 @@ export function cardRoi(
     net: round2(realized - annualFee),
     ratio: annualFee > 0 ? round2(realized / annualFee) : null,
     breakdown,
+    bonus,
   };
 }
 

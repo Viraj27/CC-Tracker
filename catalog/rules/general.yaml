@@ -1,0 +1,25 @@
+# Rules that are not tied to one issuer's application process.
+issuer: any
+rules:
+  - id: general-bonus-close-guard
+    name: Closing a card within 12 months of opening
+    issuer: any
+    effect: close
+    description: >-
+      Closing or downgrading a card within 12 months of opening it risks losing
+      its welcome bonus. American Express offer terms name this directly: Amex
+      may withhold or take back the bonus "if you cancel or downgrade your
+      account within 12 months after acquiring it". Other issuers don't publish
+      a period; 12 months is the community's working rule for all of them.
+    check:
+      type: bonus_clawback_window
+      months: 12
+    source_type: community
+    source_url: https://www.doctorofcredit.com/american-express-rat-cracking-down-on-closures-within-12-months/
+    last_verified: 2026-11-12
+    verified: true
+    note: >-
+      The source quotes the Amex offer terms and reports bonuses taken back
+      after closures at about 11 months. The Amex terms page itself could not
+      be opened on the checked date, and no issuer other than Amex states a
+      period, so this is a warning, not a rule the app enforces.

@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
-import { addEnrollment, deleteEnrollment, setActivation, setMutes, setPaymentPaid, setSkipped } from "@/app/actions";
+import { addEnrollment, deleteEnrollment, deleteWelcomeOffer, saveWelcomeOffer, setActivation, setMutes, setPaymentPaid, setSkipped } from "@/app/actions";
 import { muteKey, occurrenceKey, type Occurrence } from "@/lib/domain/skips";
-import type { MuteKind } from "@/lib/domain/types";
+import type { MuteKind, WelcomeOffer } from "@/lib/domain/types";
 import { tempId, useApp } from "./AppState";
 
 /** Mark a statement month paid / unpaid (optimistic). Used by Payments and Up next. */
@@ -43,6 +43,37 @@ export function useDeleteEnrollment() {
   const { mutate } = useApp();
   return useCallback(
     (id: string) => mutate((d) => ({ ...d, enrollments: d.enrollments.filter((e) => e.id !== id) }), () => deleteEnrollment(id)),
+    [mutate],
+  );
+}
+
+/** What the owner types for a welcome offer: everything but the ids. */
+export type OfferFields = Omit<WelcomeOffer, "id" | "holdingId">;
+
+/** Create or change a card's welcome offer (optimistic): Met, Posted, Missed, "spent so far" and edits all go through here. */
+export function useSaveOffer() {
+  const { mutate } = useApp();
+  return useCallback(
+    (holdingId: string, offer: OfferFields) =>
+      mutate(
+        (d) => ({
+          ...d,
+          welcomeOffers: [
+            ...d.welcomeOffers.filter((o) => o.holdingId !== holdingId),
+            { ...offer, holdingId, id: d.welcomeOffers.find((o) => o.holdingId === holdingId)?.id ?? tempId() },
+          ],
+        }),
+        () => saveWelcomeOffer({ holdingId, ...offer }),
+      ),
+    [mutate],
+  );
+}
+
+/** Remove a card's welcome offer (optimistic). */
+export function useDeleteOffer() {
+  const { mutate } = useApp();
+  return useCallback(
+    (holdingId: string) => mutate((d) => ({ ...d, welcomeOffers: d.welcomeOffers.filter((o) => o.holdingId !== holdingId) }), () => deleteWelcomeOffer(holdingId)),
     [mutate],
   );
 }

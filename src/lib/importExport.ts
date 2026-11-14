@@ -15,9 +15,10 @@ import { muteKey, occurrenceKey } from "./domain/skips";
 export const EXPORT_FORMAT = "cc-tracker-export";
 /**
  * 2 (v4.1) adds per-holding `skips` and `mutes`; 3 (v7) adds per-holding
- * `enrollments`. Older files still import: missing lists default to empty.
+ * `enrollments`; 4 (v6) adds a per-holding `welcomeOffer` and the welcome
+ * bonus settings. Older files still import: what's missing gets its default.
  */
-export const EXPORT_VERSION = 3;
+export const EXPORT_VERSION = 4;
 
 const monthKey = z.string().regex(/^\d{4}-\d{2}$/, "expected YYYY-MM");
 const nullable = <T extends z.ZodType>(t: T) => t.nullable().optional().default(null);
@@ -35,6 +36,22 @@ const EnrollmentIn = z.object({
   id: z.string().optional(),
   benefitId: z.string(),
   enrolledOn: isoDate,
+});
+const WelcomeOfferIn = z.object({
+  id: z.string().optional(),
+  bonusAmount: z.number().positive(),
+  bonusUnit: z.enum(["points", "miles", "usd"]),
+  program: nullable(z.string()),
+  minSpend: nullable(z.number().positive()),
+  windowMonths: nullable(z.number().int().min(1).max(36)),
+  deadline: nullable(isoDate),
+  spentSoFar: nullable(z.number().nonnegative()),
+  spentAsOf: nullable(isoDate),
+  metDate: nullable(isoDate),
+  postedDate: nullable(isoDate),
+  postedAmount: nullable(z.number().nonnegative()),
+  outcome: nullable(z.literal("missed")),
+  note: nullable(z.string()),
 });
 const PaymentIn = z.object({
   id: z.string().optional(),
@@ -71,7 +88,7 @@ const ActivationIn = z.object({
 const SkipIn = z
   .object({
     id: z.string().optional(),
-    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "unverified"]),
+    kind: z.enum(["af", "credit", "payment", "rotating", "enroll", "sub", "subpost", "unverified"]),
     benefitId: nullable(z.string()),
     period: z.string().min(1),
     date: isoDate,
@@ -103,6 +120,7 @@ const HoldingIn = z
     notes: nullable(z.string()),
     usages: z.array(UsageIn).default([]),
     enrollments: z.array(EnrollmentIn).default([]),
+    welcomeOffer: WelcomeOfferIn.nullable().optional().default(null),
     payments: z.array(PaymentIn).default([]),
     afEvents: z.array(AfEventIn).default([]),
     lifecycle: z.array(LifecycleIn).default([]),
@@ -124,6 +142,9 @@ const SettingsIn = z.object({
   afLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.afLeadDays),
   creditLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.creditLeadDays),
   paymentLeadDays: z.number().int().min(0).max(60).default(DEFAULT_SETTINGS.paymentLeadDays),
+  subLeadDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.subLeadDays),
+  subPostingDays: z.number().int().min(0).max(365).default(DEFAULT_SETTINGS.subPostingDays),
+  countBonusInRoi: z.boolean().default(DEFAULT_SETTINGS.countBonusInRoi),
   perkValueOverrides: z.record(z.string(), z.number().nonnegative()).default({}),
   centsPerPoint: z.record(z.string(), z.number().positive()).default({}),
   paymentTrackingStart: nullable(monthKey),
@@ -156,6 +177,7 @@ export function parseImport(raw: unknown): { data: UserData; hasSettings: boolea
     holdings: [],
     usages: [],
     enrollments: [],
+    welcomeOffers: [],
     payments: [],
     afEvents: [],
     lifecycle: [],
@@ -167,10 +189,12 @@ export function parseImport(raw: unknown): { data: UserData; hasSettings: boolea
   };
   for (const h of f.holdings) {
     const id = h.id ?? stableId("h", h.catalogCardId ?? h.nickname, h.approvalDate);
-    const { usages, enrollments, payments, afEvents, lifecycle, activations, skips, mutes, ...rest } = h;
+    const { usages, enrollments, welcomeOffer, payments, afEvents, lifecycle, activations, skips, mutes, ...rest } = h;
     data.holdings.push({ ...rest, id });
     for (const u of usages) data.usages.push({ ...u, holdingId: id, id: u.id ?? stableId("u", id, u) });
     for (const e of enrollments) data.enrollments.push({ ...e, holdingId: id, id: e.id ?? stableId("en", id, e) });
+    // One offer per holding: its id follows the holding's, so a merge replaces it.
+    if (welcomeOffer) data.welcomeOffers.push({ ...welcomeOffer, holdingId: id, id: welcomeOffer.id ?? stableId("wo", id) });
     for (const p of payments) data.payments.push({ ...p, holdingId: id, id: p.id ?? stableId("p", id, p.statementMonth) });
     for (const e of afEvents) data.afEvents.push({ ...e, holdingId: id, id: e.id ?? stableId("af", id, e) });
     for (const e of lifecycle) data.lifecycle.push({ ...e, holdingId: id, id: e.id ?? stableId("lc", id, e) });
@@ -210,6 +234,7 @@ export function buildExport(data: UserData, exportedAt: string) {
       ...h,
       usages: data.usages.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       enrollments: data.enrollments.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
+      welcomeOffer: data.welcomeOffers.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x)[0] ?? null,
       payments: data.payments.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       afEvents: data.afEvents.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),
       lifecycle: data.lifecycle.filter((x) => x.holdingId === h.id).map(({ holdingId: _, ...x }) => x),

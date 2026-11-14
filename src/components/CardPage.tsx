@@ -12,6 +12,7 @@ import { creditView, type CreditView } from "@/lib/domain/periods";
 import { currentAndNextQuarter, isActivated } from "@/lib/domain/rotating";
 import { isMuted } from "@/lib/domain/skips";
 import { cardHeadline } from "@/lib/domain/wallet";
+import { bonusLogEntry, offerFor } from "@/lib/domain/welcomeBonus";
 import { useApp } from "./AppState";
 import { benefitEndsText, EnrollmentBadge, isGreyed, PeriodLine } from "./BenefitBits";
 import { benefitsOf, CYCLE_LABEL, LIST_TITLE } from "./CardSheets";
@@ -20,6 +21,7 @@ import { canGoBack } from "./Nav";
 import { useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { FactBadges, Group, GroupBadges, GroupLabel, Row, usd } from "./ui";
 import { issuerLabel } from "./WalletCard";
+import { OfferRow } from "./WelcomeBonus";
 
 const money = (n: number | null | undefined) => (n === null || n === undefined ? "—" : usd(n, Number.isInteger(n) ? 0 : 2));
 /** `15 JAN 27`: fits a stat cell at 390px. */
@@ -43,6 +45,7 @@ function routeForHash(hash: string, holdingId: string): SheetRoute | null {
   if (hash.startsWith("benefit-")) return { type: "benefit", holdingId, benefitId: hash.slice("benefit-".length) };
   if (hash === "roi") return { type: "roi", holdingId };
   if (hash === "rotating") return { type: "rotating", holdingId };
+  if (hash === "bonus") return { type: "offer", holdingId };
   if (hash === "edit") return { type: "edit", holdingId };
   const list = HASH_LISTS[hash];
   return list ? { type: "list", holdingId, list } : null;
@@ -102,7 +105,7 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
     { list: "earn", count: card?.earn_rates.length ?? 0, badges: card && <GroupBadges facts={card.earn_rates} />, hidden: !card },
     { list: "downgrade", count: card?.downgrade_options.length ?? 0, badges: card && <GroupBadges facts={card.downgrade_options} />, hidden: !card },
     { list: "fees", count: data.afEvents.filter((e) => e.holdingId === h.id).length },
-    { list: "lifecycle", count: data.lifecycle.filter((e) => e.holdingId === h.id).length },
+    { list: "lifecycle", count: data.lifecycle.filter((e) => e.holdingId === h.id).length + (bonusLogEntry(offerFor(data.welcomeOffers, h.id), h) ? 1 : 0) },
   ];
 
   return (
@@ -169,6 +172,8 @@ export function CardPage({ view, attention, logBenefitId }: { view: HoldingView;
         </button>
         <Stat label={counted ? "5/24 off" : "5/24"} value={counted ? statDate(counted.dropOffDate) : drop && drop <= today ? "Out" : "—"} />
       </div>
+
+      <OfferRow view={view} />
 
       {credits.length > 0 && (
         <section aria-labelledby="credits-heading" id="credits" className="scroll-mt-24">

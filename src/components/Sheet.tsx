@@ -14,7 +14,9 @@ export type SheetRoute =
   | { type: "roi"; holdingId: string }
   | { type: "rotating"; holdingId: string }
   | { type: "list"; holdingId: string; list: ListKind }
-  | { type: "edit"; holdingId: string };
+  | { type: "offer"; holdingId: string }
+  /** `offer`: open with the Welcome offer fieldset expanded ("Edit offer"). */
+  | { type: "edit"; holdingId: string; offer?: boolean };
 
 interface SheetApi {
   stack: SheetRoute[];

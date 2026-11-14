@@ -12,6 +12,9 @@ export default function SettingsPage() {
     afLeadDays: String(s.afLeadDays),
     creditLeadDays: String(s.creditLeadDays),
     paymentLeadDays: String(s.paymentLeadDays),
+    subLeadDays: String(s.subLeadDays),
+    subPostingDays: String(s.subPostingDays),
+    countBonusInRoi: s.countBonusInRoi,
     paymentTrackingStart: s.paymentTrackingStart ?? "",
     perk: Object.fromEntries(Object.entries(s.perkValueOverrides).map(([k, v]) => [k, String(v)])) as Record<string, string>,
     cpp: Object.fromEntries(Object.entries(s.centsPerPoint).map(([k, v]) => [k, String(v)])) as Record<string, string>,
@@ -21,10 +24,13 @@ export default function SettingsPage() {
   const numMap = (m: Record<string, string>) =>
     Object.fromEntries(Object.entries(m).filter(([, v]) => v.trim() !== "").map(([k, v]) => [k, Number(v)]));
 
-  const lead = (k: "afLeadDays" | "creditLeadDays" | "paymentLeadDays", label: string) => (
+  const lead = (k: "afLeadDays" | "creditLeadDays" | "paymentLeadDays" | "subLeadDays" | "subPostingDays", label: string, hint?: string) => (
     <li>
       <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
-        <span>{label}</span>
+        <span>
+          {label}
+          {hint && <span className="block text-xs text-muted">{hint}</span>}
+        </span>
         <input type="number" min={0} className="w-24 text-right font-mono" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
       </label>
     </li>
@@ -41,6 +47,9 @@ export default function SettingsPage() {
             afLeadDays: Number(form.afLeadDays),
             creditLeadDays: Number(form.creditLeadDays),
             paymentLeadDays: Number(form.paymentLeadDays),
+            subLeadDays: Number(form.subLeadDays),
+            subPostingDays: Number(form.subPostingDays),
+            countBonusInRoi: form.countBonusInRoi,
             paymentTrackingStart: form.paymentTrackingStart || null,
             perkValueOverrides: numMap(form.perk),
             centsPerPoint: numMap(form.cpp),
@@ -61,6 +70,21 @@ export default function SettingsPage() {
                 <span className="block text-xs text-muted">Earlier months never show past due</span>
               </span>
               <input type="month" className="w-40" value={form.paymentTrackingStart} onChange={(e) => setForm({ ...form, paymentTrackingStart: e.target.value })} />
+            </label>
+          </li>
+        </Group>
+
+        <GroupLabel>Welcome bonus</GroupLabel>
+        <Group>
+          {lead("subLeadDays", "Spend deadline", "Days before the deadline it shows in Up next")}
+          {lead("subPostingDays", "Bonus not posted", "Days after you mark it met")}
+          <li>
+            <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 py-1.5">
+              <span>
+                Count welcome bonus in ROI
+                <span className="block text-xs text-muted">Off: it&apos;s listed in the breakdown but left out of the total</span>
+              </span>
+              <input type="checkbox" className="h-5 w-5 shrink-0" checked={form.countBonusInRoi} onChange={(e) => setForm({ ...form, countBonusInRoi: e.target.checked })} />
             </label>
           </li>
         </Group>

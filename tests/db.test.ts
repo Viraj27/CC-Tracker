@@ -125,6 +125,52 @@ function storageSuite(name: string, open: () => Promise<{ db: Db; batches: () =>
       await writeImport(db, PROFILE, parseImport(demo).data, "replace", true);
     });
 
+    it("stores a welcome offer per holding; merge is idempotent, replace round-trips, and it goes with its card", async () => {
+      const file = JSON.parse(JSON.stringify(demo));
+      file.holdings[1].welcomeOffer = { bonusAmount: 200, bonusUnit: "usd", minSpend: 500, windowMonths: 3, spentSoFar: 120.5, spentAsOf: "2026-11-01", note: "fake offer" };
+      file.settings = { subLeadDays: 45, subPostingDays: 70, countBonusInRoi: true };
+      const { data, hasSettings } = parseImport(file);
+      await writeImport(db, PROFILE, data, "replace", hasSettings);
+      const first = await loadUserData(db.prisma, PROFILE);
+      expect(first.welcomeOffers.map((o) => o.holdingId).sort()).toEqual(["demo-flex", "demo-reserve"]);
+      expect(first.welcomeOffers.find((o) => o.holdingId === "demo-flex")).toEqual({
+        id: data.welcomeOffers.find((o) => o.holdingId === "demo-flex")!.id,
+        holdingId: "demo-flex",
+        bonusAmount: 200,
+        bonusUnit: "usd",
+        program: null,
+        minSpend: 500,
+        windowMonths: 3,
+        deadline: null,
+        spentSoFar: 120.5,
+        spentAsOf: "2026-11-01",
+        metDate: null,
+        postedDate: null,
+        postedAmount: null,
+        outcome: null,
+        note: "fake offer",
+      });
+      expect(first.settings).toMatchObject({ subLeadDays: 45, subPostingDays: 70, countBonusInRoi: true });
+      await writeImport(db, PROFILE, data, "merge", hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(first);
+
+      // One offer per holding: a merge with another id replaces it, never adds a second.
+      const changed = { ...data, welcomeOffers: data.welcomeOffers.map((o) => ({ ...o, id: `${o.id}-other`, metDate: "2026-11-10" })) };
+      await writeImport(db, PROFILE, changed, "merge", false);
+      const merged = await loadUserData(db.prisma, PROFILE);
+      expect(merged.welcomeOffers).toHaveLength(2);
+      expect(merged.welcomeOffers.every((o) => o.metDate === "2026-11-10")).toBe(true);
+
+      const exported = JSON.parse(JSON.stringify(buildExport(merged, "2026-11-12T00:00:00.000Z")));
+      const again = parseImport(exported);
+      await writeImport(db, PROFILE, again.data, "replace", again.hasSettings);
+      expect(await loadUserData(db.prisma, PROFILE)).toEqual(merged);
+
+      await db.prisma.holding.delete({ where: { id: "demo-flex" } });
+      expect((await loadUserData(db.prisma, PROFILE)).welcomeOffers.map((o) => o.holdingId)).toEqual(["demo-reserve"]);
+      await writeImport(db, PROFILE, { ...parseImport(demo).data, settings: parseImport({}).data.settings }, "replace", true);
+    });
+
     it("a catalog reload never touches user data", async () => {
       const before = await loadUserData(db.prisma, PROFILE);
       expect(await syncCatalog(db, { ...catalog, hash: "changed", cards: catalog.cards.slice(1) })).toBe(true);

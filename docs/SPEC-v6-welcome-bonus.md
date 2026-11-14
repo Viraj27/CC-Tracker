@@ -85,3 +85,13 @@ Two new kinds, built in `attention.ts` beside the existing ones. Both use v4.1 o
 4. No screen asks for spend; `Spent so far` is optional and only changes the row's wording.
 5. Closing or downgrading within 12 months of opening a card with a bonus shows the warning with its source.
 6. `npm run typecheck`, `npm test`, `npm run test:e2e` pass.
+
+## 9. As built (deviations, deliberate)
+- **Kinds and keys:** the two Up next kinds are `sub` and `subpost` (not `sub_deadline` / `sub_posting`), so the kind is also the occurrence key's prefix, as for every other kind: `sub:<holding>:<deadline>`, `subpost:<holding>:<metDate>`.
+- **Value:** points and miles use the app's existing cents-per-point lookup (points balance, then Settings, then the program's 1¢ default), so the value is null only when the card has no program (a custom card).
+- **No minimum spend:** an offer without one counts as met from the approval date. It never has a deadline row; `Bonus not posted` shows `subPostingDays` after approval.
+- **Sheet actions follow the status:** earning and overdue show **Minimum met**, with **Bonus posted**, **Missed** and **Edit offer** under it; met shows **Bonus posted**. Every step has an **Undo**. After Posted, an **Amount posted** field covers a bonus that posted short.
+- **Close guard rule:** `catalog/rules/general.yaml`, issuer `any`, effect `close`, check `bonus_clawback_window` (12 months). It is community-sourced: the source quotes the Amex offer terms; the Amex terms page itself could not be opened when checked (2026-11-12). The rule never appears in Should I apply?.
+- **Missed** has no date of its own; its lifecycle entry uses the deadline.
+- **Demo seed:** one `posted` offer only. The seed's dates are fixed, so an `earning` or `met` offer would be right on one day and wrong ever after; the e2e tests and screenshots add those through the Add card form instead.
+- **Chip wording:** `BONUS · 22D`, `BONUS TODAY`, `BONUS LATE` (deadline passed) and `BONUS DUE` (met, not posted).

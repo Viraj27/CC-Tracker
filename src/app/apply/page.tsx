@@ -21,7 +21,7 @@ export default function ApplyPage() {
   const nllId = useId();
   const card = catalog.cards.find((c) => c.id === cardId);
   const check = useMemo(
-    () => (card ? checkApplication(card, data.holdings, catalog, today, { nll }) : null),
+    () => (card ? checkApplication(card, data.holdings, catalog, today, { nll, offers: data.welcomeOffers }) : null),
     [card, data.holdings, catalog, today, nll],
   );
   const byIssuer = useMemo(() => {
