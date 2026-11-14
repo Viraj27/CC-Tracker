@@ -73,6 +73,8 @@ model Holding {
   productChangedFromId String?
   afMonth       Int?
   afDay         Int?
+  // Owner override of the issuer's annual fee refund window, in days.
+  afRefundDays  Int?
   paymentDueDay Int?
   notes         String?
   createdAt     DateTime @default(now())
@@ -164,7 +166,7 @@ model AnnualFeeEvent {
   holding    Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
   postedDate String
   amount     Float
-  outcome    String // paid | retention_offer | downgraded | closed
+  outcome    String // pending | paid | retention_offer | downgraded | closed
   note       String?
 }
 
@@ -244,6 +246,8 @@ model Settings {
   profileId          String  @id
   profile            Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   afLeadDays         Int     @default(45)
+  // Days after the anniversary that "Watch for fee" stays in Up next.
+  afWatchDays        Int     @default(45)
   creditLeadDays     Int     @default(30)
   paymentLeadDays    Int     @default(7)
   // Welcome bonus: deadline lead time, and days after "Met" before "Bonus not posted" shows.

@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { loadCatalog } from "../catalog/loader";
-import type { Card, Catalog, PerkDefault, Program, RotatingProgram, Rule } from "../catalog/schema";
+import type { AfPolicy, Card, Catalog, PerkDefault, Program, RotatingProgram, Rule } from "../catalog/schema";
 import { type Db, isCloudflareWorker, type SqlStatement, sqlNow, upsertSql } from "./dbHandle";
 
 /** The statements that replace the Catalog* cache tables with `catalog`. Never touches user data. */
@@ -11,6 +11,7 @@ export function catalogSyncStatements(catalog: Catalog): SqlStatement[] {
     { sql: `DELETE FROM "CatalogDoc"`, params: [] },
     ...catalog.cards.map((c) => upsertSql("CatalogCard", { id: c.id, data: JSON.stringify(c) })),
     ...catalog.rules.map((r) => upsertSql("CatalogRule", { id: r.id, data: JSON.stringify(r) })),
+    upsertSql("CatalogDoc", { id: "af-policies", data: JSON.stringify(catalog.afPolicies) }),
     upsertSql("CatalogDoc", { id: "perk-defaults", data: JSON.stringify(catalog.perkDefaults) }),
     upsertSql("CatalogDoc", { id: "programs", data: JSON.stringify(catalog.programs) }),
     upsertSql("CatalogDoc", { id: "rotating", data: JSON.stringify(catalog.rotating) }),
@@ -45,6 +46,7 @@ export async function readCatalogFromDb(prisma: PrismaClient): Promise<Catalog |
     hash: meta.hash,
     cards: cards.map((c) => JSON.parse(c.data) as Card),
     rules: rules.map((r) => JSON.parse(r.data) as Rule),
+    afPolicies: doc<AfPolicy[]>("af-policies"),
     perkDefaults: doc<PerkDefault[]>("perk-defaults"),
     programs: doc<Program[]>("programs"),
     rotating: doc<RotatingProgram[]>("rotating"),

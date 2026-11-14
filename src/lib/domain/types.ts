@@ -15,6 +15,8 @@ export interface Holding {
   productChangedFromId: string | null;
   afMonth: number | null;
   afDay: number | null;
+  /** Owner override of the issuer's annual fee refund window, in days. */
+  afRefundDays: number | null;
   paymentDueDay: number | null;
   notes: string | null;
 }
@@ -50,7 +52,8 @@ export interface PaymentRecord {
   paidDate: string | null;
 }
 
-export type AfOutcome = "paid" | "retention_offer" | "downgraded" | "closed";
+/** `pending`: the fee posted and the keep / downgrade / close decision is still open. */
+export type AfOutcome = "pending" | "paid" | "retention_offer" | "downgraded" | "closed";
 export interface AnnualFeeEvent {
   id: string;
   holdingId: string;
@@ -155,6 +158,8 @@ export interface ReminderMute {
 
 export interface Settings {
   afLeadDays: number;
+  /** Days after the anniversary that "Watch for fee" stays in Up next. */
+  afWatchDays: number;
   creditLeadDays: number;
   paymentLeadDays: number;
   /** Welcome bonus: days before the spend deadline it shows in Up next. */
@@ -170,6 +175,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   afLeadDays: 45,
+  afWatchDays: 45,
   creditLeadDays: 30,
   paymentLeadDays: 7,
   subLeadDays: 30,

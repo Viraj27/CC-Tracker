@@ -1,4 +1,15 @@
 issuer: amex
+annual_fee_policy:
+  refund_days: 30
+  basis: statement
+  source_type: community
+  source_url: https://milestomemories.com/credit-card-issuer-annual-fee-rules/
+  last_verified: 2026-11-13
+  verified: true
+  note: >-
+    Not on an Amex page that could be opened. Miles to Memories (updated
+    2026-04-22) and Travel on Points (2024) both say 30 days from the closing
+    date of the statement the fee is on; a downgrade after that is prorated.
 rules:
   - id: amex-delta-gold-family
     name: Delta Gold welcome offer — "have or have had"

@@ -60,9 +60,9 @@ export function loadCatalog(dir: string = defaultCatalogDir()): Catalog {
     }
     return card;
   });
-  const rules = listYaml(path.join(dir, "rules")).flatMap(
-    (f) => parseFile(f, RulesFileSchema, hasher, dir).rules,
-  );
+  const ruleFiles = listYaml(path.join(dir, "rules")).map((f) => parseFile(f, RulesFileSchema, hasher, dir));
+  const rules = ruleFiles.flatMap((f) => f.rules);
+  const afPolicies = ruleFiles.flatMap((f) => (f.annual_fee_policy ? [{ issuer: f.issuer, ...f.annual_fee_policy }] : []));
   const perkFile = path.join(dir, "perk-defaults.yaml");
   const perkDefaults = fs.existsSync(perkFile)
     ? parseFile(perkFile, PerkDefaultsFileSchema, hasher, dir).perks
@@ -75,7 +75,7 @@ export function loadCatalog(dir: string = defaultCatalogDir()): Catalog {
     parseFile(f, RotatingProgramSchema, hasher, dir),
   );
 
-  const catalog: Catalog = { hash: hasher.digest("hex"), cards, rules, perkDefaults, programs, rotating };
+  const catalog: Catalog = { hash: hasher.digest("hex"), cards, rules, afPolicies, perkDefaults, programs, rotating };
   checkReferences(catalog);
   return catalog;
 }
@@ -92,6 +92,7 @@ export function checkReferences(c: Catalog): void {
   };
   dup("card", c.cards.map((x) => x.id));
   dup("rule", c.rules.map((x) => x.id));
+  dup("annual fee policy", c.afPolicies.map((x) => x.issuer));
   dup("perk default", c.perkDefaults.map((x) => x.id));
   dup("program", c.programs.map((x) => x.id));
 

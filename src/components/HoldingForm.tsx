@@ -5,7 +5,8 @@ import { deleteHolding, saveHolding } from "@/app/actions";
 import { offerFor } from "@/lib/domain/welcomeBonus";
 import { isMuted } from "@/lib/domain/skips";
 import type { Holding, MuteKind } from "@/lib/domain/types";
-import { useApp } from "./AppState";
+import { useSetAfOutcome } from "./AnnualFee";
+import { isTemp, useApp } from "./AppState";
 import { useHoldingViews } from "./derived";
 import { type MuteChange, useDeleteOffer, useSaveOffer, useSetMutes } from "./mutations";
 import { Button, Field } from "./ui";
@@ -38,6 +39,7 @@ export function HoldingForm({
     productChangedFromId: initial?.productChangedFromId ?? "",
     afMonth: initial?.afMonth?.toString() ?? "",
     afDay: initial?.afDay?.toString() ?? "",
+    afRefundDays: initial?.afRefundDays?.toString() ?? "",
     paymentDueDay: initial?.paymentDueDay?.toString() ?? "",
     notes: initial?.notes ?? "",
   });
@@ -45,6 +47,7 @@ export function HoldingForm({
   const existingOffer = initial ? offerFor(data.welcomeOffers, initial.id) : null;
   const [offer, setOffer] = useState(() => offerFormOf(existingOffer));
   const saveOffer = useSaveOffer();
+  const setOutcome = useSetAfOutcome();
   const deleteOffer = useDeleteOffer();
   const view = useHoldingViews().find((v) => v.holding.id === initial?.id);
   // Recurring reminders this card can mute ("Don't remind me"); payments and annual fees can't be muted.
@@ -86,6 +89,7 @@ export function HoldingForm({
             productChangedFromId: f.productChangedFromId || null,
             afMonth: num(f.afMonth),
             afDay: num(f.afDay),
+            afRefundDays: num(f.afRefundDays),
             paymentDueDay: num(f.paymentDueDay),
             notes: f.notes || null,
           });
@@ -96,6 +100,9 @@ export function HoldingForm({
           .filter((r) => remindOn(r) === mutedNow(r))
           .map((r) => ({ kind: r.kind, benefitId: r.benefitId, muted: !remindOn(r) }));
         if (ok && initial && changes.length) await setMutes(initial.id, changes);
+        // Closing or product-changing a card with a posted, undecided fee is that fee's decision (v6.1 §3).
+        const pendingFee = initial?.status === "open" && f.status !== "open" ? data.afEvents.find((x) => x.holdingId === initial.id && x.outcome === "pending" && !isTemp(x.id)) : undefined;
+        if (ok && pendingFee) await setOutcome(pendingFee.id, f.status === "closed" ? "closed" : "downgraded");
         const typed = offerFromForm(offer, existingOffer);
         const offerChanged = JSON.stringify(offer) !== JSON.stringify(offerFormOf(existingOffer));
         if (ok && savedId && typed && offerChanged) await saveOffer(savedId, typed);
@@ -165,6 +172,9 @@ export function HoldingForm({
           <input type="number" min={1} max={31} value={f.afDay} onChange={set("afDay")} placeholder="1–31" />
         </Field>
       </div>
+      <Field label="AF refund window (days)" hint="Only if you know this issuer's window differs from the catalog's.">
+        <input type="number" min={1} max={365} value={f.afRefundDays} onChange={set("afRefundDays")} placeholder="catalog" />
+      </Field>
       <Field label="Payment due day">
         <input type="number" min={1} max={31} value={f.paymentDueDay} onChange={set("paymentDueDay")} placeholder="1–31" />
       </Field>

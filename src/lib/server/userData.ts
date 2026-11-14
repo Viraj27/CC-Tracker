@@ -64,6 +64,7 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
       productChangedFromId: h.productChangedFromId,
       afMonth: h.afMonth,
       afDay: h.afDay,
+      afRefundDays: h.afRefundDays,
       paymentDueDay: h.paymentDueDay,
       notes: h.notes,
     })),
@@ -159,6 +160,7 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
     settings: settings
       ? {
           afLeadDays: settings.afLeadDays,
+          afWatchDays: settings.afWatchDays,
           creditLeadDays: settings.creditLeadDays,
           paymentLeadDays: settings.paymentLeadDays,
           subLeadDays: settings.subLeadDays,
@@ -175,6 +177,7 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
 export function settingsRow(s: Settings) {
   return {
     afLeadDays: s.afLeadDays,
+    afWatchDays: s.afWatchDays,
     creditLeadDays: s.creditLeadDays,
     paymentLeadDays: s.paymentLeadDays,
     subLeadDays: s.subLeadDays,

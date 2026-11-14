@@ -1,4 +1,17 @@
 issuer: chase
+annual_fee_policy:
+  refund_days: 30
+  basis: posting
+  source_type: community
+  source_url: https://www.doctorofcredit.com/chase-makes-no-notice-change-annual-fee-refund-policy/
+  last_verified: 2026-11-13
+  verified: true
+  note: >-
+    Chase does not publish this. Doctor of Credit (2016) and Travel on Points
+    (2024) count 30 days from the fee being billed; Miles to Memories (updated
+    2026-04-22) counts 30 days from the statement date instead. The shorter
+    reading is used. A downgrade outside the window is reported to give a
+    prorated refund in most cases.
 rules:
   - id: chase-5-24
     name: Chase 5/24

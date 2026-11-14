@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const s = data.settings;
   const [form, setForm] = useState({
     afLeadDays: String(s.afLeadDays),
+    afWatchDays: String(s.afWatchDays),
     creditLeadDays: String(s.creditLeadDays),
     paymentLeadDays: String(s.paymentLeadDays),
     subLeadDays: String(s.subLeadDays),
@@ -24,7 +25,7 @@ export default function SettingsPage() {
   const numMap = (m: Record<string, string>) =>
     Object.fromEntries(Object.entries(m).filter(([, v]) => v.trim() !== "").map(([k, v]) => [k, Number(v)]));
 
-  const lead = (k: "afLeadDays" | "creditLeadDays" | "paymentLeadDays" | "subLeadDays" | "subPostingDays", label: string, hint?: string) => (
+  const lead = (k: "afLeadDays" | "afWatchDays" | "creditLeadDays" | "paymentLeadDays" | "subLeadDays" | "subPostingDays", label: string, hint?: string) => (
     <li>
       <label className="flex min-h-12 items-center justify-between gap-3 px-4 py-1.5">
         <span>
@@ -45,6 +46,7 @@ export default function SettingsPage() {
           e.preventDefault();
           const next = {
             afLeadDays: Number(form.afLeadDays),
+            afWatchDays: Number(form.afWatchDays),
             creditLeadDays: Number(form.creditLeadDays),
             paymentLeadDays: Number(form.paymentLeadDays),
             subLeadDays: Number(form.subLeadDays),
@@ -61,6 +63,7 @@ export default function SettingsPage() {
         <GroupLabel>Lead times (days)</GroupLabel>
         <Group>
           {lead("afLeadDays", "Annual fee")}
+          {lead("afWatchDays", "Watch for the fee", "Days after the anniversary to keep watching for it to post")}
           {lead("creditLeadDays", "Expiring credits")}
           {lead("paymentLeadDays", "Payments")}
           <li>

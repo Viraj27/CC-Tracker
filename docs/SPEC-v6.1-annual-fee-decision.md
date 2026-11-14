@@ -70,3 +70,15 @@ When a card has a v6 close guard date **and** an AF cycle, the card page's AF sh
 3. Keep / Retention / Downgrade / Close each resolve the cycle and are recorded in Fee history.
 4. AF items can be skipped, never muted.
 5. typecheck, unit, e2e pass.
+
+## 9. As built (deviations, deliberate)
+- **Occurrence keys.** All three phases keep the kind `af`; the period tells them apart: `af:<holding>:<anniversary>` (upcoming, unchanged), `af:<holding>:watch@<anniversary>`, `af:<holding>:decide@<posted date>`. Skipping one phase never hides the next.
+- **First year waived (§2).** Read as: the cycle *at opening* (an anniversary inside the first 11 months) is suppressed. The first billed fee, one year in, is a normal cycle; suppressing it would hide the fee that matters most. A card that bills from day one is watched from approval.
+- **A retention call** before the anniversary still clears phase 1 (as before) but not phase 2: the fee is still going to post. A product change or closure ends the cycle.
+- **Refund windows found (§4), all community-sourced, checked 2026-11-13:** Chase 30 days from posting (one source says from the statement date; the shorter reading is used), Amex 30 days from the statement closing date, Capital One 30 days from posting (closing only; no refund on a downgrade once the fee posted), Wells Fargo 60 days from posting. Discover has no policy (its catalog card has no fee). No issuer page stating these could be found.
+- **`basis: statement`.** The app only knows the posting date, so it counts from that and says so behind ⓘ; the owner may have a few more days.
+- **Decisions.** Keep is one tap. Retention offer opens the lifecycle log; saving a retention call there records `retention_offer` in the same request. Downgrade opens Downgrade options, which gains **Record the product change** (opens Edit card). Saving a card as closed or product-changed while a fee is pending records `closed` / `downgraded`.
+- **Per-card override** is the field `AF refund window (days)` in Edit card (next to the AF date), not under Reminders.
+- **Fee history** shows the phase panel (Fee posted, or the decision) at the top while a cycle is in phase 2 or 3; a pending event reads `Posted · deciding`.
+- **Best exit (§5)** shows in the decision panel (Up next sheet and Fee history).
+- **After the refund window closes** with no decision, the item drops out; the event stays `Posted · deciding` in Fee history until changed.
