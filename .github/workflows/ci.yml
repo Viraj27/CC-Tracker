@@ -40,6 +40,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Waits for the owner's approval (required reviewer on the "production" environment, main only).
+    environment: production
     # Never run two deploys (and migrations) at once.
     concurrency:
       group: deploy-production
