@@ -17,3 +17,5 @@ playwright-report/
 .dev.vars*
 src/generated/
 .e2e-catalog/
+# Staging config with its D1 id filled in (scripts/cf-d1-ensure.mjs --staging)
+wrangler.staging.local.jsonc

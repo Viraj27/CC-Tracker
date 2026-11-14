@@ -26,7 +26,10 @@
     "preview": "npm run cf:build && npm run cf:migrate:local && opennextjs-cloudflare preview",
     "cf:d1:ensure": "node scripts/cf-d1-ensure.mjs",
     "cf:migrate:remote": "wrangler d1 migrations apply cc-tracker --remote",
-    "cf:deploy": "opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:staging:d1:ensure": "node scripts/cf-d1-ensure.mjs --staging",
+    "cf:staging:migrate": "wrangler d1 migrations apply cc-tracker-staging --remote --config wrangler.staging.local.jsonc",
+    "cf:staging:deploy": "opennextjs-cloudflare deploy --config wrangler.staging.local.jsonc"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.12",
