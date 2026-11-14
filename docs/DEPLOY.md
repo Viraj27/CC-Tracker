@@ -24,7 +24,7 @@ Spec: [`SPEC-v3-phone.md`](SPEC-v3-phone.md).
 |---|---|---|---|
 | **Dev** (your Mac) | Demo seed, throwaway (`$TMPDIR` SQLite, local D1 under `.wrangler/state`) | none | anyone working on the code, freely |
 | **Staging** (`cc-tracker-staging` Worker + D1) | Demo data only. e2e tests replace it at will | a **separate** free account | CI, on every pull request, using `STAGING_CLOUDFLARE_*` secrets |
-| **Production** (`cc-tracker` Worker + D1) | Your real cards, and nowhere else | your main account | CI on `main` only, and only after **you approve** the `production` environment |
+| **Production** (`cc-tracker` Worker + D1) | Your real cards, and nowhere else | your main account | CI on `main` only. Code changes wait until **you approve** the `production` environment; catalog-only changes (a merged Daily refresh) deploy straight away |
 
 Why staging is a separate account: a Cloudflare API token's D1 permission covers every database in the account, and there is no documented way to limit it to one database. A staging token in the production account could reach your real data, so pull-request code and its token would too. Keeping staging in a separate account means its token can't see production at all.
 
@@ -32,6 +32,8 @@ Rules that keep production out of reach:
 
 - No Cloudflare login on the Mac (`npx wrangler logout`). Production is changed only by the CI deploy job.
 - The production token lives only in GitHub secrets, used only by the `deploy` job, and that job waits for your approval (GitHub → Settings → Environments → `production`: required reviewer, `main` only).
+- The one exception to approval: when **everything** since the last successful production deploy is under `catalog/`, the deploy uses the `production-catalog` environment (no reviewer, `main` only) and goes out at once. `scripts/catalog-only-since-deploy.sh` decides this from GitHub's own deployment records; when in doubt it answers "no", and the deploy waits. That is how a merged Daily refresh reaches the app the same day. Catalog files are data the app reads, validated by `catalog:check`; they hold no code and no migrations.
+- `main` is protected: the "Typecheck, test, build" check must pass before a pull request merges (you can still override as admin). Auto-merge is on, so a Daily refresh the guard marks `auto` merges itself once CI passes.
 - e2e tests ("Replace all my data") run only against dev or staging. Never point `E2E_BASE_URL` at production.
 
 ### Staging setup (once)
