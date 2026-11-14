@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "date": "2026-11-14",
+    "card_id": "amex-business-platinum",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 695,
+    "to": 895,
+    "effective": null,
+    "source_url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "amex-gold",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 350,
+    "to": 325,
+    "effective": null,
+    "source_url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "amex-hilton-honors-surpass",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 95,
+    "to": 150,
+    "effective": null,
+    "source_url": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "barclays-wyndham-earner-plus",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 75,
+    "to": 95,
+    "effective": null,
+    "source_url": "https://www.wyndhamrewardscreditcard.com/#earnerplus",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "barclays-wyndham-earner-plus",
+    "path": "annual_fee.first_year_waived",
+    "label": "Annual fee waived the first year",
+    "from": false,
+    "to": true,
+    "effective": null,
+    "source_url": "https://www.wyndhamrewardscreditcard.com/#earnerplus",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "chase-aeroplan",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 95,
+    "to": 195,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "chase-ihg-premier",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 99,
+    "to": 150,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/premier",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "citi-aadvantage-executive",
+    "path": "annual_fee.amount",
+    "label": "Annual fee",
+    "from": 595,
+    "to": 695,
+    "effective": null,
+    "source_url": "https://creditcards.aa.com/citi-executive-card-american-airlines-direct/",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-14",
+    "card_id": "us-bank-altitude-connect",
+    "path": "annual_fee.first_year_waived",
+    "label": "Annual fee waived the first year",
+    "from": true,
+    "to": false,
+    "effective": null,
+    "source_url": "https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html",
+    "confirmed_by": "official_page"
+  }
+]

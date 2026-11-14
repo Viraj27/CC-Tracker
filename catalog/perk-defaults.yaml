@@ -28,7 +28,7 @@ perks:
     name: United Club one-time pass
     value_usd: 59
     basis: Price of a United Club one-time pass.
-    source_url: https://gtmpreview.united.com/web/en-US/content/travel/airport/lounge/rates.aspx
+    source_url: https://www.united.com/en/us/fly/travel/airport/united-club-and-lounges/membership-rates.html
     last_verified: 2026-10-16
     verified: false
-    note: $59 found only on a United preview (gtmpreview) page, not the live site; confirm current price.
+    note: "Not confirmed on 2026-11-14: United's live site sells the one-time pass only in the United app and shows no price. $59 was found on a United preview (gtmpreview) page on 2026-10-16. Set your own value in Settings."
