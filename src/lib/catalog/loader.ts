@@ -60,6 +60,8 @@ export function loadCatalog(dir: string = defaultCatalogDir()): Catalog {
     }
     return card;
   });
+  // By id (the order the DB cache reads them back in), not by file name: "a-b.yaml" sorts before "a.yaml".
+  cards.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const ruleFiles = listYaml(path.join(dir, "rules")).map((f) => parseFile(f, RulesFileSchema, hasher, dir));
   const rules = ruleFiles.flatMap((f) => f.rules);
   const afPolicies = ruleFiles.flatMap((f) => (f.annual_fee_policy ? [{ issuer: f.issuer, ...f.annual_fee_policy }] : []));

@@ -5,6 +5,7 @@ import { useApp } from "@/components/AppState";
 import { Badge, CardBar, Empty, Group, GroupLabel, PageTitle } from "@/components/ui";
 import { SPEND_CATEGORIES, type SpendCategory } from "@/lib/catalog/schema";
 import { rankCards } from "@/lib/domain/bestCard";
+import { cardFor, holdingName } from "@/lib/domain/holdings";
 
 const LABELS: Record<SpendCategory, string> = {
   dining: "Dining",
@@ -30,6 +31,17 @@ export default function BestCardPage() {
     [category, data, catalog, today],
   );
 
+  // Open cards the catalog has no earn rates for (stubs): left out, and said so in one line.
+  const unranked = useMemo(
+    () =>
+      data.holdings
+        .filter((h) => h.status === "open")
+        .map((h) => ({ h, card: cardFor(h, catalog) }))
+        .filter((x) => x.card && x.card.earn_rates.length === 0)
+        .map((x) => holdingName(x.h, x.card)),
+    [data.holdings, catalog],
+  );
+
   return (
     <div className="flex flex-col">
       <PageTitle help="Ranked by estimated value per dollar: rate × your cents per point (set in Settings or Points). Portal-only rates get their own row.">Best card</PageTitle>
@@ -48,6 +60,11 @@ export default function BestCardPage() {
         ))}
       </div>
       <GroupLabel>{LABELS[category]}</GroupLabel>
+      {unranked.length > 0 && (
+        <p className="mb-2 px-1 text-sm text-muted" data-testid="best-card-unranked">
+          Not ranked (basic card info only): {unranked.join(", ")}.
+        </p>
+      )}
       {ranked.length === 0 ? (
         <Empty>No open cards.</Empty>
       ) : (

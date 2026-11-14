@@ -144,8 +144,35 @@ export const AnnualFeeSchema = z
   })
   .refine(requireNoteWhenUnverified, unverifiedNoteMsg);
 
-export const CardSchema = z.object({
+/**
+ * A current public welcome offer (docs/SPEC-v6.2-catalog.md §3.1). Only ever
+ * a suggestion: it prefills the welcome-offer form, and the owner's own offer wins.
+ */
+export const PublicOfferSchema = z.object({
+  bonus: z.number().positive(),
+  unit: z.enum(["points", "miles", "usd"]),
+  /** USD; null when any purchase (or approval alone) earns it. */
+  min_spend: z.number().positive().nullable(),
+  /** Days from approval to make the spend. */
+  days: z.number().int().positive().nullable(),
+  /** The date the offer was seen. */
+  as_of: isoDate,
+  /** When the source says it ends. */
+  expires: isoDate.optional(),
+  source_url: z.url(),
+  source_type: z.enum(["official", "community"]).optional(),
+  note: z.string().optional(),
+});
+export type PublicOffer = z.infer<typeof PublicOfferSchema>;
+
+export const CardSchema = z
+  .object({
   id: z.string().regex(/^[a-z0-9-]+$/),
+  /**
+   * `stub`: basic facts only (issuer, fee, family), enough for 5/24, the fee
+   * cycle and issuer rules before the card is researched. `full` cards need earn rates.
+   */
+  depth: z.enum(["stub", "full"]).default("full"),
   name: z.string(),
   issuer: z.string().regex(/^[a-z0-9_]+$/),
   network: z.enum(["visa", "mastercard", "amex", "discover"]),
@@ -161,10 +188,12 @@ export const CardSchema = z.object({
   rotating_program: z.string().optional(),
   product_page: z.url(),
   annual_fee: AnnualFeeSchema,
-  earn_rates: z.array(EarnRateSchema).min(1),
-  benefits: z.array(BenefitSchema),
+  earn_rates: z.array(EarnRateSchema).default([]),
+  benefits: z.array(BenefitSchema).default([]),
   downgrade_options: z.array(DowngradeOptionSchema).default([]),
-});
+  public_offer: PublicOfferSchema.optional(),
+  })
+  .refine((c) => c.depth === "stub" || c.earn_rates.length > 0, { message: "full cards need at least one earn rate", path: ["earn_rates"] });
 export type Card = z.infer<typeof CardSchema>;
 
 // ------------------------------------------------------------------ rules --

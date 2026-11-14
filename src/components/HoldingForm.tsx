@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { deleteHolding, saveHolding } from "@/app/actions";
 import { offerFor } from "@/lib/domain/welcomeBonus";
 import { isMuted } from "@/lib/domain/skips";
@@ -53,6 +53,11 @@ export function HoldingForm({
   // Recurring reminders this card can mute ("Don't remind me"); payments and annual fees can't be muted.
   const setMutes = useSetMutes();
   const reminderCard = catalog.cards.find((c) => c.id === f.catalogCardId);
+  const byIssuer = useMemo(() => {
+    const m = new Map<string, typeof catalog.cards>();
+    for (const c of [...catalog.cards].sort((a, b) => a.name.localeCompare(b.name))) m.set(c.issuer, [...(m.get(c.issuer) ?? []), c]);
+    return [...m.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [catalog]);
   const reminders: { kind: MuteKind; benefitId: string | null; name: string }[] = initial && reminderCard
     ? [
         ...(reminderCard.rotating_program ? [{ kind: "rotating" as const, benefitId: null, name: "Rotating 5% activation" }] : []),
@@ -112,10 +117,14 @@ export function HoldingForm({
       <Field label="Card product (catalog)">
         <select value={f.catalogCardId} onChange={set("catalogCardId")}>
           <option value="">— Not in catalog —</option>
-          {catalog.cards.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
+          {byIssuer.map(([issuer, cards]) => (
+            <optgroup key={issuer} label={issuer.replaceAll("_", " ").replace(/\b\w/g, (m) => m.toUpperCase())}>
+              {cards.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </Field>
@@ -182,6 +191,7 @@ export function HoldingForm({
         <textarea rows={2} value={f.notes} onChange={set("notes")} />
       </Field>
       <OfferFieldset
+        publicOffer={existingOffer ? undefined : reminderCard?.public_offer}
         value={offer}
         onChange={setOffer}
         open={openOffer}

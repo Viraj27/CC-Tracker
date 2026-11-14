@@ -82,3 +82,22 @@ export async function mouseSwipeLeft(page: Page, target: Locator, distance = 200
   await page.mouse.move(x0 - distance, y, { steps: 6 });
   await page.mouse.up();
 }
+
+/**
+ * Start adding a fake holding of a catalog stub (American Express Gold Card), with the Welcome
+ * offer fieldset open so its public-offer hint shows. Call `saveStubCard` to finish.
+ */
+export async function startStubCard(page: Page, approvalDate: string) {
+  await gotoReady(page, "/cards");
+  await page.getByLabel("Card product (catalog)").selectOption("amex-gold");
+  await page.getByLabel("Approval date", { exact: true }).fill(approvalDate);
+  await page.getByTestId("offer-fieldset").locator("summary").click();
+  await expect(page.getByTestId("public-offer")).toBeVisible();
+}
+
+/** Use the public offer and save; ends on the stub's card page. */
+export async function saveStubCard(page: Page) {
+  await page.getByTestId("public-offer").getByRole("button", { name: "Use it" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByTestId("stub-notice")).toBeVisible();
+}

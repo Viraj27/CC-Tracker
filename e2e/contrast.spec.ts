@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, sheet, sheetSettled } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, sheet, sheetSettled, startStubCard } from "./helpers";
 
 // WCAG AA text contrast: every visible text run (and input placeholder) against the
 // background it is actually painted on, in both colour schemes, with disclosures and
@@ -115,6 +115,18 @@ test.describe("contrast", () => {
         await gotoReady(page, "/up-next");
         await expect(page.getByTestId("attention-list").getByText(/^Spend \$3,000$/)).toBeVisible();
         await check("/up-next (welcome bonus)");
+
+        // v6.2 (docs/SPEC-v6.2-catalog.md): a stub card: the public-offer hint (ⓘ open), the card page's
+        // basic-info notice (ⓘ open), and the "Not ranked" line on Best card.
+        await startStubCard(page, daysAgo(20));
+        await page.getByTestId("public-offer").getByRole("button", { name: "About the public offer" }).click();
+        await check("/cards (public offer hint)");
+        await saveStubCard(page);
+        await page.getByTestId("stub-notice").getByRole("button", { name: "About basic card info" }).click();
+        await check("card page (stub notice)");
+        await gotoReady(page, "/best-card");
+        await expect(page.getByTestId("best-card-unranked")).toBeVisible();
+        await check("/best-card (stub not ranked)");
 
         // v6.1 (docs/SPEC-v6.1-annual-fee-decision.md): the day after Demo Venture X's anniversary:
         // the "Watch for fee" row and sheet, then the refund-window sheet with its source open.

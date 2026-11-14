@@ -1,7 +1,8 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { formatDate, parseIso, shortDate } from "@/lib/domain/dates";
+import type { PublicOffer } from "@/lib/catalog/schema";
+import { formatDate, monthDay, parseIso, shortDate } from "@/lib/domain/dates";
 import type { BonusUnit, WelcomeOffer } from "@/lib/domain/types";
 import {
   bonusLabel,
@@ -310,13 +311,52 @@ export function offerFromForm(f: OfferForm, existing: WelcomeOffer | null): Offe
   };
 }
 
+/** A public offer as form values: days become whole months (90 → 3). */
+export const publicOfferForm = (o: PublicOffer): Pick<OfferForm, "bonusAmount" | "bonusUnit" | "minSpend" | "windowMonths"> => ({
+  bonusAmount: String(o.bonus),
+  bonusUnit: o.unit,
+  minSpend: o.min_spend === null ? "" : String(o.min_spend),
+  windowMonths: o.days === null ? "" : String(Math.max(1, Math.round(o.days / 30))),
+});
+
+/** `Public offer as of Jun 8 · ⓘ` with a button that fills the fields. Never applied on its own. */
+function PublicOfferHint({ offer, onUse }: { offer: PublicOffer; onUse: () => void }) {
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const what = bonusLabel({ bonusAmount: offer.bonus, bonusUnit: offer.unit, postedAmount: null });
+  return (
+    <p className="mb-2 flex flex-wrap items-center gap-x-1.5 rounded-[14px] border border-text/20 px-3 py-1.5 text-sm" data-testid="public-offer">
+      <span className="min-w-0 flex-1">
+        Public offer as of {monthDay(offer.as_of)}: {what}
+        {offer.min_spend !== null && ` for ${money(offer.min_spend)}`}
+        {offer.days !== null && ` in ${offer.days} days`}
+      </span>
+      <InfoToggle open={open} onToggle={() => setOpen((o) => !o)} controls={id} label="About the public offer" />
+      <button type="button" className="min-h-9 font-semibold underline" onClick={onUse}>
+        Use it
+      </button>
+      <span id={id} hidden={!open} className="block basis-full pb-1 text-left text-xs text-muted">
+        From a community-maintained list (
+        <a className="underline decoration-dotted underline-offset-2" href={offer.source_url} target="_blank" rel="noreferrer">
+          source
+        </a>
+        ), last updated {formatDate(offer.as_of)}
+        {offer.expires ? `; listed as ending ${formatDate(offer.expires)}` : ""}. Offers change often: check the issuer&apos;s page, and enter your own if it differs.
+      </span>
+    </p>
+  );
+}
+
 /** Add card / Edit card: the optional Welcome offer fieldset, collapsed by default (§5). */
 export function OfferFieldset({
   value,
   onChange,
   open = false,
   onRemove,
+  publicOffer,
 }: {
+  /** The catalog's public offer for the picked card: a suggestion that fills the fields on request (v6.2 §3.1). */
+  publicOffer?: PublicOffer;
   value: OfferForm;
   onChange: (f: OfferForm) => void;
   open?: boolean;
@@ -329,6 +369,7 @@ export function OfferFieldset({
       <summary className="min-h-10 cursor-pointer py-2 font-mono text-[11px] tracking-wider text-muted uppercase">
         Welcome offer{value.bonusAmount ? "" : " (optional)"}
       </summary>
+      {publicOffer && <PublicOfferHint offer={publicOffer} onUse={() => onChange({ ...value, ...publicOfferForm(publicOffer) })} />}
       <div className="grid grid-cols-2 gap-3 pt-1">
         <Field label="Bonus">
           <input type="number" inputMode="decimal" min={0} step="any" value={value.bonusAmount} onChange={set("bonusAmount")} placeholder="e.g. 60000" />

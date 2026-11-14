@@ -66,3 +66,16 @@ Not decided here. A starting rule: current, non-discontinued cards from issuers 
 3. A stub can be added as a holding; 5/24, AF items and rules work for it; the card page shows the basic-info notice; no screen errors on empty earn rates or benefits.
 4. Best card skips cards with no earn rates and says so in one line.
 5. The 7 existing full cards are byte-identical after an import.
+
+## 7. As built (deviations, deliberate)
+- **The dataset is stale.** Checked 2026-11-13: its `master` branch last changed on 2026-06-08, and the `main` branch its README links to on 2026-05-03. The importer reads `master`. Every imported fact is `verified: false`, and offers carry `as_of: 2026-06-08` and are labelled with that date. `as_of` is the dataset's own date, never the day the import ran, which is also what makes a re-run produce no diff.
+- **The allow-list (§4, §5.1) was drafted without the owner**: 66 cards in `catalog/import-allowlist.yaml` across Chase, Amex, Capital One, Citi, Bank of America, U.S. Bank, Barclays and Wells Fargo, personal and business. Trim or extend it and re-run. Left out on purpose: discontinued cards, Bilt and the Barclays AAdvantage and Hawaiian cards (the dataset's issuer for them looked out of date), and niche co-brands.
+- **New issuers have no rules yet.** Citi, Bank of America, U.S. Bank and Barclays have no `catalog/rules/` file, so **Should I apply?** only runs the cross-issuer rules (e.g. Chase 5/24 does not apply to them) and says `No rules in the catalog` for the rest. That is gap 4 of the competitor review, not this spec.
+- **Families** are set only where an existing rule uses them: Delta Platinum and Reserve (`delta-skymiles-premium`) and Capital One Venture (`capital-one-venture`).
+- **Programs.** 17 programs were added to `catalog/programs.yaml`. Hotel programs default below 1¢ per point (Marriott 0.7, Hilton 0.5, IHG 0.5, Wyndham 0.8, Choice 0.6); everything else is 1¢, as before. All are assumptions the owner can change in Settings.
+- **Full cards and `public_offer` (§3.2 vs acceptance 5).** The importer adds `public_offer` to a researched card only when that card is on the allow-list, by appending one block and keeping every other byte. None of the 7 is listed, so they are byte-identical.
+- **Public offer prefill** is a hint with a **Use it** button, not an automatic fill, so nothing is saved that the owner did not choose. Days become whole months (180 → 6).
+- **Badges.** A fact that is both community-sourced and unverified now shows **⚠ Unverified** (it used to show Community curated); a verified community fact is unchanged.
+- **Add card** groups the picker by issuer. **Card order** in the loaded catalog is by id.
+- **§5.2** was already done by v7: **Should I apply?** picks a catalog card. Stubs appear there.
+- **§3.4 (the routine)** is v9.
