@@ -163,6 +163,8 @@ The catalog is bundled at build time, so a change needs a deploy (push to `main`
 
 ## Limits worth knowing (Workers Free plan)
 
+- **CPU time: 10 ms per request on Free (30 s default on Paid, $5/month).** Measured on staging on 2026-11-14, over 136 requests: median 11 ms, slowest 200–780 ms (Settings is the heaviest), 69 over 10 ms. Most still succeed, but some fail with **Error 1102** ("Worker exceeded resource limits") or "Worker threw exception": about 1 in 10 page loads during an e2e run. Local runs never show this, because the local runtime doesn't enforce the limit. Decision (owner, 2026-11-14): stay on Free for now; switch to Paid, or rework the heaviest pages, if errors show up often in daily use.
+
 - **Worker size:** 3 MiB gzipped on Free. The CI build log prints the size (about 2.1 MiB at v3).
 - **D1 queries per request:** 50 on Free. A page view uses 14 (measured against a local D1); a save uses about 16. Import and catalog load use one atomic D1 `batch()` each, so the size of an import file doesn't matter.
 - **D1 storage:** 500 MB per database on Free, far more than this app needs. D1 Time Travel lets you restore the database to any point in the last 7 days (Free).
