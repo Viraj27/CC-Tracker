@@ -35,6 +35,20 @@ export async function addCardWithOffer(page: Page, approvalDate: string) {
   await expect(page.getByTestId("bonus-row")).toBeVisible();
 }
 
+/**
+ * Run `act` and wait until the save it starts has reached the server. Use before a full page load
+ * that must see the change: `waitForLoadState("networkidle")` does not wait for a server action
+ * (the state was already reached when the page loaded), so the load could read the old data.
+ */
+export async function saved(page: Page, act: () => Promise<unknown>) {
+  const response = page.waitForResponse((r) => r.request().method() === "POST");
+  await act();
+  // A server action answers only after it has run, so the response starting is enough;
+  // the streamed body usually ends at once, but is not worth a test timeout when it lingers.
+  const r = await response;
+  await Promise.race([r.finished(), new Promise((done) => setTimeout(done, 2000))]);
+}
+
 /** Navigate and wait until the client has loaded its data and rendered the page heading. */
 export async function gotoReady(page: Page, url: string) {
   await page.goto(url);
@@ -126,7 +140,6 @@ export async function setDemoSpend(page: Page) {
   await group.getByLabel("Groceries").fill("600");
   await group.getByLabel("Everything else").fill("1000");
   await expect(page.getByTestId("spend-total")).toHaveText("$2,000");
-  await page.getByRole("button", { name: "Save settings" }).click();
-  await page.waitForLoadState("networkidle");
+  await saved(page, () => page.getByRole("button", { name: "Save settings" }).click());
 }
 

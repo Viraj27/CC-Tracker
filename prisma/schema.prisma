@@ -264,4 +264,7 @@ model Settings {
   // Find a card: JSON { [spendCategory]: usdPerMonth } and the page's remembered criteria.
   spendProfile       String  @default("{}")
   findCardCriteria   String  @default("{}")
+  // Deals: JSON array of dismissed feed item ids, and the feed run (`ran_at`) last seen on the Deals page.
+  dismissedDeals     String  @default("[]")
+  dealsSeenAt        String?
 }

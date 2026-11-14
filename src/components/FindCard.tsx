@@ -4,6 +4,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { formatDate, monthDay } from "@/lib/domain/dates";
+import { offerHistory } from "@/lib/domain/deals";
 import { criteriaOf, findCards, offerLine, type Candidate, type FindResult } from "@/lib/domain/findCard";
 import { SPEND_LABELS } from "@/lib/domain/spend";
 import type { FindCardCriteria } from "@/lib/domain/types";
@@ -19,7 +20,7 @@ export function useFindCards(override?: FindCardCriteria): { criteria: FindCardC
   const { catalog, data, today } = useApp();
   return useMemo(() => {
     const criteria = override ?? criteriaOf(data.settings.findCardCriteria);
-    return { criteria, result: findCards(catalog, data, criteria, today) };
+    return { criteria, result: findCards(catalog, data, criteria, today, offerHistory(catalog.feed.changelog)) };
   }, [catalog, data, today, override]);
 }
 

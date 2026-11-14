@@ -18,6 +18,8 @@
     "test:watch": "vitest",
     "catalog:check": "tsx scripts/catalog-check.ts",
     "catalog:import": "tsx scripts/catalog-import.ts",
+    "refresh:guard": "tsx scripts/refresh-guard.ts",
+    "feed:prune": "tsx scripts/feed-prune.ts",
     "test:e2e": "playwright test",
     "cf:build": "opennextjs-cloudflare build",
     "cf:migrate:local": "wrangler d1 migrations apply cc-tracker --local",

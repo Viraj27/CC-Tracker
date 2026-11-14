@@ -135,7 +135,21 @@ The owner chose no review step. These checks stand in for it:
 6. Three days without a run shows the warning.
 
 ## 10. Open items
-1. **Doctor of Credit's terms** for automated reading of its feed have not been checked. The design stores only facts and links; confirm before the first run.
+1. **Doctor of Credit's terms**, read 2026-11-13: `robots.txt` allows the feed and asks for a crawl delay of 600 seconds; the terms of use say nothing about automated access or RSS, forbid copying or republishing its text, and allow personal non-commercial use. The routine reads the feed once a day, never opens individual posts and stores only its own wording and a link. Whether that is acceptable in a public repository is the owner's call before the first run; nothing from the site has been fetched or committed.
 2. **Usage cost** of a daily run is unmeasured. Measure the first week and fall back to weekdays or weekly if it is too much.
 3. **The v6.2 offers dataset** (`credit-card-bonuses-api`) had its last repo push on 2026-06-08 (checked 2026-11-12), though v6.2 describes it as synced daily. If it is stale, §4.3 becomes the only source of `public_offer`, and v6.2's import is used for stub basics only.
 4. **Issuer pages behind bot walls** will make some confirmations fail (§5.2). Track how often in `meta.json` before deciding whether that needs a better fetch method.
+
+## 11. As built (deviations, deliberate)
+- **Nothing is scheduled and the feed ships empty.** This change is the app, the files, the checks and the routine's instructions (`routines/daily-refresh.md`). Turning it on is the owner's: confirm the source (§10.1), allow auto-merge and require the CI check on `main`, give the routine a token that can open and merge pull requests, and schedule it. Until then Deals reads `Not updated yet`.
+- **Files.** `catalog/feed/sources.yaml`, `deals.json`, `changelog.json`, `meta.json`. All optional: a catalog without them loads with an empty feed. They are part of the catalog's content hash, so a new run reaches the app's cache like any catalog edit. Deal ids are unique; a deal's `source`, `card_id` and `issuer`, and a changelog entry's `card_id`, must exist.
+- **Dismissed deals are a setting**, not Dismissal rows (those need a holding): `Settings.dismissedDeals` (a JSON list of ids) and `Settings.dealsSeenAt`. Migration `20261113180000_deals`. Both are in export/import.
+- **`dealsSeenAt` is a date**, not the run's date-time: D1 hands a date-time in a TEXT column back as a Date and Prisma then refuses the row. One run a day makes the date enough.
+- **For your cards (§4.4).** An item whose `card_id` is an open holding, or a `card_linked` item whose `issuer` matches an open holding (catalog or hand-entered). A `card_offer` for a card you do not hold stays under New card offers even when you have another card with that issuer.
+- **Reported changes** are `deals.json` items of kind `reported_change`, shown at the top of What changed with a `Reported` badge. They are kept 30 days from the run that added them, then pruned.
+- **Retention** is `npm run feed:prune` (the routine runs it): past `expires`, or 30 days after `published`. The app applies the same rule when it renders, so a late run never shows an expired item.
+- **What changed** covers 60 days; the card chip `CHANGED NOV 12` covers 30 and links to `/deals?card=<id>#changed`.
+- **The dot** is on **More** (phone) and next to **Deals** (desktop), and More's Deals row carries `New`. It counts For-your-cards items added after the last run you opened Deals on.
+- **Guards (§6).** `npm run refresh:guard` prints `decision=auto | needs-owner | reject`. Reject: any file outside `catalog/`. Needs owner: more than 10 changed facts (public offers do not count: they only prefill a form), any `annual_fee` change, or an earlier changelog entry removed or rewritten. CI runs `catalog:check --base` on every pull request (a benefit id on the base branch may not go missing) and the path check on pull requests titled `Daily refresh`.
+- **Elevated offers (v8 §3.3).** Find a card now reads earlier bonuses from changelog entries with `path: public_offer.bonus`.
+- **Tests (§8).** The routine dry run was done by hand against a made-up feed in a scratch clone (see the pull request); it has not run on a schedule or against a real feed. e2e uses a made-up feed (`e2e/feedFixture.ts`, built into a copy of the catalog by `scripts/e2e-catalog.ts`, `CATALOG_DIR`).

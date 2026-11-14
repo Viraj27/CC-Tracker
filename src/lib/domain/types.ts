@@ -176,6 +176,10 @@ export interface Settings {
   spendProfile: Partial<Record<SpendCategory, number>>;
   /** Find a card: the page's criteria as last left; missing keys take their defaults. */
   findCardCriteria: Partial<FindCardCriteria>;
+  /** Deals: ids of feed items the owner dismissed. */
+  dismissedDeals: string[];
+  /** Deals: the date of the feed run that was current when the Deals page was last opened. */
+  dealsSeenAt: string | null;
 }
 
 /** Find a card's filters (docs/SPEC-v8-find-a-card.md §2.2). */
@@ -203,6 +207,8 @@ export const DEFAULT_SETTINGS: Settings = {
   paymentTrackingStart: null,
   spendProfile: {},
   findCardCriteria: {},
+  dismissedDeals: [],
+  dealsSeenAt: null,
 };
 
 export interface UserData {

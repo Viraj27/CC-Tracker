@@ -7,10 +7,16 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
-import type { z } from "zod";
+import { z } from "zod";
 import {
   type Catalog,
   CardSchema,
+  ChangelogEntrySchema,
+  DealSchema,
+  EMPTY_FEED,
+  type Feed,
+  FeedMetaSchema,
+  FeedSourcesFileSchema,
   PerkDefaultsFileSchema,
   ProgramsFileSchema,
   RotatingProgramSchema,
@@ -51,6 +57,35 @@ function parseFile<T>(file: string, schema: z.ZodType<T>, hasher: ReturnType<typ
   return result.data;
 }
 
+function parseJsonFile<T>(file: string, schema: z.ZodType<T>, hasher: ReturnType<typeof createHash>, root: string): T {
+  const text = fs.readFileSync(file, "utf8");
+  hasher.update(path.relative(root, file)).update("\0").update(text).update("\0");
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch (e) {
+    throw new CatalogError(`${file}: invalid JSON: ${(e as Error).message}`);
+  }
+  const result = schema.safeParse(raw);
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`).join("\n");
+    throw new CatalogError(`${file}: feed validation failed\n${issues}`);
+  }
+  return result.data;
+}
+
+/** catalog/feed/: every file is optional, so a catalog without a feed (tests, a fresh clone) loads as empty. */
+function loadFeed(dir: string, hasher: ReturnType<typeof createHash>): Feed {
+  const at = (name: string) => path.join(dir, "feed", name);
+  const has = (name: string) => fs.existsSync(at(name));
+  return {
+    sources: has("sources.yaml") ? parseFile(at("sources.yaml"), FeedSourcesFileSchema, hasher, dir).sources : [],
+    deals: has("deals.json") ? parseJsonFile(at("deals.json"), z.array(DealSchema), hasher, dir) : [],
+    changelog: has("changelog.json") ? parseJsonFile(at("changelog.json"), z.array(ChangelogEntrySchema), hasher, dir) : [],
+    meta: has("meta.json") ? parseJsonFile(at("meta.json"), FeedMetaSchema, hasher, dir) : EMPTY_FEED.meta,
+  };
+}
+
 export function loadCatalog(dir: string = defaultCatalogDir()): Catalog {
   const hasher = createHash("sha256");
   const cards = listYaml(path.join(dir, "cards")).map((f) => {
@@ -77,7 +112,9 @@ export function loadCatalog(dir: string = defaultCatalogDir()): Catalog {
     parseFile(f, RotatingProgramSchema, hasher, dir),
   );
 
-  const catalog: Catalog = { hash: hasher.digest("hex"), cards, rules, afPolicies, perkDefaults, programs, rotating };
+  const feed = loadFeed(dir, hasher);
+
+  const catalog: Catalog = { hash: hasher.digest("hex"), cards, rules, afPolicies, perkDefaults, programs, rotating, feed };
   checkReferences(catalog);
   return catalog;
 }
@@ -121,6 +158,17 @@ export function checkReferences(c: Catalog): void {
         errors.push(`card ${card.id}: downgrade target_card_id "${d.target_card_id}" not in catalog`);
       }
     }
+  }
+  dup("deal", c.feed.deals.map((x) => x.id));
+  const sourceIds = new Set(c.feed.sources.map((x) => x.id));
+  const issuers = new Set(c.cards.map((x) => x.issuer));
+  for (const d of c.feed.deals) {
+    if (!sourceIds.has(d.source)) errors.push(`deal ${d.id}: unknown source "${d.source}"`);
+    if (d.card_id && !cardIds.has(d.card_id)) errors.push(`deal ${d.id}: unknown card_id "${d.card_id}"`);
+    if (d.issuer && !issuers.has(d.issuer)) errors.push(`deal ${d.id}: unknown issuer "${d.issuer}"`);
+  }
+  for (const e of c.feed.changelog) {
+    if (!cardIds.has(e.card_id)) errors.push(`changelog ${e.date} ${e.path}: unknown card_id "${e.card_id}"`);
   }
   const families = new Set(c.cards.map((x) => x.family).filter((f): f is string => !!f));
   for (const r of c.rules) {

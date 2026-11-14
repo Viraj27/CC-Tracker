@@ -354,6 +354,8 @@ const SettingsInput = z.object({
   paymentTrackingStart: z.string().regex(/^\d{4}-\d{2}$/).nullable(),
   spendProfile: SpendProfileInput,
   findCardCriteria: FindCriteriaInput,
+  dismissedDeals: z.array(z.string().max(200)).max(2000),
+  dealsSeenAt: z.string().max(40).nullable().transform((s) => s?.slice(0, 10) ?? null),
 });
 
 export async function saveSettings(input: z.input<typeof SettingsInput>): Promise<UserData> {
@@ -368,6 +370,29 @@ export async function saveFindCardCriteria(input: z.input<typeof FindCriteriaInp
   const prisma = await prismaClient();
   const findCardCriteria = JSON.stringify(FindCriteriaInput.parse(input));
   await prisma.settings.upsert({ where: { profileId }, create: { profileId, findCardCriteria }, update: { findCardCriteria } });
+  return snapshot();
+}
+
+// ----------------------------------------------------------------- deals --
+
+/** Dismiss a deal, or bring it back (docs/SPEC-v9-daily-refresh.md §4.4). Only this column changes. */
+export async function setDealDismissed(input: { dealId: string; dismissed: boolean }): Promise<UserData> {
+  const { dealId, dismissed } = z.object({ dealId: z.string().min(1).max(200), dismissed: z.boolean() }).parse(input);
+  const prisma = await prismaClient();
+  const current = (await snapshot()).settings.dismissedDeals.filter((id) => id !== dealId);
+  const dismissedDeals = JSON.stringify(dismissed ? [...current, dealId] : current);
+  await prisma.settings.upsert({ where: { profileId }, create: { profileId, dismissedDeals }, update: { dismissedDeals } });
+  return snapshot();
+}
+
+/**
+ * The Deals page was opened: remember the date of the feed run it showed, for the "unseen" dot.
+ * A date only: D1 reads a full date-time back from a TEXT column as a Date, which Prisma then rejects.
+ */
+export async function markDealsSeen(ranAt: string): Promise<UserData> {
+  const dealsSeenAt = z.string().regex(/^\d{4}-\d{2}-\d{2}/).max(40).parse(ranAt).slice(0, 10);
+  const prisma = await prismaClient();
+  await prisma.settings.upsert({ where: { profileId }, create: { profileId, dealsSeenAt }, update: { dealsSeenAt } });
   return snapshot();
 }
 

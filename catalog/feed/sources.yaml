@@ -1,0 +1,8 @@
+# Where the daily refresh looks (docs/SPEC-v9-daily-refresh.md §3). Owner-edited: one entry per feed.
+# The routine reads the feed and stores facts and a link, never a post's text.
+sources:
+  - id: doctorofcredit
+    name: Doctor of Credit
+    url: https://www.doctorofcredit.com/feed/
+    kind: rss
+    trust: community

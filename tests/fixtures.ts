@@ -70,6 +70,7 @@ export function catalog(over: Partial<Catalog> = {}): Catalog {
       { id: "test-cash", name: "Test Cash", kind: "cash", default_cents_per_point: 1 },
     ],
     rotating: [],
+    feed: { sources: [], deals: [], changelog: [], meta: { ran_at: null, items_seen: 0, status: "never" } },
     ...over,
   };
 }

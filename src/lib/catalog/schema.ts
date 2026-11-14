@@ -363,4 +363,90 @@ export interface Catalog {
   perkDefaults: PerkDefault[];
   programs: Program[];
   rotating: RotatingProgram[];
+  /** The daily refresh's deals, changelog and run status; empty before the first run. */
+  feed: Feed;
 }
+
+// -------------------------------------------------------------------- feed --
+// The daily refresh's output (docs/SPEC-v9-daily-refresh.md): deals, a log of
+// every catalog fact it changed, and when it last ran. Public, like the rest of
+// the catalog: nothing here says which cards anyone holds.
+
+export const FeedSourceSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string(),
+  url: z.url(),
+  kind: z.literal("rss"),
+  trust: z.literal("community"),
+});
+export type FeedSource = z.infer<typeof FeedSourceSchema>;
+export const FeedSourcesFileSchema = z.object({ sources: z.array(FeedSourceSchema) });
+
+export const DEAL_KINDS = ["card_offer", "card_linked", "shopping", "reported_change"] as const;
+
+export const DealSchema = z
+  .object({
+    id: z.string().regex(/^[a-z0-9-]+$/),
+    /** `reported_change`: a benefit change a post reported that the issuer's page did not confirm (§5.2). */
+    kind: z.enum(DEAL_KINDS),
+    /** The routine's own one-line wording, never the post's text. */
+    title: z.string().min(1).max(160),
+    url: z.url(),
+    /** A `sources.yaml` id. */
+    source: z.string(),
+    published: isoDate,
+    /** The run that first wrote the item. */
+    added: isoDate,
+    expires: isoDate.nullable(),
+    /** Set only when the item clearly maps to a catalog card / a known issuer. */
+    card_id: z.string().nullable().default(null),
+    issuer: z.string().nullable().default(null),
+    /** `card_offer` items where the post states the numbers. */
+    offer: z
+      .object({
+        bonus: z.number().positive(),
+        unit: z.enum(["points", "miles", "usd"]),
+        min_spend: z.number().positive().nullable(),
+        days: z.number().int().positive().nullable(),
+      })
+      .optional(),
+  })
+  .refine((d) => d.kind !== "reported_change" || !!d.card_id, { message: "a reported change must name its card_id" });
+export type Deal = z.infer<typeof DealSchema>;
+
+export const ChangelogEntrySchema = z.object({
+  /** The run that made the change. */
+  date: isoDate,
+  card_id: z.string(),
+  /** Where in the card file, e.g. `benefits.doordash-credit.amount`, `public_offer.bonus`, `annual_fee.amount`. */
+  path: z.string().min(1),
+  /** What changed, for a row: `DoorDash credit`. */
+  label: z.string().min(1).max(80),
+  from: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+  to: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+  /** When the new terms apply; null = already in effect. */
+  effective: isoDate.nullable(),
+  source_url: z.url(),
+  /** How it was confirmed: on the issuer's page, or (offers only) from the community post. */
+  confirmed_by: z.enum(["official_page", "community_post"]),
+});
+export type ChangelogEntry = z.infer<typeof ChangelogEntrySchema>;
+
+export const FeedMetaSchema = z.object({
+  /** ISO date-time of the last run; null before the first one. */
+  ran_at: z.string().nullable(),
+  items_seen: z.number().int().nonnegative(),
+  status: z.enum(["ok", "failed", "never"]),
+  reason: z.string().optional(),
+  /** Official-page checks this run: how many were tried and how many could not be read (§10.4). */
+  confirmations: z.object({ attempted: z.number().int().nonnegative(), failed: z.number().int().nonnegative() }).optional(),
+});
+export type FeedMeta = z.infer<typeof FeedMetaSchema>;
+
+export interface Feed {
+  sources: FeedSource[];
+  deals: Deal[];
+  changelog: ChangelogEntry[];
+  meta: FeedMeta;
+}
+export const EMPTY_FEED: Feed = { sources: [], deals: [], changelog: [], meta: { ran_at: null, items_seen: 0, status: "never" } };

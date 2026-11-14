@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { loadCatalog } from "../catalog/loader";
-import type { AfPolicy, Card, Catalog, PerkDefault, Program, RotatingProgram, Rule } from "../catalog/schema";
+import { type AfPolicy, type Card, type Catalog, EMPTY_FEED, type Feed, type PerkDefault, type Program, type RotatingProgram, type Rule } from "../catalog/schema";
 import { type Db, isCloudflareWorker, type SqlStatement, sqlNow, upsertSql } from "./dbHandle";
 
 /** The statements that replace the Catalog* cache tables with `catalog`. Never touches user data. */
@@ -15,6 +15,7 @@ export function catalogSyncStatements(catalog: Catalog): SqlStatement[] {
     upsertSql("CatalogDoc", { id: "perk-defaults", data: JSON.stringify(catalog.perkDefaults) }),
     upsertSql("CatalogDoc", { id: "programs", data: JSON.stringify(catalog.programs) }),
     upsertSql("CatalogDoc", { id: "rotating", data: JSON.stringify(catalog.rotating) }),
+    upsertSql("CatalogDoc", { id: "feed", data: JSON.stringify(catalog.feed) }),
     // Written last, in the same atomic batch: the hash only changes if everything above did.
     upsertSql("CatalogMeta", { id: "catalog", hash: catalog.hash, loadedAt: sqlNow() }),
   ];
@@ -50,6 +51,7 @@ export async function readCatalogFromDb(prisma: PrismaClient): Promise<Catalog |
     perkDefaults: doc<PerkDefault[]>("perk-defaults"),
     programs: doc<Program[]>("programs"),
     rotating: doc<RotatingProgram[]>("rotating"),
+    feed: docs.some((d) => d.id === "feed") ? doc<Feed>("feed") : EMPTY_FEED,
   };
 }
 

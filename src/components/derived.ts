@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { Card } from "@/lib/catalog/schema";
 import { buildAttention } from "@/lib/domain/attention";
+import { groupDeals, unseenDeals } from "@/lib/domain/deals";
 import { chase524Params, fiveTwentyFourStatus } from "@/lib/domain/fiveTwentyFour";
 import { cardFor, holdingName } from "@/lib/domain/holdings";
 import { splitAttention } from "@/lib/domain/skips";
@@ -66,6 +67,15 @@ export function useUpNext() {
 /** The Up next items that show (skipped and muted ones left out). Drives the Wallet's order, chips and headlines too. */
 export function useAttention() {
   return useUpNext().visible;
+}
+
+/** "For your cards" deals added since the Deals page was last opened (docs/SPEC-v9-daily-refresh.md §4.4). */
+export function useUnseenDeals(): number {
+  const { catalog, data, today } = useApp();
+  return useMemo(
+    () => unseenDeals(groupDeals(catalog.feed.deals, data.holdings, catalog, data.settings.dismissedDeals, today).yours, data.settings.dealsSeenAt),
+    [catalog, data.holdings, data.settings.dismissedDeals, data.settings.dealsSeenAt, today],
+  );
 }
 
 export function use524() {

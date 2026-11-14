@@ -22,11 +22,21 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history on pull requests: the catalog checks compare against the base branch.
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The catalog and its feed validate; on a pull request, no benefit id from the base branch is missing.
+      - name: Catalog check
+        run: npm run catalog:check -- ${{ github.event_name == 'pull_request' && format('--base origin/{0}', github.base_ref) || '' }}
+      # A "Daily refresh" pull request merges itself, so it may only change files under catalog/ (docs/SPEC-v9-daily-refresh.md §6).
+      - name: Daily refresh may only touch catalog/
+        if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'Daily refresh')
+        run: npm run refresh:guard -- --base origin/${{ github.base_ref }} --paths-only
       - run: npm run typecheck
       - run: npm test
       # Builds the Next.js app and the Cloudflare Worker bundle (.open-next/).

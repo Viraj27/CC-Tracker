@@ -162,6 +162,8 @@ const SettingsIn = z.object({
     })
     .partial()
     .default({}),
+  dismissedDeals: z.array(z.string()).default([]),
+  dealsSeenAt: nullable(z.string().transform((s) => s.slice(0, 10))),
 });
 
 export const ImportSchema = z.object({

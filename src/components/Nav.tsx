@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dayDate } from "@/lib/domain/dates";
 import { useApp } from "./AppState";
-import { use524 } from "./derived";
+import { use524, useUnseenDeals } from "./derived";
 import { PillLink } from "./ui";
 
 /** Desktop header links. `short` is what shows when the full label would not fit the row; the link keeps its full name. */
@@ -14,10 +14,15 @@ const LINKS: { href: string; label: string; short?: string }[] = [
   { href: "/up-next", label: "Up next" },
   { href: "/eligibility", label: "5/24" },
   { href: "/payments", label: "Payments" },
-  { href: "/rotating", label: "Rotating" },
   { href: "/best-card", label: "Best card" },
   { href: "/apply", label: "Should I apply?", short: "Apply?" },
   { href: "/find-card", label: "Find a card", short: "Find card" },
+  { href: "/deals", label: "Deals" },
+];
+
+/** Desktop: the screens opened least, behind "More" so the row fits at 1280px. */
+const OVERFLOW_LINKS = [
+  { href: "/rotating", label: "Rotating 5%" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
 ];
@@ -29,10 +34,55 @@ export const MORE_LINKS = [
   { href: "/best-card", label: "Best card" },
   { href: "/apply", label: "Should I apply?" },
   { href: "/find-card", label: "Find a card" },
+  { href: "/deals", label: "Deals" },
   { href: "/points", label: "Points" },
   { href: "/settings", label: "Settings" },
   { href: "/cards", label: "Add card" },
 ];
+
+/** Desktop header: a small menu for OVERFLOW_LINKS. Closes on navigation, Escape and a click elsewhere. */
+function DesktopMore({ path }: { path: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onDown = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [open]);
+  const active = OVERFLOW_LINKS.some((l) => path.startsWith(l.href));
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        data-testid="nav-more"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((o) => !o)}
+        className={`rounded-full px-2.5 py-1.5 ${active ? "bg-text/[0.07] font-semibold text-text" : "text-muted hover:text-text"}`}
+      >
+        More
+      </button>
+      {open && (
+        <ul data-testid="nav-more-menu" className="absolute top-full right-0 z-30 mt-2 min-w-40 rounded-xl border border-hairline bg-bg p-1 shadow-lg">
+          {OVERFLOW_LINKS.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} aria-current={path.startsWith(l.href) ? "page" : undefined} className={`block rounded-lg px-3 py-2 hover:bg-text/[0.05] ${path.startsWith(l.href) ? "font-semibold text-text" : "text-muted hover:text-text"}`}>
+                {l.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 // Whether this tab has navigated inside the app, so "‹ Wallet" can go back instead of pushing "/".
 let lastPath: string | null = null;
@@ -64,7 +114,13 @@ export function WalletStatus() {
   );
 }
 
+/** New "For your cards" deals since the Deals page was last opened. */
+const Dot = () => (
+  <span data-testid="deals-dot" role="img" aria-label="new for your cards" className="ml-1 inline-block h-2 w-2 rounded-full bg-urgent align-middle" />
+);
+
 export function Nav() {
+  const unseen = useUnseenDeals();
   const path = usePathname();
   const { error, clearError, pending } = useApp();
   useEffect(() => {
@@ -94,9 +150,11 @@ export function Nav() {
                 className={`shrink-0 rounded-full px-2.5 py-1.5 ${active ? "bg-text/[0.07] font-semibold text-text" : "text-muted hover:text-text"}`}
               >
                 {l.short ?? l.label}
+                {l.href === "/deals" && unseen > 0 && <Dot />}
               </Link>
             );
           })}
+          <DesktopMore path={path} />
         </nav>
         <span aria-live="polite" className="w-4 shrink-0 font-mono text-xs text-muted">
           {pending ? "…" : ""}
@@ -176,6 +234,7 @@ const TABS: { href: string; label: string; section: Section; icon: React.ReactNo
 
 /** Phone bottom tab bar (< 1024px), clear of the home indicator. */
 export function TabBar() {
+  const unseen = useUnseenDeals();
   const section = sectionOf(usePathname());
   return (
     <nav
@@ -195,7 +254,12 @@ export function TabBar() {
                   active ? "text-text" : "text-muted"
                 }`}
               >
-                {t.icon}
+                <span className="relative">
+                  {t.icon}
+                  {t.section === "more" && unseen > 0 && (
+                    <span data-testid="deals-dot" role="img" aria-label="New deals for your cards" className="absolute -top-0.5 -right-1.5 h-2 w-2 rounded-full bg-urgent" />
+                  )}
+                </span>
                 {t.label}
               </Link>
             </li>
