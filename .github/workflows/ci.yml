@@ -139,10 +139,14 @@ jobs:
         run: npm run cf:staging:migrate
       - name: Deploy (staging)
         if: steps.secrets.outputs.ready == 'true'
+        # shell: bash adds pipefail, so a failed deploy fails the step even through tee.
+        shell: bash
         run: npm run cf:staging:deploy | tee "$RUNNER_TEMP/deploy.log"
       - name: Staging address
         if: steps.secrets.outputs.ready == 'true'
+        shell: bash
         run: |
           url=$(grep -o 'https://[^ ]*workers.dev' "$RUNNER_TEMP/deploy.log" | head -1)
+          if [ -z "$url" ]; then echo "::error title=Staging::The deploy printed no workers.dev address."; exit 1; fi
           echo "::notice title=Staging::$url"
           echo "Staging: $url" >> "$GITHUB_STEP_SUMMARY"
