@@ -89,12 +89,21 @@ export function cardChangedChip(changelog: ChangelogEntry[], cardId: string | nu
   return `CHANGED ${shortDate(latest.date, today).replace(/^(\d+) (\w+)/, "$2 $1")}`;
 }
 
-const show = (v: ChangelogEntry["from"]) => (v === null ? "none" : typeof v === "number" ? v.toLocaleString("en-US") : String(v));
+/** Paths whose numbers are US dollars. */
+const USD_PATH = /^annual_fee\.amount$|(^|\.)(amount_usd|value_usd)$/;
+
+/** A changelog value as a person reads it: `$695`, `75,000`, `yes`, `none`. */
+const show = (v: ChangelogEntry["from"], path = "") => {
+  if (v === null) return "none";
+  if (typeof v === "boolean") return v ? "yes" : "no";
+  if (typeof v === "number") return USD_PATH.test(path) ? "$" + v.toLocaleString("en-US") : v.toLocaleString("en-US");
+  return String(v);
+};
 
 /** `Sapphire Reserve · DoorDash credit · $5/mo → $10/mo · from Jan 1`. */
 export function changeLine(e: ChangelogEntry, card: Pick<Card, "name"> | undefined, today: string): string {
   const when = e.effective && e.effective > today ? ` · from ${monthDay(e.effective)}` : "";
-  return `${card?.name ?? e.card_id} · ${e.label} · ${show(e.from)} → ${show(e.to)}${when}`;
+  return `${card?.name ?? e.card_id} · ${e.label} · ${show(e.from, e.path)} → ${show(e.to, e.path)}${when}`;
 }
 
 /** Earlier public bonuses per card, from the changelog: what makes an offer "Elevated" in Find a card. */
@@ -115,8 +124,8 @@ export function reportUrl(e: ChangelogEntry, card: Pick<Card, "name"> | undefine
   const body = [
     `Card: ${e.card_id}`,
     `Path: ${e.path}`,
-    `From: ${show(e.from)}`,
-    `To: ${show(e.to)}`,
+    `From: ${show(e.from, e.path)}`,
+    `To: ${show(e.to, e.path)}`,
     `Changed on: ${e.date}`,
     `Source: ${e.source_url}`,
     `Daily refresh PRs for that day: ${REPO_URL}/pulls?q=is%3Apr+%22Daily+refresh+${e.date}%22`,

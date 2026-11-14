@@ -4,6 +4,7 @@ import YAML from "yaml";
 import { describe, expect, it } from "vitest";
 import {
   AllowListSchema,
+  checkedFee,
   type AllowEntry,
   type DatasetCard,
   ImportError,
@@ -157,6 +158,22 @@ describe("planning an import", () => {
     const existing = new Map([["chase-demo-full", { text: full, depth: "full" as const }]]);
     expect(planImport([row()], [entry], existing, programs, AS_OF).writes.map((w) => w.id)).toEqual(["chase-demo-preferred"]);
   });
+  it("keeps an annual fee checked against the issuer's page; replaces only the importer's own", () => {
+    const first = planImport([row()], [entry], new Map(), programs, AS_OF).writes[0].text;
+    expect(checkedFee(first)).toBeNull();
+    // Checked on the issuer's page: the next import (even with a new upstream fee) keeps it.
+    const doc = YAML.parse(first);
+    doc.annual_fee = { amount: 150, first_year_waived: false, source_url: "https://example.com/card", last_verified: "2026-11-14", verified: true };
+    const checked = renderStub(doc);
+    const existing = new Map([["chase-demo-preferred", { text: checked, depth: "stub" as const }]]);
+    expect(planImport([row()], [entry], existing, programs, AS_OF).writes).toEqual([]);
+    const [w] = planImport([row({ annualFee: 250, offers: [{ spend: 5000, amount: [{ amount: 75000 }], days: 90 }] })], [entry], existing, programs, AS_OF).writes;
+    expect(YAML.parse(w.text).annual_fee).toEqual(doc.annual_fee);
+    expect(YAML.parse(w.text).public_offer.bonus).toBe(75000);
+    // Tried and not confirmed: the note says why, and that is kept too.
+    doc.annual_fee = { ...doc.annual_fee, amount: 95, verified: false, source_type: "community", note: "Not confirmed on 2026-11-14: the page redirects." };
+    expect(checkedFee(renderStub(doc))).toMatchObject({ verified: false, note: /redirects/ });
+  });
   it("skips discontinued cards and rejects allow-list mistakes", () => {
     expect(planImport([row({ discontinued: true })], [entry], new Map(), programs, AS_OF)).toEqual({ writes: [], skipped: [{ id: "chase-demo-preferred", reason: "discontinued in the dataset" }] });
     expect(() => planImport([row()], [{ ...entry, card_id: "nope" }], new Map(), programs, AS_OF)).toThrow(/not in the dataset/);
@@ -169,7 +186,7 @@ describe("the real catalog with stubs", () => {
   const stubs = cat.cards.filter((c) => c.depth === "stub");
   const allow = AllowListSchema.parse(YAML.parse(fs.readFileSync(path.join(process.cwd(), "catalog", "import-allowlist.yaml"), "utf8"))).cards;
 
-  it("has the 7 researched cards plus one stub per allow-list entry, all unverified and community-sourced", () => {
+  it("has the 7 researched cards plus one stub per allow-list entry; each stub fee checked against the issuer's page or saying why not", () => {
     expect(cat.cards.filter((c) => c.depth === "full").map((c) => c.id).sort()).toEqual([
       "amex-delta-skymiles-gold",
       "capital-one-venture-x",
@@ -182,8 +199,11 @@ describe("the real catalog with stubs", () => {
     expect(stubs.map((c) => c.id).sort()).toEqual(allow.map((a) => a.id).sort());
     expect(stubs.length).toBeGreaterThanOrEqual(40);
     expect(stubs.length).toBeLessThanOrEqual(80);
+    expect(stubs.filter((s) => !s.annual_fee.verified).map((s) => s.id).sort()).toEqual(["amex-green", "citi-custom-cash", "us-bank-shopper-cash"]);
     for (const s of stubs) {
-      expect(s.annual_fee).toMatchObject({ verified: false, source_type: "community" });
+      // Confirmed on the issuer's own page, or unverified with the reason it could not be.
+      if (s.annual_fee.verified) expect(s.annual_fee.source_type ?? "official").toBe("official");
+      else expect(s.annual_fee.note).toMatch(/^Not confirmed on \d{4}-\d{2}-\d{2}: /);
       expect(s.earn_rates).toEqual([]);
       expect(s.benefits).toEqual([]);
     }
@@ -197,12 +217,15 @@ describe("the real catalog with stubs", () => {
 
   it("a held stub works for 5/24, the annual fee and issuer rules, and is left out of Best card (acceptance 3, 4)", () => {
     const h = holding({ id: "h1", catalogCardId: "chase-sapphire-preferred", approvalDate: "2025-12-01" });
+    const green = holding({ id: "h3", catalogCardId: "amex-green", approvalDate: "2025-12-01" });
     const data = userData({ holdings: [h] });
     expect(fiveTwentyFourStatus([h], cat, "2026-11-13", chase524Params(cat)).count).toBe(1);
     const items = buildAttention(cat, data, "2026-11-13");
     expect(items.find((a) => a.kind === "af")).toMatchObject({ amount: 95, short: "Annual fee" });
-    // The imported fee is flagged as unverified next to it.
-    expect(items.some((a) => a.kind === "unverified" && a.title.includes("Chase Sapphire Preferred annual fee"))).toBe(true);
+    // Checked against Chase's page: no Unverified flag. A fee that could not be checked still gets one.
+    expect(items.some((a) => a.kind === "unverified" && a.title.includes("Chase Sapphire Preferred annual fee"))).toBe(false);
+    const withGreen = buildAttention(cat, userData({ holdings: [green] }), "2026-11-13");
+    expect(withGreen.some((a) => a.kind === "unverified" && a.title.includes("annual fee"))).toBe(true);
     expect(rankCards("dining", [h], cat, data.settings, [], "2026-11-13")).toEqual([]);
     // Rules: the Delta family rule now sees a held Delta Platinum stub.
     const delta = holding({ id: "h2", catalogCardId: "amex-delta-skymiles-platinum", approvalDate: "2024-01-10" });

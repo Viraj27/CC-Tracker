@@ -274,6 +274,11 @@ describe("what changed", () => {
     expect(changeLine(change({ effective: "2027-01-01" }), { name: "Demo Card" }, TODAY)).toBe("Demo Card · Dining credit · $5/mo → $10/mo · from Jan 1");
     expect(changeLine(change({ effective: "2026-11-01" }), { name: "Demo Card" }, TODAY)).toBe("Demo Card · Dining credit · $5/mo → $10/mo");
     expect(changeLine(change({ from: null, to: 75000 }), undefined, TODAY)).toBe("held · Dining credit · none → 75,000");
+    // Dollar amounts and yes/no read as such.
+    expect(changeLine(change({ path: "annual_fee.amount", label: "Annual fee", from: 695, to: 895 }), { name: "Demo Card" }, TODAY)).toBe("Demo Card · Annual fee · $695 → $895");
+    expect(changeLine(change({ path: "annual_fee.first_year_waived", label: "Annual fee waived the first year", from: false, to: true }), { name: "Demo Card" }, TODAY)).toBe(
+      "Demo Card · Annual fee waived the first year · no → yes",
+    );
   });
 
   it("the report link is a prefilled GitHub issue labelled refresh", () => {

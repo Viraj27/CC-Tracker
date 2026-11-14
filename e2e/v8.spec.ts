@@ -92,7 +92,9 @@ for (const [label, width, height] of [
         await expect(s.getByTestId("candidate-everyday")).toContainText("Earn rates not researched yet");
         await expect(s.getByTestId("candidate-524")).toContainText("Takes you to 4/24");
         await expect(s.getByTestId("candidate-offer-source")).toContainText("public offer as of Jun 8");
-        await expect(s).toContainText("Unverified");
+        // The offer is community-sourced and says so; the fee was checked on Chase's page, so no Unverified badge.
+        await expect(s).toContainText("Community curated");
+        await expect(s).not.toContainText("Unverified");
         expect(await overflow(page)).toBeLessThanOrEqual(0);
 
         // Should I apply? opens on that card with a verdict.

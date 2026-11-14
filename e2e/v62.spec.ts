@@ -49,15 +49,15 @@ for (const [label, width, height] of [
         await expect(notice).toContainText("Basic card info only");
         await notice.getByRole("button", { name: "About basic card info" }).click();
         await expect(notice).toContainText("5/24, fee reminders and issuer rules work");
-        await expect(page.getByTestId("card-detail")).toContainText("$350");
+        await expect(page.getByTestId("card-detail")).toContainText("$325");
         await expect(page.getByTestId("bonus-row")).toContainText("60K pts · $6,000");
         await expect(page.locator("#credits")).toHaveCount(0);
         expect(await overflow(page)).toBeLessThanOrEqual(0);
-        // The imported fee is honest about being unchecked.
+        // The fee was checked against the issuer's page, so it carries no Unverified badge.
         await page.getByTestId("drill-fees").click();
         await sheetSettled(page);
-        await expect(sheet(page)).toContainText("$350");
-        await expect(sheet(page)).toContainText(/unverified/i);
+        await expect(sheet(page)).toContainText("$325");
+        await expect(sheet(page)).not.toContainText(/unverified/i);
         await page.keyboard.press("Escape");
 
         // 5/24 counts it; Up next shows its bonus deadline (and, being day-one billed, the fee to watch for).
