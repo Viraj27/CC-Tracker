@@ -1,6 +1,6 @@
 # Deploying CC-Tracker to Cloudflare (v3)
 
-This puts CC-Tracker on **Cloudflare Workers** with a **D1** database, behind **Cloudflare Access** so only you can sign in. Once it's set up, every push to `main` deploys automatically. You can then use the app from your iPhone as a home-screen app, with the Mac switched off.
+This puts CC-Tracker on **Cloudflare Workers** with a **D1** database, behind **Cloudflare Access** so only you can sign in. Once it's set up, every push to `main` deploys after you approve it. You can then use the app from your iPhone as a home-screen app, with the Mac switched off.
 
 Spec: [`SPEC-v3-phone.md`](SPEC-v3-phone.md).
 
@@ -16,7 +16,33 @@ Spec: [`SPEC-v3-phone.md`](SPEC-v3-phone.md).
 | Schema | `prisma/migrations/*/migration.sql`. Wrangler applies these same files to D1 (`migrations_pattern` in `wrangler.jsonc`), so there is one migration history |
 | Catalog | Bundled into the Worker at build time (`src/generated/catalog.json`). On the first request after a deploy, it's loaded into D1 if its content hash changed. That load only touches the `Catalog*` tables, never your data |
 | Login | Cloudflare Access in front of the whole Worker. The app has no login code |
-| CI/CD | `.github/workflows/ci.yml`. PRs run typecheck, tests and build. Pushes to `main` do the same, then find/create D1, apply migrations and deploy |
+| CI/CD | `.github/workflows/ci.yml`. PRs run typecheck, tests and build, then deploy to **staging**. Pushes to `main` do the same checks; after you approve the `production` environment, CI finds or creates D1, applies migrations and deploys |
+
+## Tiers: where real data lives
+
+| Tier | Data | Cloudflare account | Who can change it |
+|---|---|---|---|
+| **Dev** (your Mac) | Demo seed, throwaway (`$TMPDIR` SQLite, local D1 under `.wrangler/state`) | none | anyone working on the code, freely |
+| **Staging** (`cc-tracker-staging` Worker + D1) | Demo data only. e2e tests replace it at will | a **separate** free account | CI, on every pull request, using `STAGING_CLOUDFLARE_*` secrets |
+| **Production** (`cc-tracker` Worker + D1) | Your real cards, and nowhere else | your main account | CI on `main` only, and only after **you approve** the `production` environment |
+
+Why staging is a separate account: a Cloudflare API token's D1 permission covers every database in the account, and there is no documented way to limit it to one database. A staging token in the production account could reach your real data, so pull-request code and its token would too. Keeping staging in a separate account means its token can't see production at all.
+
+Rules that keep production out of reach:
+
+- No Cloudflare login on the Mac (`npx wrangler logout`). Production is changed only by the CI deploy job.
+- The production token lives only in GitHub secrets, used only by the `deploy` job, and that job waits for your approval (GitHub → Settings → Environments → `production`: required reviewer, `main` only).
+- e2e tests ("Replace all my data") run only against dev or staging. Never point `E2E_BASE_URL` at production.
+
+### Staging setup (once)
+
+1. Create a second, free Cloudflare account, for example with a `+staging` alias of your email.
+2. In that account, create a token as in step 1 below (Workers Scripts: Edit, D1: Edit, that account only) and copy its account ID.
+3. Add the GitHub repository secrets `STAGING_CLOUDFLARE_API_TOKEN` and `STAGING_CLOUDFLARE_ACCOUNT_ID`.
+
+The next pull request creates the `cc-tracker-staging` D1 database, applies the migrations and deploys. The run's summary shows the staging address. Config: `wrangler.staging.jsonc`; scripts: `npm run cf:staging:d1:ensure`, `cf:staging:migrate`, `cf:staging:deploy`. All of them name staging explicitly, and none reads `wrangler.jsonc`.
+
+To run the e2e suite against staging, deploy a build made with the made-up feed (`CATALOG_DIR=.e2e-catalog`), then `E2E_BASE_URL=https://cc-tracker-staging.<subdomain>.workers.dev npx playwright test`.
 
 ## 1. API token, account ID and GitHub secrets
 
@@ -136,6 +162,8 @@ The catalog is bundled at build time, so a change needs a deploy (push to `main`
 - `npm test` runs the storage tests against both local SQLite and a local D1 (`wrangler d1 migrations apply --local` plus Prisma's D1 adapter). This needs no Cloudflare account.
 
 ## Limits worth knowing (Workers Free plan)
+
+- **CPU time: 10 ms per request on Free (30 s default on Paid, $5/month).** Measured on staging on 2026-11-14, over 136 requests: median 11 ms, slowest 200–780 ms (Settings is the heaviest), 69 over 10 ms. Most still succeed, but some fail with **Error 1102** ("Worker exceeded resource limits") or "Worker threw exception": about 1 in 10 page loads during an e2e run. Local runs never show this, because the local runtime doesn't enforce the limit. Decision (owner, 2026-11-14): stay on Free for now; switch to Paid, or rework the heaviest pages, if errors show up often in daily use.
 
 - **Worker size:** 3 MiB gzipped on Free. The CI build log prints the size (about 2.1 MiB at v3).
 - **D1 queries per request:** 50 on Free. A page view uses 14 (measured against a local D1); a save uses about 16. Import and catalog load use one atomic D1 `batch()` each, so the size of an import file doesn't matter.

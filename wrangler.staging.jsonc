@@ -1,0 +1,31 @@
+// Staging: a second Worker with its own D1 database, for demo data only. It never holds real cards,
+// so e2e tests ("Replace all my data") may run against it. Every staging command passes
+// `--config wrangler.staging.jsonc` (see the cf:staging:* scripts); production uses wrangler.jsonc.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cc-tracker-staging",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    { "binding": "WORKER_SELF_REFERENCE", "service": "cc-tracker-staging" }
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cc-tracker-staging",
+      // Filled in by `npm run cf:staging:d1:ensure` (into wrangler.staging.local.jsonc, not committed).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "prisma/migrations",
+      "migrations_pattern": "prisma/migrations/*/migration.sql"
+    }
+  ],
+  "vars": { "CC_TIER": "staging" },
+  "observability": { "enabled": true }
+}

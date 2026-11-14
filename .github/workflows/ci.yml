@@ -1,5 +1,6 @@
-# PRs: typecheck, test, build. Pushes to main: the same, then apply D1
-# migrations and deploy to Cloudflare Workers. See docs/DEPLOY.md.
+# PRs: typecheck, test, build, then deploy the PR to staging (demo data only).
+# Pushes to main: the same checks, then, once the owner approves the
+# "production" environment, apply D1 migrations and deploy. See docs/DEPLOY.md.
 name: CI
 
 on:
@@ -90,3 +91,62 @@ jobs:
       - name: Deploy
         if: steps.secrets.outputs.ready == 'true'
         run: npm run cf:deploy
+
+  # Staging: a second Worker and D1 database (wrangler.staging.jsonc) holding demo data only, in a
+  # separate Cloudflare account. A D1 token can't be limited to one database, so a separate account is
+  # what keeps pull-request code and its token away from production. Each pull request from this repo
+  # is deployed there, so it can be tried and e2e-tested on the Workers runtime first.
+  staging:
+    name: Deploy to staging
+    needs: test
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # One staging database: deploy one pull request at a time, the latest wins.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: true
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.STAGING_CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check the staging secret
+        id: secrets
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice title=Staging deploy skipped::Add the STAGING_CLOUDFLARE_API_TOKEN and STAGING_CLOUDFLARE_ACCOUNT_ID repository secrets (a separate Cloudflare account) to deploy pull requests to staging (docs/DEPLOY.md)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@v4
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+      - name: Build
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run cf:build
+      - name: Find the staging D1 database
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run cf:staging:d1:ensure
+      - name: Apply D1 migrations (staging)
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm run cf:staging:migrate
+      - name: Deploy (staging)
+        if: steps.secrets.outputs.ready == 'true'
+        # shell: bash adds pipefail, so a failed deploy fails the step even through tee.
+        shell: bash
+        run: npm run cf:staging:deploy | tee "$RUNNER_TEMP/deploy.log"
+      - name: Staging address
+        if: steps.secrets.outputs.ready == 'true'
+        shell: bash
+        run: |
+          url=$(grep -o 'https://[^ ]*workers.dev' "$RUNNER_TEMP/deploy.log" | head -1)
+          if [ -z "$url" ]; then echo "::error title=Staging::The deploy printed no workers.dev address."; exit 1; fi
+          echo "::notice title=Staging::$url"
+          echo "Staging: $url" >> "$GITHUB_STEP_SUMMARY"

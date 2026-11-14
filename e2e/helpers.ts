@@ -4,7 +4,8 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 /** Replace all data with examples/demo-seed.json (fake demo data). */
 export async function importDemo(page: Page) {
-  await page.goto("/settings");
+  // Wait for the page to be ready: on a remote server an upload before hydration is silently dropped.
+  await gotoReady(page, "/settings");
   await page.getByLabel("Replace all my data").check();
   page.once("dialog", (d) => d.accept());
   await page.getByLabel("Import JSON file").setInputFiles(path.join(__dirname, "..", "examples", "demo-seed.json"));
@@ -125,7 +126,8 @@ export async function importDemoWithSettings(page: Page, settings: Record<string
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "examples", "demo-seed.json"), "utf8"));
   // A fresh database tracks payments from the current month; keep that, or every earlier month turns past due.
   settings = { paymentTrackingStart: daysAgo(0).slice(0, 7), ...settings };
-  await page.goto("/settings");
+  // Wait for the page to be ready: on a remote server an upload before hydration is silently dropped.
+  await gotoReady(page, "/settings");
   await page.getByLabel("Replace all my data").check();
   page.once("dialog", (d) => d.accept());
   await page.getByLabel("Import JSON file").setInputFiles({ name: "demo-seed.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ ...seed, settings })) });
