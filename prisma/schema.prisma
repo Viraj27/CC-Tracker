@@ -261,4 +261,7 @@ model Settings {
   centsPerPoint      String  @default("{}")
   // YYYY-MM: payments before this month are not flagged as past due.
   paymentTrackingStart String?
+  // Find a card: JSON { [spendCategory]: usdPerMonth } and the page's remembered criteria.
+  spendProfile       String  @default("{}")
+  findCardCriteria   String  @default("{}")
 }

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, sheet, sheetSettled, startStubCard } from "./helpers";
+import { addCardWithOffer, daysAgo, gotoReady, importDemo, mouseSwipeLeft, saveStubCard, setDemoSpend, sheet, sheetSettled, startStubCard } from "./helpers";
 
 // Regenerates docs/screenshots/ from the demo seed: `SCREENSHOTS=1 npm run test:e2e -- screenshots`.
 // docs/SPEC-v5-app-pass.md §5: Wallet, Card page, Up next (one row swiped), a sheet with ⓘ open;
@@ -94,6 +94,21 @@ test.describe("screenshots", () => {
         await gotoReady(page, "/up-next");
         await page.getByTestId("attention-list").getByText(/^Spend \$3,000$/).scrollIntoViewIfNeeded();
         await shot("up-next-bonus");
+
+        // v8 (docs/SPEC-v8-find-a-card.md): the Spending group, Find a card, and a candidate's sheet.
+        await setDemoSpend(page);
+        await page.getByTestId("spend-profile").scrollIntoViewIfNeeded();
+        await shot("settings-spending");
+        await gotoReady(page, "/find-card");
+        await page.getByTestId("find-goal").selectOption("bonus");
+        await page.getByTestId("find-type").selectOption("personal");
+        await page.waitForLoadState("networkidle");
+        await shot("find-card");
+        await page.getByTestId("candidate-chase-sapphire-preferred").getByRole("button").click();
+        await sheetSettled(page);
+        await shot("find-card-sheet");
+        await page.keyboard.press("Escape");
+        await expect(sheet(page)).toHaveCount(0);
 
         // v6.2 (docs/SPEC-v6.2-catalog.md): a stub card: Add card with the public-offer hint, its card page.
         await startStubCard(page, daysAgo(20));

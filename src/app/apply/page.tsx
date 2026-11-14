@@ -1,8 +1,8 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, useEffect } from "react";
 import { useApp } from "@/components/AppState";
-import { Badge, CELL, Empty, Field, Group, GroupLabel, InfoToggle, PageTitle, Provenance } from "@/components/ui";
+import { Badge, CELL, Empty, Field, Group, GroupLabel, InfoToggle, PageTitle, Provenance, Row } from "@/components/ui";
 import { shortDate } from "@/lib/domain/dates";
 import { checkApplication, type ApplyEvaluation, type Verdict } from "@/lib/domain/rules";
 
@@ -16,6 +16,11 @@ const ISSUER = (id: string) => id.replaceAll("_", " ").replace(/\b\w/g, (c) => c
 export default function ApplyPage() {
   const { catalog, data, today } = useApp();
   const [cardId, setCardId] = useState("");
+  // Find a card links here with ?card=<id>.
+  useEffect(() => {
+    const preset = new URLSearchParams(window.location.search).get("card");
+    if (preset && catalog.cards.some((c) => c.id === preset)) setCardId(preset);
+  }, [catalog]);
   const [nll, setNll] = useState(false);
   const [nllInfo, setNllInfo] = useState(false);
   const nllId = useId();
@@ -55,6 +60,7 @@ export default function ApplyPage() {
             </select>
           </Field>
         </li>
+        <Row title="Not sure which card?" sub="Rank the cards you don't hold" href="/find-card" chevron testId="apply-find-card" />
         {check?.nllApplies && (
           <li className={`${CELL} flex flex-wrap items-center gap-x-1`}>
             <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3">

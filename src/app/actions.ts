@@ -5,7 +5,7 @@
  * client can reconcile its optimistic state; nothing triggers a page reload.
  */
 import { z } from "zod";
-import { isoDate } from "@/lib/catalog/schema";
+import { isoDate, SPEND_CATEGORIES } from "@/lib/catalog/schema";
 import { localToday } from "@/lib/domain/dates";
 import { muteKey, occurrenceKey } from "@/lib/domain/skips";
 import type { UserData } from "@/lib/domain/types";
@@ -330,6 +330,17 @@ export async function deletePoints(id: string): Promise<UserData> {
 
 // ------------------------------------------------------------- settings --
 
+const SpendProfileInput = z.partialRecord(z.enum(SPEND_CATEGORIES), z.number().nonnegative().max(1_000_000));
+const FindCriteriaInput = z
+  .object({
+    accountType: z.enum(["personal", "business", "both"]),
+    goal: z.enum(["bonus", "everyday"]),
+    program: z.string().max(64),
+    maxFee: z.number().nonnegative().nullable(),
+    excludedIssuers: z.array(z.string().max(64)).max(64),
+  })
+  .partial();
+
 const SettingsInput = z.object({
   afLeadDays: z.number().int().min(0).max(365),
   afWatchDays: z.number().int().min(0).max(365),
@@ -341,12 +352,22 @@ const SettingsInput = z.object({
   perkValueOverrides: z.record(z.string(), z.number().nonnegative()),
   centsPerPoint: z.record(z.string(), z.number().positive()),
   paymentTrackingStart: z.string().regex(/^\d{4}-\d{2}$/).nullable(),
+  spendProfile: SpendProfileInput,
+  findCardCriteria: FindCriteriaInput,
 });
 
 export async function saveSettings(input: z.input<typeof SettingsInput>): Promise<UserData> {
   const prisma = await prismaClient();
   const row = settingsRow(SettingsInput.parse(input));
   await prisma.settings.upsert({ where: { profileId }, create: { profileId, ...row }, update: row });
+  return snapshot();
+}
+
+/** Find a card remembers its criteria (docs/SPEC-v8-find-a-card.md §2.2); nothing else in Settings changes. */
+export async function saveFindCardCriteria(input: z.input<typeof FindCriteriaInput>): Promise<UserData> {
+  const prisma = await prismaClient();
+  const findCardCriteria = JSON.stringify(FindCriteriaInput.parse(input));
+  await prisma.settings.upsert({ where: { profileId }, create: { profileId, findCardCriteria }, update: { findCardCriteria } });
   return snapshot();
 }
 

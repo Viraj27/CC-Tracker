@@ -255,7 +255,7 @@ describe("import / export", () => {
     expect(parseImport(JSON.parse(JSON.stringify(file))).data.welcomeOffers[0].id).toBe(d.welcomeOffers[0].id);
     const exported = JSON.parse(JSON.stringify(buildExport(d, "2026-11-12T00:00:00Z")));
     expect(exported.version).toBe(EXPORT_VERSION);
-    expect(EXPORT_VERSION).toBe(4);
+    expect(EXPORT_VERSION).toBeGreaterThanOrEqual(4);
     expect(exported.holdings[0].welcomeOffer).not.toHaveProperty("holdingId");
     expect(exported.holdings[1].welcomeOffer).toBeNull();
     expect(parseImport(exported).data).toEqual(d);

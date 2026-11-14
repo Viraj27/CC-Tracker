@@ -22,6 +22,7 @@ import { ReminderSwitch } from "./Reminders";
 import { bonusLogEntry, offerFor } from "@/lib/domain/welcomeBonus";
 import { CloseGuardWarning, OfferPanel } from "./WelcomeBonus";
 import { AfPanel, useAfCycle } from "./AnnualFee";
+import { CandidateSheet } from "./FindCard";
 import { KeyFigures, Sheet, SheetHeader, SheetPrimary, SheetSecondary, useSheet, type ListKind, type SheetRoute } from "./Sheet";
 import { Badge, Button, CELL, Empty, FactBadges, Field, Group, GroupBadges, GroupLabel, Label, Provenance, Row, usd } from "./ui";
 
@@ -82,6 +83,8 @@ function routeTitle(r: SheetRoute, views: HoldingView[]): string {
       return "Rotating";
     case "offer":
       return "Welcome bonus";
+    case "candidate":
+      return "Card";
     case "edit":
       return "Edit";
   }
@@ -104,6 +107,7 @@ export function SheetHost() {
 function SheetContent({ route }: { route: SheetRoute }) {
   const views = useHoldingViews();
   if (route.type === "item") return <ItemSheet snapshot={route.item} />;
+  if (route.type === "candidate") return <CandidateSheet cardId={route.cardId} />;
   const view = views.find((v) => v.holding.id === route.holdingId);
   if (!view) return <SheetHeader title="Card not found" />;
   switch (route.type) {

@@ -96,3 +96,17 @@ It goes to the clipboard only. Nothing is sent anywhere.
 ## 9. Open questions for the owner
 1. Should **Not right now** also list cards you already hold whose bonus you could earn again later?
 2. Reachability uses total spend. Some spend can't go on a card (rent, transfers); should the profile have a separate "can put on a new card" total?
+
+## 10. As built (deviations, deliberate)
+- **Offers are stale.** Every `public_offer` comes from the v6.2 import, dated 2026-06-08 (the dataset has not synced since). The footer and each sheet show that date; v9 is what keeps them current.
+- **Elevated (§4.1)** is implemented and unit-tested (`isElevated`, `findCards(..., offerHistory)`), but no offer history exists until v9's changelog, so no card shows `ELEVATED` yet.
+- **Uplift valuation (§4.1).** "Valued with the same cents-per-point" is read as: each rate is turned into cents per dollar with its own program's value (the owner's, else the default), exactly as Best card does, then compared.
+- **5/24 line** reads `Takes you to 4/24 (Chase denies at 5)`, matching the app's `3/24` notation, instead of `4/5`.
+- **Issuers (§2.2)** are stored as the ones turned off (`excludedIssuers`), so an issuer added to the catalog later is on by default.
+- **A missing spend window.** An offer with a minimum spend but no number of days is judged over 90 days, and the sheet says so.
+- **Valuation notice (§4.2)** names the programs still on the catalog's default value (which is below 1¢ for hotel programs since v6.2), not "1¢".
+- **Badges.** A row shows one: `CHECK` wins over reach; `REACHABLE` / `STRETCH` / `OUT OF REACH` show only with a spend profile and the Welcome bonus goal.
+- **Criteria** are saved on every change (their own request, which touches nothing else in Settings). The page keeps its own copy while open, so quick changes can't be overwritten by a slower save's reply.
+- **Add card** from a sheet opens `/cards?card=<id>&offer=1` with the public offer already in the Welcome offer fields; **Should I apply?** opens `/apply?card=<id>`.
+- **Discontinued cards** are not in the catalog at all (the v6.2 importer skips them), so there is nothing to filter.
+- **Open questions (§9)** are not decided: held cards are never listed, and reachability uses total spend.

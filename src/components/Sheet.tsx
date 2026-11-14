@@ -16,6 +16,8 @@ export type SheetRoute =
   /** `resolveAf`: the lifecycle log opened from "Retention offer"; saving a call records that outcome on this fee event. */
   | { type: "list"; holdingId: string; list: ListKind; resolveAf?: string }
   | { type: "offer"; holdingId: string }
+  /** Find a card: one candidate's breakdown (a catalog card, not a holding). */
+  | { type: "candidate"; cardId: string }
   /** `offer`: open with the Welcome offer fieldset expanded ("Edit offer"). */
   | { type: "edit"; holdingId: string; offer?: boolean };
 

@@ -169,6 +169,8 @@ export async function loadUserData(prisma: PrismaClient, profileId: string): Pro
           perkValueOverrides: parseJson(settings.perkValueOverrides, {}),
           centsPerPoint: parseJson(settings.centsPerPoint, {}),
           paymentTrackingStart: settings.paymentTrackingStart,
+          spendProfile: parseJson(settings.spendProfile, {}),
+          findCardCriteria: parseJson(settings.findCardCriteria, {}),
         }
       : { ...DEFAULT_SETTINGS },
   };
@@ -186,6 +188,8 @@ export function settingsRow(s: Settings) {
     perkValueOverrides: JSON.stringify(s.perkValueOverrides),
     centsPerPoint: JSON.stringify(s.centsPerPoint),
     paymentTrackingStart: s.paymentTrackingStart,
+    spendProfile: JSON.stringify(s.spendProfile),
+    findCardCriteria: JSON.stringify(s.findCardCriteria),
   };
 }
 
