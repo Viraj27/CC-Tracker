@@ -135,7 +135,8 @@ headless browser, use it).
   the note. Count it as failed for `meta.json`. If **every** check this run failed this way, write
   `"status": "failed"` with a `reason` such as `issuer pages unreachable from this environment`,
   commit only `meta.json`, and say so at the top of the pull request.
-- **The public welcome offer**: only if the page states it plainly for everyone (not "see if you're
+- **The public welcome offer**: check it on every card you visit, stubs included (most stubs have a
+  `public_offer` copied from the open dataset, `source_type: community`). Only if the page states it plainly for everyone (not "see if you're
   pre-approved", not a targeted or upgrade offer). If it differs from the card's `public_offer`, set
   `public_offer` to it with `as_of` today, `source_url` the page and `source_type: official`, and log
   the bonus change (`path: public_offer.bonus`, bare numbers, `confirmed_by: official_page`). If the
@@ -176,7 +177,8 @@ an earlier entry.
 ## 7. Run status
 
 Write `catalog/feed/meta.json` on **every** run, including one that found nothing new, so that
-"no news" and "not running" look different in the app:
+"no news" and "not running" look different in the app. Take `ran_at` from the clock, never estimate
+it: `date -u +%Y-%m-%dT%H:%M:%SZ`.
 
 ```json
 { "ran_at": "2026-11-13T09:00:00Z", "items_seen": 14, "status": "ok", "confirmations": { "attempted": 2, "failed": 1 } }
