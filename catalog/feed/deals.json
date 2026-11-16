@@ -1,1 +1,98 @@
-[]
+[
+  {
+    "id": "doc-2026-11-16-mygiftcardsplus-delta",
+    "kind": "shopping",
+    "title": "Mygiftcardsplus: 10% off Delta eGift cards and more",
+    "url": "https://www.doctorofcredit.com/mygiftcardsplus-save-10-on-delta-egiftcards-more-11-10-only/",
+    "source": "doctorofcredit",
+    "published": "2026-11-16",
+    "added": "2026-11-16",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-16-topcashback-purevpn",
+    "kind": "shopping",
+    "title": "TopCashback: 130% back on PureVPN",
+    "url": "https://www.doctorofcredit.com/ends-soon-topcashback-120-back-on-purevpn-11-moneymaker/",
+    "source": "doctorofcredit",
+    "published": "2026-11-16",
+    "added": "2026-11-16",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-15-capital-one-shopping-klook",
+    "kind": "shopping",
+    "title": "Capital One Shopping: up to 94% back on Klook",
+    "url": "https://www.doctorofcredit.com/capital-one-shopping-up-to-40-back-on-klook/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-15-chase-ihg-premier-select",
+    "kind": "card_offer",
+    "title": "Chase launches IHG Premier Select card, $350 annual fee, launch bonus ends 11/19",
+    "url": "https://www.doctorofcredit.com/chase-launches-new-premium-ihg-card-ihg-premier-select-350-annual-fee/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": "2026-11-19",
+    "card_id": null,
+    "issuer": "chase"
+  },
+  {
+    "id": "doc-2026-11-15-grubhub-promo-outofoffice",
+    "kind": "shopping",
+    "title": "GrubHub/Seamless: $10 off $10 promo code, ends 11/19",
+    "url": "https://www.doctorofcredit.com/grubhub-seamless-promo-codes/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": "2026-11-19",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-15-shoprite-huggies",
+    "kind": "shopping",
+    "title": "ShopRite: $25 off $50+ on Huggies",
+    "url": "https://www.doctorofcredit.com/shoprite-25-off-50-on-huggies-products/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-15-staples-visa-gift-cards",
+    "kind": "shopping",
+    "title": "Staples: no purchase fee on $200 Visa gift cards through 1/2/27",
+    "url": "https://www.doctorofcredit.com/staples-no-purchase-fee-on-200-visa-gift-cards-10-31-11-6-limit-5/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": "2027-01-02",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-15-walgreens-photo-cards",
+    "kind": "shopping",
+    "title": "Walgreens: set of 6 photo cards free with a promo code",
+    "url": "https://www.doctorofcredit.com/walgreens-set-of-6-customized-5x7-premium-photo-cards-free-with-promo-code/",
+    "source": "doctorofcredit",
+    "published": "2026-11-15",
+    "added": "2026-11-16",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  }
+]
