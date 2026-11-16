@@ -37,11 +37,13 @@ for (const [label, width, height] of [
         await link.click();
         await expect(page.locator("main h1:visible").first()).toHaveText(/Deals/);
         await expect(page.getByTestId("deals-status")).toHaveText(`Updated ${monthDay(0)} · community-sourced`);
+        // The feed's name is never shown: rows say when, not who.
+        await expect(page.getByRole("main")).not.toContainText("Example Feed");
 
         // For your cards: a Chase card-linked offer (issuer match) and an item for the Reserve (card match).
         const yours = page.getByTestId("deals-yours");
         await expect(yours.locator("li")).toHaveCount(2);
-        await expect(deal(page, "reserve-transfer-bonus")).toContainText(`Example Feed · ${monthDay(1)}`);
+        await expect(deal(page, "reserve-transfer-bonus")).toContainText(`Posted ${monthDay(1)}`);
         await expect(yours.getByTestId("deal-chase-offers-grocery")).toContainText(`ends ${monthDay(-10)}`);
         await expect(page.getByText("For your cards · 2")).toBeVisible();
         // New card offers: a catalog card the demo does not hold, with a way into Should I apply?
