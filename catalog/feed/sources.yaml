@@ -1,13 +1,13 @@
 # Where the daily refresh looks for news (docs/SPEC-v9-daily-refresh.md §3). Owner-edited: one entry per feed.
-# The routine reads a feed and stores facts and a link, never a post's text.
+# The routine reads a feed once a day and stores facts, its own one-line wording and a link, never a post's
+# text (routines/daily-refresh.md, rules 3 and 6).
 #
-# Empty on purpose (owner's decision, 2026-11-14): the routine works from the issuers' own pages only
-# (routines/daily-refresh.md, step 4). To add a news feed later, once its terms allow this use, add an
-# entry like:
-#
-#   - id: doctorofcredit
-#     name: Doctor of Credit
-#     url: https://www.doctorofcredit.com/feed/
-#     kind: rss
-#     trust: community
-sources: []
+# Doctor of Credit: enabled by the owner on 2026-11-16. Its robots.txt allows the feed (Crawl-delay: 600);
+# its terms of use allow personal non-commercial use, forbid copying or republishing its material, and say
+# nothing about feeds, automated reading, links or summaries (re-read 2026-11-16).
+sources:
+  - id: doctorofcredit
+    name: Doctor of Credit
+    url: https://www.doctorofcredit.com/feed/
+    kind: rss
+    trust: community
