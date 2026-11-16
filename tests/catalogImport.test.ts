@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   AllowListSchema,
   checkedFee,
+  checkedOffer,
   type AllowEntry,
   type DatasetCard,
   ImportError,
@@ -173,6 +174,18 @@ describe("planning an import", () => {
     // Tried and not confirmed: the note says why, and that is kept too.
     doc.annual_fee = { ...doc.annual_fee, amount: 95, verified: false, source_type: "community", note: "Not confirmed on 2026-11-14: the page redirects." };
     expect(checkedFee(renderStub(doc))).toMatchObject({ verified: false, note: /redirects/ });
+  });
+  it("keeps a public offer read on the issuer's page, for stubs and researched cards", () => {
+    const official = { bonus: 80000, unit: "points" as const, min_spend: 4000, days: 90, as_of: "2026-11-15", source_url: "https://example.com/card", source_type: "official" as const };
+    const doc = YAML.parse(planImport([row()], [entry], new Map(), programs, AS_OF).writes[0].text);
+    expect(checkedOffer(renderStub(doc))).toBeNull(); // the dataset's copy is community-sourced
+    doc.public_offer = official;
+    const stub = new Map([["chase-demo-preferred", { text: renderStub(doc), depth: "stub" as const }]]);
+    expect(planImport([row()], [entry], stub, programs, AS_OF).writes).toEqual([]);
+    const fullEntry = { ...entry, id: "chase-demo-full" };
+    const fullText = withPublicOffer("id: chase-demo-full\nname: Demo Full\n", official);
+    const full = new Map([["chase-demo-full", { text: fullText, depth: "full" as const }]]);
+    expect(planImport([row({ offers: [{ spend: 5000, amount: [{ amount: 75000 }], days: 90 }] })], [fullEntry], full, programs, AS_OF).writes).toEqual([]);
   });
   it("skips discontinued cards and rejects allow-list mistakes", () => {
     expect(planImport([row({ discontinued: true })], [entry], new Map(), programs, AS_OF)).toEqual({ writes: [], skipped: [{ id: "chase-demo-preferred", reason: "discontinued in the dataset" }] });

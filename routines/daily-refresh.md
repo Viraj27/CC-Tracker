@@ -12,7 +12,7 @@ leave the pull request open with the label `needs-owner` and a note saying why.
 1. **Write only under `catalog/`.** CI fails a `Daily refresh` pull request that touches anything else.
 2. **This repository is public and holds no personal data.** You do not know which cards the owner
    holds and must not try to find out. Never write anything about holdings, spending or accounts.
-3. **Store facts and a link, never a post's text.** Every `title` is your own one-line wording.
+3. **Store facts and a link, never a post's or a page's text.** Every `title` is your own one-line wording.
    Do not copy sentences, headlines or images from a source.
 4. **A news post alone never changes an amount, a cycle or a date.** News is the trigger; the
    issuer's own page is the source (step 4).
@@ -35,6 +35,9 @@ leave the pull request open with the label `needs-owner` and a note saying why.
 - `npm ci`
 
 ## 2. Read the feeds
+
+`catalog/feed/sources.yaml` may list no feeds at all (the owner's choice, for now): then skip
+this step and step 3, set `items_seen` to 0, and go on to step 4, which is where most of the work is.
 
 For each source in `catalog/feed/sources.yaml`, fetch `url` once. Keep the posts published since
 the newest `published` date already in `catalog/feed/deals.json` (all of them on a first run, at
@@ -110,12 +113,36 @@ issuer page the post cites.
   If the same report is already there, leave it: it is retried on every run until it is confirmed
   (then remove it) or its 30 days pass (`feed:prune` removes it).
 
+### 4b. Card pages: annual fee and public welcome offer
+
+Every run, also check up to **10** cards on their issuer's product page (the card's `product_page`,
+or its `annual_fee.source_url`), any `depth`. Pick the cards whose `annual_fee.last_verified` is
+oldest; skip a card whose fee is `verified: false` with a "Not confirmed" note dated in the last
+30 days. Fetch each page once (a plain request; if the fee is filled in by script and you have a
+headless browser, use it).
+
+- **The fee**: find the sentence on the page that states the annual fee (and whether the first year
+  is $0). If it matches the catalog, set `last_verified` to today, `verified: true`, `source_url`
+  to the page, and remove `source_type`/`note` if they said "imported". If it differs, change
+  `amount` / `first_year_waived` the same way and log it (step 6, `path: annual_fee.amount` or
+  `annual_fee.first_year_waived`, `confirmed_by: official_page`). An annual fee change always makes
+  the guard say `needs-owner`; that is intended. If the page can't be read or doesn't state the fee,
+  leave the amount, set `verified: false` and a `note` starting `Not confirmed on YYYY-MM-DD: ` with
+  the reason.
+- **The public welcome offer**: only if the page states it plainly for everyone (not "see if you're
+  pre-approved", not a targeted or upgrade offer). If it differs from the card's `public_offer`, set
+  `public_offer` to it with `as_of` today, `source_url` the page and `source_type: official`, and log
+  the bonus change (`path: public_offer.bonus`, bare numbers, `confirmed_by: official_page`). If the
+  page shows no public offer, leave `public_offer` as it is.
+
+Quote nothing from the page in the catalog; keep the sentence you relied on for the pull request body.
+
 Count the official-page checks you tried and how many could not be read, for `meta.json`.
 
 ## 5. Stubs
 
-Do not research stubs here. `npm run catalog:import` refreshes them from the open dataset when the
-owner runs it.
+Do not add earn rates or benefits to stubs here, and do not run `npm run catalog:import`: the owner
+runs it. (It keeps an annual fee or a public offer that was checked on the issuer's page.)
 
 ## 6. Changelog
 

@@ -123,7 +123,8 @@ benefits: []
 
   it("the committed feed validates and the feed is part of the content hash", () => {
     const committed = loadCatalog(path.join(process.cwd(), "catalog"));
-    expect(committed.feed.sources.map((s) => s.id)).toContain("doctorofcredit");
+    // Issuer pages only for now (owner's decision): no news feed is configured.
+    expect(committed.feed.sources).toEqual([]);
     const a = loadCatalog(tmpCatalog({ "deals.json": "[]" }));
     const b = loadCatalog(tmpCatalog({ "deals.json": JSON.stringify([deal({ id: "a" })]) }));
     expect(b.feed.deals).toHaveLength(1);

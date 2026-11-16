@@ -146,11 +146,27 @@ export function checkedFee(text: string): StubFee | null {
 }
 
 /** The stub's fields, in file order. */
-export function stubOf(entry: AllowEntry, card: DatasetCard, programs: Pick<Program, "id" | "kind">[], asOf: string, keptFee: StubFee | null = null) {
+/**
+ * A public offer read on the issuer's own page (`source_type: official`, written by the daily
+ * refresh). The importer keeps it rather than going back to the dataset's older copy.
+ */
+export function checkedOffer(text: string): PublicOffer | null {
+  const offer = (YAML.parse(text) as { public_offer?: PublicOffer } | null)?.public_offer;
+  return offer && offer.source_type === "official" ? offer : null;
+}
+
+export function stubOf(
+  entry: AllowEntry,
+  card: DatasetCard,
+  programs: Pick<Program, "id" | "kind">[],
+  asOf: string,
+  keptFee: StubFee | null = null,
+  keptOffer: PublicOffer | null = null,
+) {
   const issuer = mapIssuer(card.issuer, card.name);
   const rewards_program = mapProgram(card.currency, card.name);
   if (!programs.some((p) => p.id === rewards_program)) throw new ImportError(`${card.name}: program "${rewards_program}" is not in catalog/programs.yaml`);
-  const offer = publicOfferOf(card, programs, asOf);
+  const offer = keptOffer ?? publicOfferOf(card, programs, asOf);
   return {
     id: entry.id,
     depth: "stub" as const,
@@ -214,7 +230,8 @@ export interface ImportPlan {
 
 /**
  * What an import would write. `existing` maps a catalog id to its current file
- * text and depth. Stubs are regenerated, keeping a checked annual fee; a full card only gets `public_offer`.
+ * text and depth. Stubs are regenerated, keeping a checked annual fee and an official public offer;
+ * a full card only gets `public_offer`, unless it already has an official one.
  * Deterministic: the same dataset, allow-list and `asOf` give the same text.
  */
 export function planImport(
@@ -234,6 +251,7 @@ export function planImport(
     if (!card) throw new ImportError(`allow-list: ${entry.id} points at card_id ${entry.card_id}, which is not in the dataset`);
     const current = existing.get(entry.id);
     if (current?.depth === "full") {
+      if (checkedOffer(current.text)) continue; // read on the issuer's page: newer than the dataset
       const text = withPublicOffer(current.text, publicOfferOf(card, programs, asOf));
       if (text !== current.text) plan.writes.push({ id: entry.id, text, kind: "offer" });
       continue;
@@ -242,7 +260,7 @@ export function planImport(
       plan.skipped.push({ id: entry.id, reason: "discontinued in the dataset" });
       continue;
     }
-    const text = renderStub(stubOf(entry, card, programs, asOf, current ? checkedFee(current.text) : null));
+    const text = renderStub(stubOf(entry, card, programs, asOf, current ? checkedFee(current.text) : null, current ? checkedOffer(current.text) : null));
     if (text !== current?.text) plan.writes.push({ id: entry.id, text, kind: "stub" });
   }
   return plan;

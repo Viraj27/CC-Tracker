@@ -45,14 +45,37 @@ jobs:
       - name: Worker bundle size
         run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/dry-run" | grep -i "total upload"
 
-  deploy:
-    name: Deploy to Cloudflare
+  # Data-only updates (a merged Daily refresh) go out without waiting; anything else waits for the owner.
+  changes:
+    name: Catalog-only since the last deploy?
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      deployments: read
+    outputs:
+      catalog_only: ${{ steps.check.outputs.catalog_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/catalog-only-since-deploy.sh >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy to Cloudflare
+    needs: [test, changes]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Waits for the owner's approval (required reviewer on the "production" environment, main only).
-    environment: production
+    # "production" waits for the owner's approval (required reviewer, main only). "production-catalog"
+    # (no reviewer, main only) is used only when everything since the last successful deploy is under
+    # catalog/: data the app reads, checked by catalog:check, with no code and no migrations.
+    environment: ${{ needs.changes.outputs.catalog_only == 'true' && 'production-catalog' || 'production' }}
     # Never run two deploys (and migrations) at once.
     concurrency:
       group: deploy-production
