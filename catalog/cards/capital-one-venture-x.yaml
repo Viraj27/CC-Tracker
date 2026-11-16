@@ -14,7 +14,8 @@ annual_fee:
   first_year_waived: false
   source_url: https://www.capitalone.com/learn-grow/more-than-money/all-about-venture-x/
   last_verified: 2026-10-16
-  verified: true
+  verified: false
+  note: "Not confirmed on 2026-11-16: the issuer's page could not be read (the network proxy refused the connection)."
 
 earn_rates:
   - categories: [hotels, travel]
