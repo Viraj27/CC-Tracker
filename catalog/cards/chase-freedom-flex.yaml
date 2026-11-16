@@ -15,8 +15,7 @@ annual_fee:
   first_year_waived: false
   source_url: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
   last_verified: 2026-10-16
-  verified: false
-  note: "Not confirmed on 2026-11-16: the issuer's page could not be read (the network proxy refused the connection)."
+  verified: true
 
 earn_rates:
   - categories: [travel, airfare, hotels]

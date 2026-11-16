@@ -126,9 +126,15 @@ headless browser, use it).
   to the page, and remove `source_type`/`note` if they said "imported". If it differs, change
   `amount` / `first_year_waived` the same way and log it (step 6, `path: annual_fee.amount` or
   `annual_fee.first_year_waived`, `confirmed_by: official_page`). An annual fee change always makes
-  the guard say `needs-owner`; that is intended. If the page can't be read or doesn't state the fee,
-  leave the amount, set `verified: false` and a `note` starting `Not confirmed on YYYY-MM-DD: ` with
-  the reason.
+  the guard say `needs-owner`; that is intended. If the page **loads but does not state the fee**
+  (or shows a different product), leave the amount, set `verified: false` and a `note` starting
+  `Not confirmed on YYYY-MM-DD: ` with the reason.
+- **A request that fails is not evidence.** When the page can't be fetched at all (connection
+  refused, a proxy or firewall error, DNS failure, a timeout, a bot wall or a captcha page), the
+  check did not happen: **change nothing on that card**, not `verified`, not `last_verified`, not
+  the note. Count it as failed for `meta.json`. If **every** check this run failed this way, write
+  `"status": "failed"` with a `reason` such as `issuer pages unreachable from this environment`,
+  commit only `meta.json`, and say so at the top of the pull request.
 - **The public welcome offer**: only if the page states it plainly for everyone (not "see if you're
   pre-approved", not a targeted or upgrade offer). If it differs from the card's `public_offer`, set
   `public_offer` to it with `as_of` today, `source_url` the page and `source_type: official`, and log

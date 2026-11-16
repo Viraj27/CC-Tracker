@@ -14,8 +14,8 @@ annual_fee:
   first_year_waived: false
   source_url: https://newsroom.wf.com/news-releases/news-details/2022/Wells-Fargo-to-Launch-AutographSM-a-New-Visa-Rewards-Credit-Card-that-Offers-3X-Points-Across-Top-Spending-Categories/default.aspx
   last_verified: 2026-10-16
-  verified: false
-  note: "Not confirmed on 2026-11-16: the issuer's page could not be read (the network proxy refused the connection). Earlier note: Per Wells Fargo's 2022 launch release; the current fee schedule page was not available to the build."
+  verified: true
+  note: Per Wells Fargo's 2022 launch release; the current fee schedule page was not available to the build.
 
 earn_rates:
   - categories: [streaming]
