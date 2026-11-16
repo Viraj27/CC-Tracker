@@ -26,7 +26,6 @@ export default function DealsPage() {
   const reported = useMemo(() => groups.reported.filter((d) => !cardFilter || d.card_id === cardFilter), [groups.reported, cardFilter]);
   const status = feedStatus(feed.meta, today);
   const cardName = (id: string | null) => catalog.cards.find((c) => c.id === id);
-  const sourceName = (id: string) => feed.sources.find((s) => s.id === id)?.name ?? id;
 
   // Opening the page marks this run as seen (clears the dot on More).
   const ranAt = feed.meta.ran_at?.slice(0, 10) ?? null;
@@ -49,7 +48,7 @@ export default function DealsPage() {
         <a href={d.url} target="_blank" rel="noreferrer" className="flex min-h-14 min-w-0 flex-1 flex-col justify-center px-4 py-2 hover:bg-text/[0.03]">
           <span className="truncate leading-snug font-semibold">{d.title}</span>
           <span className="block truncate text-sm text-muted">
-            {sourceName(d.source)} · {monthDay(d.published)}
+            Posted {monthDay(d.published)}
             {ends}
             {d.kind === "reported_change" && ` · retrying until ${monthDay(dealEnds(d))}`}
           </span>
@@ -137,7 +136,7 @@ export default function DealsPage() {
                   {d.title}
                 </a>
                 <span className="basis-full text-sm text-muted">
-                  {sourceName(d.source)} · {monthDay(d.published)} · not confirmed on the issuer&apos;s page, so the catalog is unchanged · retrying until {monthDay(dealEnds(d))}
+                  Reported {monthDay(d.published)} · not confirmed on the issuer&apos;s page, so the catalog is unchanged · retrying until {monthDay(dealEnds(d))}
                 </span>
             </li>
           ))}
