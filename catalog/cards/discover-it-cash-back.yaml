@@ -15,7 +15,8 @@ annual_fee:
   first_year_waived: false
   source_url: https://www.discover.com/credit-cards/cash-back/it-card/
   last_verified: 2026-10-16
-  verified: true
+  verified: false
+  note: "Not confirmed on 2026-11-16: the issuer's page could not be read (the network proxy refused the connection)."
 
 earn_rates:
   - categories: [other]

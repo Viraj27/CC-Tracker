@@ -1,5 +1,1 @@
-{
-  "ran_at": null,
-  "items_seen": 0,
-  "status": "never"
-}
+{ "ran_at": "2026-11-16T01:37:31Z", "items_seen": 0, "status": "ok", "confirmations": { "attempted": 7, "failed": 7 } }
