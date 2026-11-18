@@ -97,5 +97,16 @@
     "effective": null,
     "source_url": "https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html",
     "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-18",
+    "card_id": "barclays-jetblue-plus",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 75000,
+    "to": 60000,
+    "effective": null,
+    "source_url": "https://cards.barclaycardus.com/banking/cards/jetblue-plus-card/",
+    "confirmed_by": "official_page"
   }
 ]
