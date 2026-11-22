@@ -13,9 +13,9 @@ brand_color: "#2E6F9E"
 product_page: https://www.hilton.com/en/hilton-honors/credit-cards/
 annual_fee:
   amount: 150
-  first_year_waived: false
+  first_year_waived: true
   source_url: https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/
-  last_verified: 2026-11-14
+  last_verified: 2026-11-22
   verified: true
 public_offer:
   bonus: 130000

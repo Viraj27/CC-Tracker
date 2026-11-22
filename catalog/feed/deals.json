@@ -1,5 +1,29 @@
 [
   {
+    "id": "doc-2026-11-21-7eleven-7now-promo",
+    "kind": "shopping",
+    "title": "7-Eleven 7NOW app: $25 off $50+ with promo codes",
+    "url": "https://www.doctorofcredit.com/7-eleven-7now-app-promo-codes/",
+    "source": "doctorofcredit",
+    "published": "2026-11-21",
+    "added": "2026-11-22",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-21-befrugal-40-referral",
+    "kind": "shopping",
+    "title": "BeFrugal shopping portal: $40 referral bonus",
+    "url": "https://www.doctorofcredit.com/befrugal-40-referral-bonus-3/",
+    "source": "doctorofcredit",
+    "published": "2026-11-21",
+    "added": "2026-11-22",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-20-apple-black-friday",
     "kind": "shopping",
     "title": "Apple Black Friday event: gift card with purchase, up to $300",
@@ -236,18 +260,6 @@
     "published": "2026-11-19",
     "added": "2026-11-20",
     "expires": null,
-    "card_id": null,
-    "issuer": null
-  },
-  {
-    "id": "doc-2026-11-19-target-circle-10-back",
-    "kind": "shopping",
-    "title": "Target Circle: $10 back on $100 spend, up to $50 (11/19-11/21)",
-    "url": "https://www.doctorofcredit.com/target-circle-10-back-with-100-spend-up-to-50-back-11-19-11-21/",
-    "source": "doctorofcredit",
-    "published": "2026-11-19",
-    "added": "2026-11-20",
-    "expires": "2026-11-21",
     "card_id": null,
     "issuer": null
   },

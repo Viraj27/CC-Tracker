@@ -108,5 +108,16 @@
     "effective": null,
     "source_url": "https://cards.barclaycardus.com/banking/cards/jetblue-plus-card/",
     "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-22",
+    "card_id": "amex-hilton-honors-surpass",
+    "path": "annual_fee.first_year_waived",
+    "label": "First-year annual fee",
+    "from": "$150 first year",
+    "to": "$0 first year, then $150",
+    "effective": null,
+    "source_url": "https://www.americanexpress.com/us/credit-cards/card/hilton-honors-surpass/",
+    "confirmed_by": "official_page"
   }
 ]
