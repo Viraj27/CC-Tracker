@@ -1,5 +1,101 @@
 [
   {
+    "id": "doc-2026-11-23-shoprite-gift-card-20-off",
+    "kind": "shopping",
+    "title": "ShopRite: $20 off next shop when buying $100 in gift cards, Nov 22-28",
+    "url": "https://www.doctorofcredit.com/shoprite-purchase-100-in-gift-cards-save-15-on-your-next-shop-2/",
+    "source": "doctorofcredit",
+    "published": "2026-11-23",
+    "added": "2026-11-23",
+    "expires": "2026-11-28",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-amazon-music-3-months-free",
+    "kind": "shopping",
+    "title": "Amazon Music Unlimited: free 3-month trial",
+    "url": "https://www.doctorofcredit.com/free-3-months-amazon-music-unlimited-subscription/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-family-dollar-15-off",
+    "kind": "shopping",
+    "title": "Family Dollar: 15% off almost everything on Dec 5-6",
+    "url": "https://www.doctorofcredit.com/family-dollar-15-off-almost-everything-on-december-5-6/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": "2026-12-06",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-food-lion-chase-usbank-offers",
+    "kind": "card_linked",
+    "title": "Chase/U.S. Bank Offers: 5-7% back at Food Lion (up to $5/$7)",
+    "url": "https://www.doctorofcredit.com/citi-offers-get-3-back-at-food-lion/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-office-depot-mc-gift-card-15-off",
+    "kind": "shopping",
+    "title": "Office Depot/OfficeMax: $15 off $300 Mastercard gift cards, Nov 22-28",
+    "url": "https://www.doctorofcredit.com/office-depot-max-stores-buy-300-in-mastercard-giftcards-get-15-instant-discount-2-13-2-19/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": "2026-11-28",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-stop-shop-3x-fuel-gift-cards",
+    "kind": "shopping",
+    "title": "Stop&Shop/Giant/Martin's: 3x fuel points on Mastercard gift cards, Nov 20-26",
+    "url": "https://www.doctorofcredit.com/giant-stopshop-martins-3x-fuel-points-on-mastercard-gift-cards-10-8-10-14/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": "2026-11-26",
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-22-ubereats-11-25-off-18",
+    "kind": "shopping",
+    "title": "UberEats promo code: $11.25 off $18+",
+    "url": "https://www.doctorofcredit.com/ubereats-promo-codes-discounts-other-savings/",
+    "source": "doctorofcredit",
+    "published": "2026-11-22",
+    "added": "2026-11-23",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-21-befrugal-40-referral",
+    "kind": "shopping",
+    "title": "BeFrugal: $40 referral bonus",
+    "url": "https://www.doctorofcredit.com/befrugal-40-referral-bonus-3/",
+    "source": "doctorofcredit",
+    "published": "2026-11-21",
+    "added": "2026-11-23",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-20-apple-black-friday",
     "kind": "shopping",
     "title": "Apple Black Friday event: gift card with purchase, up to $300",
@@ -240,18 +336,6 @@
     "issuer": null
   },
   {
-    "id": "doc-2026-11-19-target-circle-10-back",
-    "kind": "shopping",
-    "title": "Target Circle: $10 back on $100 spend, up to $50 (11/19-11/21)",
-    "url": "https://www.doctorofcredit.com/target-circle-10-back-with-100-spend-up-to-50-back-11-19-11-21/",
-    "source": "doctorofcredit",
-    "published": "2026-11-19",
-    "added": "2026-11-20",
-    "expires": "2026-11-21",
-    "card_id": null,
-    "issuer": null
-  },
-  {
     "id": "doc-2026-11-19-wells-bestbuy-10-back",
     "kind": "card_linked",
     "title": "Wells Fargo Offers (targeted): 10% back at Best Buy stores",
@@ -344,18 +428,6 @@
     "published": "2026-11-18",
     "added": "2026-11-19",
     "expires": null,
-    "card_id": null,
-    "issuer": null
-  },
-  {
-    "id": "doc-2026-11-18-instacart-free-turkey",
-    "kind": "shopping",
-    "title": "Instacart: free turkey up to $40 with $10 other purchases, 11/18-11/22",
-    "url": "https://www.doctorofcredit.com/instacart-free-turkey-11-18-11-22/",
-    "source": "doctorofcredit",
-    "published": "2026-11-18",
-    "added": "2026-11-19",
-    "expires": "2026-11-22",
     "card_id": null,
     "issuer": null
   },

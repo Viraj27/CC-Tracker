@@ -15,13 +15,13 @@ annual_fee:
   amount: 195
   first_year_waived: false
   source_url: https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan
-  last_verified: 2026-11-14
+  last_verified: 2026-11-23
   verified: true
 public_offer:
-  bonus: 85000
+  bonus: 60000
   unit: points
-  min_spend: 4000
+  min_spend: 3000
   days: 90
-  as_of: 2026-06-08
-  source_url: https://github.com/andenacitelli/credit-card-bonuses-api
-  source_type: community
+  as_of: 2026-11-23
+  source_url: https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan
+  source_type: official
