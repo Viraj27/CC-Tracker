@@ -108,5 +108,38 @@
     "effective": null,
     "source_url": "https://cards.barclaycardus.com/banking/cards/jetblue-plus-card/",
     "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-23",
+    "card_id": "chase-aeroplan",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 85000,
+    "to": 60000,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-23",
+    "card_id": "chase-british-airways",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 90000,
+    "to": 75000,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/travel-credit-cards/avios/british-airways",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-23",
+    "card_id": "chase-freedom-unlimited",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 25000,
+    "to": 200,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+    "confirmed_by": "official_page"
   }
 ]

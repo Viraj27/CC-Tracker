@@ -16,7 +16,8 @@ annual_fee:
   first_year_waived: false
   source_url: https://www.bankofamerica.com/credit-cards/products/unlimited-cash-back-credit-card/
   last_verified: 2026-11-14
-  verified: true
+  verified: false
+  note: "Not confirmed on 2026-11-23: the page loaded but does not state the annual fee"
 public_offer:
   bonus: 200
   unit: usd
