@@ -141,5 +141,16 @@
     "effective": null,
     "source_url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
     "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-24",
+    "card_id": "chase-ihg-premier",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 185000,
+    "to": 140000,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/premier",
+    "confirmed_by": "official_page"
   }
 ]
