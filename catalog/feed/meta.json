@@ -1,1 +1,1 @@
-{ "ran_at": "2026-11-24T11:05:30Z", "items_seen": 15, "status": "ok", "confirmations": { "attempted": 10, "failed": 8 } }
+{"ran_at": "2026-11-25T11:04:48Z", "items_seen": 4, "status": "ok", "confirmations": {"attempted": 10, "failed": 6}}
