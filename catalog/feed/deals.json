@@ -1,5 +1,29 @@
 [
   {
+    "id": "doc-2026-11-25-chase-offers-giftcards-com",
+    "kind": "card_linked",
+    "title": "Chase Offers: 5% back at Giftcards.com, up to $40",
+    "url": "https://www.doctorofcredit.com/chase-offers-offers-get-5-back-at-giftcards-com-up-to-50-back/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-25",
+    "expires": null,
+    "card_id": null,
+    "issuer": "chase"
+  },
+  {
+    "id": "doc-2026-11-25-mrrebates-free-5",
+    "kind": "shopping",
+    "title": "Mrrebates portal: free $5 for new and existing users (targeted)",
+    "url": "https://www.doctorofcredit.com/free-5-from-mrrebates-portal-minimum-10-to-cashout/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-25",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-24-airtag-18",
     "kind": "shopping",
     "title": "Apple AirTag 2nd gen single pack for $18 at major retailers",
