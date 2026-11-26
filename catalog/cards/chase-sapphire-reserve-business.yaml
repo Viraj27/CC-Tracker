@@ -15,13 +15,13 @@ annual_fee:
   amount: 795
   first_year_waived: false
   source_url: https://creditcards.chase.com/business-credit-cards/sapphire/reserve
-  last_verified: 2026-11-14
+  last_verified: 2026-11-26
   verified: true
 public_offer:
   bonus: 150000
   unit: points
-  min_spend: 20000
-  days: 90
-  as_of: 2026-06-08
-  source_url: https://github.com/andenacitelli/credit-card-bonuses-api
-  source_type: community
+  min_spend: 30000
+  days: 180
+  as_of: 2026-11-26
+  source_url: https://creditcards.chase.com/business-credit-cards/sapphire/reserve
+  source_type: official

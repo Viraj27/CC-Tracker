@@ -163,5 +163,27 @@
     "effective": null,
     "source_url": "https://creditcards.chase.com/business-credit-cards/ink/cash",
     "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-26",
+    "card_id": "chase-ink-business-unlimited",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 75000,
+    "to": 750,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+    "confirmed_by": "official_page"
+  },
+  {
+    "date": "2026-11-26",
+    "card_id": "chase-world-of-hyatt-business",
+    "path": "public_offer.bonus",
+    "label": "Welcome bonus",
+    "from": 60000,
+    "to": 70000,
+    "effective": null,
+    "source_url": "https://creditcards.chase.com/business-credit-cards/world-of-hyatt/hyatt-business-card",
+    "confirmed_by": "official_page"
   }
 ]
