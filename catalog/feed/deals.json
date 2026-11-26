@@ -1,5 +1,29 @@
 [
   {
+    "id": "doc-2026-11-26-thegiftcardshop-visa-fees",
+    "kind": "shopping",
+    "title": "TheGiftCardShop: Visa purchase fees waived on $50+ with a code",
+    "url": "https://www.doctorofcredit.com/thegiftcardshop-com-100-off-200-visa-mastercard-purchase-fees/",
+    "source": "doctorofcredit",
+    "published": "2026-11-26",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-25-amazon-one4all-90",
+    "kind": "shopping",
+    "title": "Amazon: $100 One4all gift card for $90",
+    "url": "https://www.doctorofcredit.com/amazon-100-one4all-ultimate-physical-gift-card-for-90/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-25-chase-offers-giftcards-com",
     "kind": "card_linked",
     "title": "Chase Offers: 5% back at Giftcards.com, up to $40",
@@ -12,6 +36,42 @@
     "issuer": "chase"
   },
   {
+    "id": "doc-2026-11-25-chase-southwest-80k-90k",
+    "kind": "card_offer",
+    "title": "Chase Southwest personal cards: 80,000 to 90,000 point bonuses (referral links exist)",
+    "url": "https://www.doctorofcredit.com/chase-southwest-personal-cards-80000-90000-points-signup-bonus-2/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": "chase"
+  },
+  {
+    "id": "doc-2026-11-25-giftcards-com-lowes-uber",
+    "kind": "shopping",
+    "title": "Giftcards.com: 10% off Lowe's and Uber eGift cards",
+    "url": "https://www.doctorofcredit.com/giftcards-com-save-10-on-lowes-uber-egiftcards/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-25-kroger-boost-25",
+    "kind": "shopping",
+    "title": "Kroger: one-year Boost membership for $25",
+    "url": "https://www.doctorofcredit.com/kroger-one-year-boost-membership-for-25-includes-disney-hulu-or-espn/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-25-mrrebates-free-5",
     "kind": "shopping",
     "title": "Mrrebates portal: free $5 for new and existing users (targeted)",
@@ -19,6 +79,30 @@
     "source": "doctorofcredit",
     "published": "2026-11-25",
     "added": "2026-11-25",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-25-postmates-gobble",
+    "kind": "shopping",
+    "title": "Postmates: $10 off $25 with a promo code",
+    "url": "https://www.doctorofcredit.com/postmates-15-off-45-with-promo-code-dodgers/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-25-starbucks-egift-bonus",
+    "kind": "shopping",
+    "title": "Starbucks: $5 bonus card with a $25 eGift card from Nov 27",
+    "url": "https://www.doctorofcredit.com/starbucks-purchase-25-egiftcard-get-5-bonus-giftcard-stack-with-citi-offer/",
+    "source": "doctorofcredit",
+    "published": "2026-11-25",
+    "added": "2026-11-26",
     "expires": null,
     "card_id": null,
     "issuer": null

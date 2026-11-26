@@ -15,14 +15,13 @@ annual_fee:
   amount: 149
   first_year_waived: false
   source_url: https://creditcards.chase.com/travel-credit-cards/southwest/premier
-  last_verified: 2026-11-14
+  last_verified: 2026-11-26
   verified: true
 public_offer:
   bonus: 85000
   unit: points
   min_spend: 2000
   days: 90
-  as_of: 2026-06-08
-  expires: 2026-07-01
-  source_url: https://github.com/andenacitelli/credit-card-bonuses-api
-  source_type: community
+  as_of: 2026-11-26
+  source_url: https://creditcards.chase.com/travel-credit-cards/southwest/premier
+  source_type: official
