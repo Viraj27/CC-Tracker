@@ -1,1 +1,1 @@
-{"ran_at": "2026-11-26T11:05:52Z", "items_seen": 11, "status": "ok", "confirmations": {"attempted": 10, "failed": 1}}
+{"ran_at": "2026-11-27T11:05:40Z", "items_seen": 15, "status": "failed", "reason": "issuer pages unreachable or bot-walled from this environment (Hilton 403, Bank of America 403/Access Denied, Chase United pages proxy-blocked)", "confirmations": {"attempted": 10, "failed": 10}}
