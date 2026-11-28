@@ -1,5 +1,17 @@
 [
   {
+    "id": "doc-2026-11-28-amexgiftcard-no-fees",
+    "kind": "shopping",
+    "title": "AmExGiftCard.com: purchase fees waived on Vanilla eGift cards with a promo code",
+    "url": "https://www.doctorofcredit.com/amexgiftcard-com-100-off-purchase-shipping-fees-vanilla-egift-cards-with-promo-code-epic23/",
+    "source": "doctorofcredit",
+    "published": "2026-11-28",
+    "added": "2026-11-28",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-27-amazon-bf-giftcard-sale",
     "kind": "shopping",
     "title": "Amazon Black Friday gift card sale: $100 Lowe's for $85 and more",
@@ -7,6 +19,18 @@
     "source": "doctorofcredit",
     "published": "2026-11-27",
     "added": "2026-11-27",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-27-amazon-giftcard-deals",
+    "kind": "shopping",
+    "title": "Amazon: discounted gift cards for Airbnb, Uber, Lyft, Amtrak and more",
+    "url": "https://www.doctorofcredit.com/amazon-save-on-giftcards-for-uber-lyft-zift-choice-hotels-com-amtrak-inkind-many-more/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
     "expires": null,
     "card_id": null,
     "issuer": null
@@ -24,6 +48,18 @@
     "issuer": null
   },
   {
+    "id": "doc-2026-11-27-amex-delta-offers-90k",
+    "kind": "card_offer",
+    "title": "Amex Delta offers (targeted): up to 90,000 miles plus $300",
+    "url": "https://www.doctorofcredit.com/ymmv-american-express-delta-offers-up-to-75000-miles-200-statement-credit-no-lifetime-language/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
+    "expires": null,
+    "card_id": null,
+    "issuer": "amex"
+  },
+  {
     "id": "doc-2026-11-27-capital-one-offers-amazon-tj",
     "kind": "card_linked",
     "title": "Capital One Offers: $5 back on $20 at Amazon and Trader Joe's",
@@ -36,6 +72,42 @@
     "issuer": "capital_one"
   },
   {
+    "id": "doc-2026-11-27-capital-one-shopping-walmart",
+    "kind": "shopping",
+    "title": "Capital One Shopping/Offers: 18-20% back at Walmart",
+    "url": "https://www.doctorofcredit.com/capital-one-shopping-offers-get-18-20-back-at-walmart/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
+    "expires": null,
+    "card_id": null,
+    "issuer": "capital_one"
+  },
+  {
+    "id": "doc-2026-11-27-doordash-giftcard-20",
+    "kind": "shopping",
+    "title": "DoorDash: DashPass members get 20% off DoorDash gift cards",
+    "url": "https://www.doctorofcredit.com/doordash-save-15-off-many-egiftcard-brands-starbucks-zift-amazon-lowes-doordash-walgreens-outback-and-many-more/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-27-google-play-giftcards",
+    "kind": "shopping",
+    "title": "Google Play app: discounted gift cards for Starbucks, Instacart, Home Depot and more",
+    "url": "https://www.doctorofcredit.com/google-play-app-save-on-giftcards-for-starbucks-instacart-home-depot-lowes-uber-lyft-doordash-st-tarbucks-uber-chipotle-more/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-27-grubhub-30-off-grocery",
     "kind": "shopping",
     "title": "GrubHub/Seamless: 30% off grocery orders, up to $30",
@@ -43,6 +115,18 @@
     "source": "doctorofcredit",
     "published": "2026-11-27",
     "added": "2026-11-27",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-27-rakuten-dell-12x",
+    "kind": "shopping",
+    "title": "Rakuten: 12x cash back at Dell",
+    "url": "https://www.doctorofcredit.com/rakuten-get-12x-on-dell/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
     "expires": null,
     "card_id": null,
     "issuer": null
@@ -60,6 +144,18 @@
     "issuer": null
   },
   {
+    "id": "doc-2026-11-27-synchrony-virgin-red-75k",
+    "kind": "card_offer",
+    "title": "Synchrony Virgin Red: 75,000-point bonus (12/1 to 12/7)",
+    "url": "https://www.doctorofcredit.com/synchrony-virgin-red-75000-point-bonus-9-3-9-5/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
+    "expires": "2026-12-07",
+    "card_id": null,
+    "issuer": null
+  },
+  {
     "id": "doc-2026-11-27-uber-one-member-days",
     "kind": "shopping",
     "title": "Uber One Member Days to 12/1: 15% off gift cards, $40 off $100 at Best Buy",
@@ -67,6 +163,18 @@
     "source": "doctorofcredit",
     "published": "2026-11-27",
     "added": "2026-11-27",
+    "expires": null,
+    "card_id": null,
+    "issuer": null
+  },
+  {
+    "id": "doc-2026-11-27-vanillagift-no-fees",
+    "kind": "shopping",
+    "title": "VanillaGift.com: purchase fees waived on Visa gift cards with a promo code",
+    "url": "https://www.doctorofcredit.com/vanillagift-com-100-off-purchase-fees-vanilla-egift-cards-with-promo-code-lastminute23/",
+    "source": "doctorofcredit",
+    "published": "2026-11-27",
+    "added": "2026-11-28",
     "expires": null,
     "card_id": null,
     "issuer": null
@@ -716,18 +824,6 @@
     "published": "2026-11-18",
     "added": "2026-11-19",
     "expires": null,
-    "card_id": null,
-    "issuer": null
-  },
-  {
-    "id": "doc-2026-11-18-bestbuy-instore-giftcard-60",
-    "kind": "shopping",
-    "title": "Best Buy in store: $100 gift card for $60, 11/27 only",
-    "url": "https://www.doctorofcredit.com/best-buy-in-store-100-best-buy-giftcard-for-60-11-27-only/",
-    "source": "doctorofcredit",
-    "published": "2026-11-18",
-    "added": "2026-11-19",
-    "expires": "2026-11-27",
     "card_id": null,
     "issuer": null
   },
